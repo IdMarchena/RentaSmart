@@ -1,1 +1,27 @@
 @import "tailwindcss";
+
+.border-short-r {
+    position: relative;
+}
+  
+.border-short-r::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 1rem;            
+  height: 70%;           
+  border-right: 2px solid #CCCCCB;
+}
+
+.border-short-b{
+  position: relative;
+  
+}
+
+.border-short-b::after {
+  content: "";
+  position: absolute;
+  bottom: 0;           
+  width: 95%;           
+  border-bottom: 2px solid #FEFCEC;
+}
