@@ -10,16 +10,17 @@ import imgUsers from "../assets/users.png"
 import imgDeliver from "../assets/delivery.png"
 import imgRound from "../assets/round.png"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
+import { Link } from "react-router-dom"
 
 export const CardPublications = () => {
     return (
-        <div className="w-[95%] h-[250px] rounded-[10px] overflow-hidden p-5 bg-[#FEFEFE] shadow-[10px_10px_10px_rgba(0,0,0,0.2)] flex flex-row">
-            <div className="w-[30%]">
+        <div className="w-[95%] h-[220px] rounded-[10px] overflow-hidden p-5 bg-[#FEFEFE] shadow-[10px_10px_10px_rgba(0,0,0,0.2)] flex flex-row">
+            <div className="w-[40%]">
                 <Carousel className="w-full">
                     <CarouselContent>
                         {[imgB1, imgB2, imgB3].map((img, index) => (
                             <CarouselItem key={index}>
-                                <img src={img} alt={`apartment-${index}`} className="w-full h-[210px] object-cover rounded-[10px]" />
+                                <img src={img} alt={`apartment-${index}`} className="w-full h-[190px] object-cover rounded-[10px]" />
                             </CarouselItem>
                         ))}
                     </CarouselContent>
@@ -27,9 +28,9 @@ export const CardPublications = () => {
                     <CarouselNext className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white shadow-md rounded-full" />
                 </Carousel>
             </div>
-            <div className="w-[70%] ml-5">
+            <div className="w-[60%] ml-5">
                 <h2 className="text-[#393939] text-[20px] md:text-[20px] font-bold">Departamento</h2>
-                <div className="flex flex-row justify-between mb-10 flex-nowrap">
+                <div className="flex flex-row justify-between mb-5 flex-nowrap">
                     <p className="text-[#A6A6A6] text-sm md:text-sm font-bold">Descripcion</p>
                     <span className="text-[#393939] text-sm md:text-lg font-bold">$2.600.000</span>
                 </div>
@@ -72,9 +73,9 @@ export const CardPublications = () => {
                     </div>
                     <div className="flex flex-col items-end gap-2 flex-nowrap justify-end">
                         <span className="text-[#393939] text-sm md:text-sm font-bold bg-[#92C1FD] px-2 py-1 rounded-[20px]">Disponible</span>
-                        <button className="px-4 py-1 text-sm bg-[#EB8369] text-white font-semibold rounded-[20px] hover:bg-[#dd7059] transition">
+                        <Link to={`/publication`} className="px-4 py-1 text-sm bg-[#EB8369] text-white font-semibold rounded-[20px] hover:bg-[#dd7059] transition">
                             Ver más
-                        </button>
+                        </Link>
                     </div>
                 </div>
                 

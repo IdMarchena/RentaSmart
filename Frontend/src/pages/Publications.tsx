@@ -13,7 +13,7 @@ export const Publications = () => {
                 <h1 className="text-[#393939] text-[30px] md:text-[30px] font-bold absolute z-10 mt-[100px] ml-5">Busca Tu Nuevo<br/> Hogar</h1>
                 <img src={imgBanner} alt="banner" className="w-full h-[240px] md:h-[300px] rounded-[30px] opacity-[70%] object-cover shadow-[0_10px_10px_rgba(0,0,0,0.2)] relative z-0"/>
                 <div className="flex flex-col items-center justify-center">
-                    <div className="w-[90%] h-[150vh] flex flex-col flex-wrap items-start p-10 absolute z-10 bg-[#F3F4F6] rounded-[30px] mt-[900px]">
+                    <div className="w-[90%] h-[100vh] flex flex-col flex-wrap items-start p-10 absolute z-10 bg-[#F3F4F6] rounded-[30px] mt-[600px]">
                         <div className="flex flex-row flex-wrap items-center justify-center gap-5">
                             <div className="relative w-[25%] h-[40px] mr-10">
                                 <input
@@ -88,7 +88,7 @@ export const Publications = () => {
                         </div>
                         
                         <h1 className="text-[#393939] text-md md:text-lg font-bold mt-10">Mejores Publicaciones</h1>
-                        <div className="flex flex-row flex-wrap items-center justify-start gap-5 overflow-y-scroll custom-scrollbar  w-full h-[860px] mt-5">
+                        <div className="flex flex-row flex-wrap items-center justify-start gap-5 overflow-y-scroll custom-scrollbar  w-full h-[70vh] mt-5">
                             <CardPublications />
                             <CardPublications />
                             <CardPublications />
@@ -101,7 +101,7 @@ export const Publications = () => {
                 </div>
                 
             </div>
-            <div className="h-[700px]"></div>
+            <div className="h-[300px]"></div>
             
             <Footer />
         </>
