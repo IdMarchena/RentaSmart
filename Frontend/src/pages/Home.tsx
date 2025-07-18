@@ -9,6 +9,7 @@ import imgApartment from "../assets/Apartment.webp"
 import { Footer } from "../components/Footer";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 import { Cards } from "../components/Cards";
+import { Link } from "react-router-dom";
 
 export const Home = () => {
     return (
@@ -53,7 +54,7 @@ export const Home = () => {
                     <h2 className="text-[#EB8369] text-[20px] font-semibold">Apartamentos Disponibles</h2>
                     <div className="flex flex-row items-center gap-2">
                         <span className="text-[#EB8369] text-[12px] font-semibold">Ver todos</span>
-                        <img src={imgMenu} alt="menu" className="w-[20px] h-[20px]" />
+                        <Link to="/publications"><img src={imgMenu} alt="menu" className="w-[20px] h-[20px]" /></Link>
                     </div>
                 </div>
                 <div className='relative w-full px-12 mt-10'>

@@ -84,7 +84,7 @@ export const Publication = () => {
                 </div>
             </div>
             <div className="w-full h-auto flex flex-col items-start p-5 mt-10">
-                <h1 className="text-[#393939] text-[20px] md:text-[20px] font-bold">Agenda Tu Cita</h1>
+                <h1 className="text-[#393939] text-[20px] md:text-[20px] font-bold">Medios de Contacto</h1>
                 <div className="w-full flex flex-row items-center justify-between mt-10">
                     <div className="w-[40%] flex flex-col items-start gap-3">
                         <div className="w-full h-[250px]  rounded-[10px] border-[1px] border-[#C7C7C7] p-10 flex flex-col items-start gap-2 bg-[#FEFEFE]">
