@@ -3,6 +3,10 @@
 
 @custom-variant dark (&:is(.dark *));
 
+body {
+  background-color: #fefcec;
+}
+
 .border-short-r {
     position: relative;
 }
@@ -27,6 +31,25 @@
   bottom: 0;           
   width: 95%;           
   border-bottom: 2px solid #FEFCEC;
+}
+
+@layer utilities {
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+   
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: #ffff;
+    border-radius: 30px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #DFE0E2;
+    border-radius: 30px;
+    border: 2px solid #f1f1f1;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: #555;
+  }
 }
 
 @theme inline {
