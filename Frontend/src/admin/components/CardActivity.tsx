@@ -8,11 +8,11 @@ export const CardActivity = () => {
                 <img src={imgAdd} alt="add" className="w-[30px] h-[30px] object-cover"/>
                 <div className="w-[70%] flex flex-col items-start justify-center  gap-1">
                     <h1 className="text-[#393939] text-[12px] font-bold">Publicación</h1>
-                    <p className="text-[#393939] text-[8px] font-medium">Creaste una nueva publicación de apartamento o habitación.</p>
+                    <p className="text-[#393939] text-[8px] font-medium">Creaste una nueva publicación.</p>
                 </div>
             </div>
            
-            <div className="w-[25%] flex flex-row items-start justify-start gap-1 flex-nowrap">
+            <div className="w-[25%] flex flex-row items-start justify-start gap-1 flex-nowrap max-[908px]:justify-end">
                 <img src={imgHistory} alt="history" className="w-[15px] h-[15px] object-cover"/>
                 <span className="text-[#393939] text-[8px] font-medium">20 ene 2024</span>
 

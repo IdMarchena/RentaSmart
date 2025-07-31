@@ -13,27 +13,27 @@ export const HomeDash = () => {
     return (
         <div className="w-full h-screen flex flex-row">
             <Aside />
-            <div className="w-[85%] h-full flex flex-col items-start justify-start p-5 overflow-y-scroll custom-scrollbar-2">
+            <div className="w-[85%] h-full flex flex-col items-start justify-start p-5 overflow-y-scroll custom-scrollbar-2 max-[1082px]:w-[100%]">
                 <div className="w-full h-[280px] flex flex-row items-center justify-between bg-[#393939] rounded-[10px] shadow-[0px_20px_10px_rgba(0,0,0,0.2)] mt-3">
                     <div className="w-[50%] flex flex-col items-start justify-center p-5">
-                        <h1 className="text-[#FFFFFF] text-[25px] font-bold">¡Bienvenido a tu panel de Renta<span className="text-[#EB8369] text-[25px] font-bold">Smart</span>!</h1>
+                        <h1 className="text-[#FFFFFF] text-[25px] font-bold max-[708px]:text-[20px]">¡Bienvenido a tu panel de Renta<span className="text-[#EB8369] text-[25px] font-bold max-[708px]:text-[20px]">Smart</span>!</h1>
                         <br />
-                        <p className="text-[#FFFFFF] text-[12px] font-medium">Desde aquí puedes gestionar fácilmente todo lo relacionado con tus propiedades.</p>
+                        <p className="text-[#FFFFFF] text-[12px] font-medium max-[708px]:text-[10px]">Desde aquí puedes gestionar fácilmente todo lo relacionado con tus propiedades.</p>
                         <br />
-                        <p className="text-[#FFFFFF] text-[12px] font-medium">Crea nuevas publicaciones de apartamentos o habitaciones, edita o elimina las existentes, revisa tus contratos activos, y mantén el control total de tus arriendos.</p>
+                        <p className="text-[#FFFFFF] text-[12px] font-medium max-[708px]:text-[10px]">Crea nuevas publicaciones de apartamentos o habitaciones, edita o elimina las existentes, revisa tus contratos activos, y mantén el control total de tus arriendos.</p>
                     </div>
-                    <img src={imgBannerAdmin} alt="Banner Admin" className="w-[500px] h-[280px] object-cover rounded-[10px]" />
+                    <img src={imgBannerAdmin} alt="Banner Admin" className="w-[500px] h-[280px] object-cover rounded-[10px] max-[1082px]:w-[400px] max-[824px]:w-[300px] max-[610px]:w-[200px]" />
                 </div>
-                <div className="w-full h-auto flex flex-row items-center justify-start gap-5 p-2 flex-nowrap mt-10">
+                <div className="w-full h-auto flex flex-row items-center justify-start gap-5 p-2 flex-nowrap mt-10 max-[708px]:flex-col">
                     <CardsData1 />
                     <CardsData2 />
                     <CardsData3 />
                     <CardsData4 />
                 </div>
                 <h2 className="text-[#393939] text-[20px] font-bold mt-10">Detalles Generales</h2>
-                <div className="w-full h-auto flex flex-row items-center justify-start gap-5 flex-nowrap mt-5">
+                <div className="w-full h-auto flex flex-row items-center justify-start gap-5 flex-nowrap mt-5 max-[908px]:flex-col">
                     <CardChart1 />
-                    <div className="w-[40%] h-[400px] flex flex-col items-center justify-start bg-[#EFEDDE] border-[1px] border-[#BCBBB0] rounded-[10px]">
+                    <div className="w-[40%] h-[400px] flex flex-col items-center justify-start bg-[#EFEDDE] border-[1px] border-[#BCBBB0] rounded-[10px] max-[908px]:w-full">
                         <div className="w-full h-auto flex flex-row items-center justify-between">
                             <div className="w-[70%] flex flex-col items-start justify-start p-6 gap-1">
                                 <h1 className="text-[#393939] text-[14px] font-bold">Actividad Reciente</h1>
