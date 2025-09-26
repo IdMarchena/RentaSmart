@@ -8,6 +8,7 @@ import { ContratoDash } from "../admin/pages/ContratoDash";
 import { MensajesDash } from "../admin/pages/MensajesDash";
 import { ServiciosDash } from "../admin/pages/ServiciosDash";
 import { UsuarioDash } from "../admin/pages/UsuarioDash";
+import {ServiciosAdminDash} from "../admin/pages/ServiciosAdminDash.tsx";
 
 export const AppsRouter = () => {
   return (
@@ -21,6 +22,8 @@ export const AppsRouter = () => {
       <Route path="/admin/messages" element={<MensajesDash />} />
       <Route path="/admin/services" element={<ServiciosDash />} />
       <Route path="/admin/user" element={<UsuarioDash />} />
+        <Route path="/admin/servicesAdmin" element={<ServiciosAdminDash />} />
+
     </Routes>
   );
 };

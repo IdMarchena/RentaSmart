@@ -6,7 +6,7 @@ export const ContratoDash = () => {
         <div className="w-full h-screen flex flex-row">
             <Aside />
             <div className="w-[85%] h-full flex flex-col items-start justify-start p-5 overflow-y-scroll custom-scrollbar-2 max-[1082px]:w-[100%]">
-                <div className="w-full h-[100px] flex flex-row items-center justify-between mt-3">
+                <div className="w-full h-[100px] flex flex-row items-center justify-between mt-3 cursor-pointer">
                         <h1 className="text-[#393939] text-[20px] font-bold"> Tus Contratos</h1>
                         <div className="flex flex-row items-center gap-1 rounded-[10px] bg-[#EB8369] p-2 shadow-[0px_10px_10px_rgba(0,0,0,0.2)]">
                             <img src={imgAdd1} alt="" className="w-[20px] h-[20px] object-cover" />

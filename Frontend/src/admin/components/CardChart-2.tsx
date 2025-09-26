@@ -4,7 +4,7 @@ import { PieChart } from '@mui/x-charts/PieChart';
 export const CardChart2 = () => {
     return (
         <div className="w-[40%] h-[400px] flex flex-col items-center justify-center bg-[#EFEDDE] border-[1px] border-[#BCBBB0] rounded-[10px] max-[890px]:w-full">
-            <h1 className="text-[#393939] text-[14px] font-bold mt-10">Publicaciones</h1>
+            <h1 className="text-[#393939] text-[14px] font-bold mt-10">Rendimiento</h1>
             <PieChart
                 series={[
                     {
