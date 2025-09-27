@@ -1,0 +1,5 @@
+package com.afk.model.entity.enums;
+
+public enum EstadoChat {
+    LEIDO, NO_LEIDO,ENVIADO,ENTREGADO,ACTIVO,INACTIVO
+}
