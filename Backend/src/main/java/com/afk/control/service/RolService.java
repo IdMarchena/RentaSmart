@@ -11,4 +11,7 @@ public interface RolService {
     RolDto findRolById(Long id);
     List<RolDto> findAllRoles();
     void deleteRolById(Long id);
+    void guardarRol(RolDto rol);
+    void actualizarRol(RolDto rol);
+    RolDto buscarRolPorNombre(String nombre);
 }

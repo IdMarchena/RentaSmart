@@ -1,17 +1,17 @@
-package com.afk.backend.control.security.oauth2;
+package com.afk.control.security.oauth2;
 
 import com.afk.backend.control.security.service.UserDetailsImpl;
-import com.afk.backend.model.entity.Rol;
-import com.afk.backend.model.entity.Ubicacion;
-import com.afk.backend.model.entity.UsuarioRegistrado;
-import com.afk.backend.model.entity.UsuarioRol;
-import com.afk.backend.model.entity.enm.EstadoUsuarioRegistrado;
-import com.afk.backend.model.entity.enm.EstadoUsuarioRol;
-import com.afk.backend.model.entity.enm.Roles;
-import com.afk.backend.model.repository.RolRepository;
-import com.afk.backend.model.repository.UbicacionRepository;
-import com.afk.backend.model.repository.UsuarioRegistradoRepository;
-import com.afk.backend.model.repository.UsuarioRolRepository;
+import com.afk.model.entity.Rol;
+import com.afk.model.entity.Ubicacion;
+import com.afk.model.entity.UsuarioRegistrado;
+import com.afk.model.entity.UsuarioRol;
+import com.afk.model.entity.enums.EstadoUsuarioRegistrado;
+import com.afk.model.entity.enums.EstadoUsuarioRol;
+import com.afk.model.entity.enums.Roles;
+import com.afk.model.repository.RolRepository;
+import com.afk.model.repository.UbicacionRepository;
+import com.afk.model.repository.UsuarioRegistradoRepository;
+import com.afk.model.repository.UsuarioRolRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -120,7 +120,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
      * Crea un nuevo usuario con configuración por defecto
      */
     private UsuarioRegistrado createNewUser(String correo, String nombre) {
-        Rol rolDefault = rolRepository.findByRole(Roles.ROLE_POSTULANTE)
+        Rol rolDefault = rolRepository.findByRole(Roles.ARRENDATARIO)
                 .orElseThrow(() -> new RuntimeException("Rol ROLE_POSTULANTE no encontrado"));
 
         Ubicacion ubicacionDefault = ubicacionRepository.findByNombre("Santa Marta")
@@ -129,8 +129,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         UsuarioRegistrado user = UsuarioRegistrado.builder()
                 .nombre(nombre != null ? nombre : "Usuario OAuth2")
                 .correo(correo)
-                .contrasenia("oauth2_user") // Password placeholder para usuarios OAuth2
-                .fecha_registro(LocalDateTime.now())
+                .clave("oauth2_user") // Password placeholder para usuarios OAuth2
+                .(LocalDateTime.now())
                 .estado_usuario_registrado(EstadoUsuarioRegistrado.ACTIVO)
                 .telefono_usuario("0000000000") // Teléfono placeholder
                 .rol(rolDefault)

@@ -1,13 +1,13 @@
-package com.afk.backend.control.service.impl;
+package com.afk.control.service.impl;
 
 import com.afk.backend.control.dto.CreateRequest;
 import com.afk.backend.control.dto.HistorialResponse;
 import com.afk.backend.control.dto.UsuarioRolDto;
-import com.afk.backend.control.mapper.UsuarioRolMapper;
+import com.afk.control.mapper.UsuarioRolMapper;
 import com.afk.backend.control.service.UsuarioRolService;
-import com.afk.backend.model.entity.*;
-import com.afk.backend.model.entity.enm.EstadoUsuarioRol;
-import com.afk.backend.model.repository.*;
+import com.afk.model.entity.*;
+import com.afk.model.entity.Rol;
+import com.afk.model.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;

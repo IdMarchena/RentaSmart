@@ -1,13 +1,13 @@
-package com.afk.backend.control.controller;
+package com.afk.control.controller;
 
 import com.afk.backend.control.dto.JwtResponse;
 import com.afk.backend.control.dto.LoginRequest;
 import com.afk.backend.control.dto.SignUpRequest;
 import com.afk.backend.control.security.jwt.JwtUtil;
-import com.afk.backend.model.entity.*;
-import com.afk.backend.model.entity.enm.EstadoUsuarioRegistrado;
-import com.afk.backend.model.entity.enm.EstadoUsuarioRol;
-import com.afk.backend.model.repository.*;
+import com.afk.model.entity.*;
+import com.afk.model.entity.enums.EstadoUsuarioRegistrado;
+import com.afk.model.entity.enums.EstadoUsuarioRol;
+import com.afk.model.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -20,7 +20,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import com.afk.backend.model.entity.Rol;
+import com.afk.model.entity.Rol;
 
 import java.time.LocalDateTime;
 import java.util.List;
