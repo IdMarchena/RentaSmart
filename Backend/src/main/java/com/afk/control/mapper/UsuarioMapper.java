@@ -1,25 +1,21 @@
 package com.afk.control.mapper;
-
+import com.afk.control.dto.UsuarioDto;
 import com.afk.model.entity.Usuario;
 import org.mapstruct.Mapper;
-import org.mapstruct.Named;
-
-import java.util.Set;
+import org.mapstruct.Mapping;
+import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface UsuarioMapper {
 
-    @Named("fromId")
-    default Usuario fromId(Long id) {
-        if (id == null) return null;
-        Usuario usuario = new Usuario();
-        usuario.setId(id);
-        return usuario;
-    }
+    @Mapping(source = "contrasenia", target = "clave")
+    Usuario toEntity(UsuarioDto dto);
 
-    @Named("toId")
-    default Long toId(Usuario usuario) {
-        if (usuario == null) return null;
-        return usuario.getId();
-    }
+    @Mapping(source = "clave", target = "contrasenia")
+    UsuarioDto toDto(Usuario usuario);
+
+    List<UsuarioDto> toDto(List<Usuario> usuarios);
+
+    List<Usuario> toEntity(List<UsuarioDto> usuarioDtos);
 }
+
