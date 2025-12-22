@@ -14,7 +14,7 @@ import { Link } from "react-router-dom"
 
 export const CardPublications = () => {
     return (
-        <div className="w-[95%] h-[220px] rounded-[10px] overflow-hidden p-5 bg-[#FEFEFE] shadow-[10px_10px_10px_rgba(0,0,0,0.2)] flex flex-row">
+        <div className="w-[95%] h-[220px] rounded-[10px] overflow-hidden p-5 bg-[#FFFEF8] shadow-[10px_10px_10px_rgba(0,0,0,0.2)] flex flex-row">
             <div className="w-[40%]">
                 <Carousel className="w-full">
                     <CarouselContent>
