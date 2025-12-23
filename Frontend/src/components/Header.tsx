@@ -15,12 +15,12 @@ export const Header = () => {
             <div className="w-full h-[50px] bg-[#FEFCEC] flex flex-row justify-between items-center px-3 md:px-5 mt-5">
                 <div className="flex flex-row items-center gap-2">
                     <img src={imgLogo} alt="Logo" className="w-[30px] h-[40px] md:w-[37.33px] md:h-[50px]" />
-                    <h1 className="text-[#393939] text-[12px] md:text-[20px] font-semibold">Renta<span className="text-[#EB8369] text-[14px] md:text-[20px] font-semibold">Smart</span></h1>
+                    <h1 className="text-[#393939] text-[15px] md:text-[20px] font-semibold">Renta<span className="text-[#EB8369] text-[15px] md:text-[20px] font-semibold">Smart</span></h1>
                 </div>
                 <div className="flex flex-row items-center gap-2 md:gap-10">
-                    <Link to="/"><h1 className="text-[#393939] text-[11px] md:text-[18px] font-semibold">Inicio</h1></Link>
-                    <Link to="/publications"><h1 className="text-[#393939] text-[11px] md:text-[18px] font-semibold">Publicaciones</h1></Link>
-                    <button className="text-[#EB8369] text-[10px] md:text-[16px] font-semibold border-[1px] border-[#EB8369] rounded-[10px] w-[80px] md:w-[150px] h-[28px] cursor-pointer focus:bg-[#EB8369] focus:text-white" onClick={toggleLoginModal}>Iniciar Sesión</button>
+                    <Link to="/"><h1 className="text-[#393939] text-[15px] md:text-[18px] font-semibold">Inicio</h1></Link>
+                    <Link to="/publications"><h1 className="text-[#393939] text-[15px] md:text-[18px] font-semibold">Publicaciones</h1></Link>
+                    <button className="text-[#EB8369] text-[11px] md:text-[16px] font-semibold border-[1px] border-[#EB8369] rounded-[10px] w-[80px] md:w-[150px] h-[28px] cursor-pointer focus:bg-[#EB8369] focus:text-white" onClick={toggleLoginModal}>Iniciar Sesión</button>
                 </div>
             </div>
 
