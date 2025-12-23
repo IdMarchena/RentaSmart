@@ -11,5 +11,6 @@ public interface HabitacionService {
     HabitacionDto getHabitacionById(Long id);
     void deleteHabitacion(Long id);
     void updateHabitacion(HabitacionDto habitacion);
+    void actualizarEstadoHabitacion(Long id, String estado);
 
 }

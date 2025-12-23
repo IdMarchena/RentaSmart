@@ -8,7 +8,7 @@ import com.afk.model.repository.HabitacionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import com.afk.model.entity.enums.Estado;
 import java.util.List;
 
 @Service
@@ -71,5 +71,36 @@ public class HabitacionServiceImpl implements HabitacionService {
         hExistente.setEstado(h.getEstado());
 
         habitacionRepository.save(hExistente);
+    }
+    @Override
+    public void actualizarEstadoHabitacion(Long id, String estado) {
+        if(id == null || id <= 0){
+            throw new IllegalArgumentException("El habitacion no puede ser nulo");
+        }
+        Habitacion h = habitacionRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("El habitacion no existe"));
+        switch(estado){
+            case "INACTIVO":
+                h.setEstado(Estado.INACTIVO);
+                break;
+            case "ACTIVO":
+                h.setEstado(Estado.ACTIVO);
+                break;
+            case "PENDIENTE":
+                h.setEstado(Estado.PENDIENTE);
+                break;
+            case "RESERVADA":
+                h.setEstado(Estado.RESERVADA);
+                break;
+            case "OCUPADA":
+                h.setEstado(Estado.OCUPADA);
+                break;
+            case "LIBRE":
+                h.setEstado(Estado.LIBRE);
+                break;
+            default:
+                throw new IllegalArgumentException("El habitacion no existe");
+        }
+        h = habitacionRepository.save(h);
     }
 }
