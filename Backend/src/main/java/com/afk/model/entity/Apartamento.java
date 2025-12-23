@@ -15,7 +15,9 @@ import java.util.List;
 @PrimaryKeyJoinColumn(name="id_inmueble")
 public class Apartamento extends Inmueble {
 
-    @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_habitacion", nullable = false)
+    @OneToMany(mappedBy = "apartamento", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Habitacion> habitaciones;
+
+    @Column(name="descripcion",nullable=false)
+    private String descripcion;
 }

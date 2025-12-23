@@ -28,4 +28,8 @@ public class Habitacion {
     @Enumerated(EnumType.STRING)
     @Column(name = "estado_habitacion", nullable = false)
     private Estado estado;
+
+    @ManyToOne
+    @JoinColumn(name="id_apartamento")
+    private Apartamento apartamento;
 }
