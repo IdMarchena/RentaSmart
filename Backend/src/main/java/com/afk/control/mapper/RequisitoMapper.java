@@ -1,50 +1,54 @@
 package com.afk.control.mapper;
 
-import com.afk.control.dto.ReporteMantenimientoDto;
 import com.afk.control.dto.RequisitoDto;
-import com.afk.model.entity.Inmueble;
-import com.afk.model.entity.ReporteMantenimiento;
 import com.afk.model.entity.Requisito;
-import com.afk.model.entity.TipoRequisito;
 import org.mapstruct.*;
-
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring",
+        uses = {
+                TipoRequisitoMapper.class
+                }
+        )
 public interface RequisitoMapper {
 
-    @Named("mapI")
-    default Inmueble mapI(Long id) {
+    @Named("requisitoFromId")
+    default Requisito requisitoFromId(Long id) {
         if (id == null) return null;
-        Inmueble inmueble = new Inmueble();
-        inmueble.setId(id);
-        return inmueble;
+        Requisito requisito = new Requisito();
+        requisito.setId(id);
+        return requisito;
+    }
+    @Named("requisitoFromDto")
+    default RequisitoDto requisitoFromDto(Requisito requisito) {
+        if (requisito == null) return null;
+        RequisitoDto requisitoDto = new RequisitoDto(
+                requisito.getId(),
+                requisito.getDescripcion(),
+                requisito.getTipo().getId()
+        );
+        return requisitoDto;
     }
 
-    @Named("mapT")
-    default TipoRequisito mapT(Long id) {
-        if (id == null) return null;
-        TipoRequisito tipo = new TipoRequisito();
-        tipo.setId(id);
-        return tipo;
-    }
-
-    @Mapping(target="descripcion", source = "descripcion")
-    @Mapping(target="inmueble",source="idInmueble",qualifiedByName ="mapI" )
-    @Mapping(target="tipo",source="idTipo",qualifiedByName = "mapT")
+    @Mapping(target="tipo",source="idTipo",qualifiedByName = "TipoRequisitoFromId")
     Requisito toEntity(RequisitoDto dto);
 
-    @Mapping(source="descripcion", target = "descripcion")
-    @Mapping(source = "inmueble.id", target = "inmueble")
-    @Mapping(source = "tipo.id", target = "tipo")
+    @Mapping(target = "tipo", source = "tipo.id")
 
     RequisitoDto toDto(Requisito requisito);
 
+    @Named("requisitoToDtoList")
     default List<RequisitoDto> toDtoList(Iterable<Requisito> requisitos) {
         return StreamSupport.stream(requisitos.spliterator(), false)
                 .map(this::toDto)
+                .collect(Collectors.toList());
+    }
+    @Named("requisitoToEntityList")
+    default List<Requisito> toEntityList(Iterable<RequisitoDto> requisitoDtos) {
+        return StreamSupport.stream(requisitoDtos.spliterator(),false)
+                .map(this::toEntity)
                 .collect(Collectors.toList());
     }
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)

@@ -11,19 +11,44 @@ import java.util.stream.StreamSupport;
 @Mapper(componentModel = "spring")
 public interface HabitacionMapper {
 
-    @Mapping(target = "capacidad", source = "capacidad")
-    @Mapping(target = "precio", source = "precio")
-    @Mapping(target = "estado", source = "estado")
+    @Named("habitacionFromId")
+    default Habitacion habitacionFromId(Long id) {
+        if (id == null) return null;
+        Habitacion habitacion = new Habitacion();
+        habitacion.setId(id);
+        return habitacion;
+    }
+
+    @Named("habitacionFromDto")
+    default HabitacionDto habitacionFromDto(Habitacion habitacion) {
+        if (habitacion == null) return null;
+        HabitacionDto dto = new HabitacionDto(
+                habitacion.getId(),
+                habitacion.getCapacidad(),
+                habitacion.getPrecio(),
+                habitacion.getEstado()
+
+        );
+        return dto;
+    }
+
+
     Habitacion toEntity(HabitacionDto chatRequest);
 
-    @Mapping(source = "capacidad", target = "capacidad")
-    @Mapping(source = "precio", target = "precio")
-    @Mapping(source = "estado", target = "estado")
+
     HabitacionDto toDto(Habitacion chat);
 
+    @Named("habitacionToDtoList")
     default List<HabitacionDto> toDtoList(Iterable<Habitacion> habitaciones) {
         return StreamSupport.stream(habitaciones.spliterator(), false)
                 .map(this::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Named("habitacionToEntityList")
+    default List<Habitacion> toEntityList(Iterable<HabitacionDto> habitaciones) {
+        return StreamSupport.stream(habitaciones.spliterator(),false)
+                .map(this::toEntity)
                 .collect(Collectors.toList());
     }
 

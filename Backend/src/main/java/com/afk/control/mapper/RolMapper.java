@@ -10,15 +10,17 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface RolMapper {
-    @Named("mapRol")
-    default Rol map(Long id) {
+
+    @Named("RolFromId")
+    default Rol fromId(Long id) {
         if (id == null) {
             return null;
         }
-        Rol rol = new Rol();
-        rol.setId(id);
-        return rol;
+        Rol u = new Rol();
+        u.setId(id);
+        return u;
     }
+
 
     @Named("mapDtoToRol")
     default Rol DtoToRol(RolDto rolDto) {
