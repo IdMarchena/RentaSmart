@@ -22,10 +22,6 @@ public class Requisito {
     private String descripcion;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_inmueble")
-    private Inmueble inmueble;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_tipo_requisito")
     private TipoRequisito tipo;
 }

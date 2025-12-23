@@ -1,18 +1,12 @@
-package com.afk.backend.control.dto;
+package com.afk.control.dto;
 
-import com.afk.backend.model.entity.enm.EstadoUsuarioRegistrado;
+import com.afk.model.entity.enums.EstadoUsuarioRegistrado;
 import java.time.LocalDateTime;
 
 public record UsuarioRegistradoDto(
         Long id,
-        String nombre,
-        String email,
-        String telefono,
-        Long rolId,
-        String rolNombre,
-        Long ubicacionId,
-        LocalDateTime fechaRegistro,
+        Long rol,
+        Long ubicacion,
         EstadoUsuarioRegistrado estado,
-        String username,
-        String password
+        String telefono
 ) {}

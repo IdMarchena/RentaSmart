@@ -18,7 +18,7 @@ public class UsuarioRol {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id_usuario")
-    private Long id_usuario;
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_usuario-registrado",nullable = false)
@@ -36,5 +36,5 @@ public class UsuarioRol {
     private EstadoUsuarioRol estadoUsuarioRol;
 
     @Column(name = "fecha_fin_rol")
-    private LocalDateTime fecha_fin_rol;
+    private LocalDateTime fechaFinRol;
 }

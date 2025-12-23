@@ -18,20 +18,20 @@ import java.time.LocalDateTime;
 public class UsuarioRegistrado extends Usuario {
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_rol", nullable = true)
+    @JoinColumn(name = "id_rol")
     private Rol rol;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_ubicacion", nullable = true)
+    @JoinColumn(name = "id_ubicacion")
     private Ubicacion ubicacion;
 
     @Column(name="fecha_registro",nullable = false)
-    private LocalDateTime fecha_registro;
+    private LocalDateTime fechaRegistro;
 
     @Enumerated(EnumType.STRING)
-    private EstadoUsuarioRegistrado estado_usuario_registrado;
+    private EstadoUsuarioRegistrado estado;
 
     @Column(name="telefono_usuario",nullable = false,length = 10)
-    private String telefono_usuario;
+    private String telefono;
 }
 

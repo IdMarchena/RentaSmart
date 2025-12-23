@@ -1,7 +1,7 @@
-package com.afk.backend.control.dto;
+package com.afk.control.dto;
 
-import com.afk.backend.model.entity.Ubicacion;
-import com.afk.backend.model.entity.enm.EstadoUbicacion;
+import com.afk.model.entity.Ubicacion;
+import com.afk.model.entity.enums.EstadoUbicacion;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import lombok.*;
@@ -11,8 +11,8 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UbicacionDto {
-    private Long id_ubicacion;
-    private Ubicacion id_padre;
+    private Long id;
+    private Ubicacion padre;
     private String nombre;
     private Double latitud;
     private Double longitud;

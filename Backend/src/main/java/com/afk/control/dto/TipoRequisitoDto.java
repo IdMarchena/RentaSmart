@@ -1,6 +1,6 @@
 package com.afk.control.dto;
 
 public record TipoRequisitoDto(
-        Integer id,
+        long id,
         String nombre
 ) {}
