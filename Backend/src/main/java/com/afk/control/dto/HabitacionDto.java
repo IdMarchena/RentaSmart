@@ -6,6 +6,7 @@ public record HabitacionDto(
         Long id,
         Integer capacidad,
         Integer precio,
-        Estado estado
+        Estado estado,
+        Long idApartamento
 ) {
 }
