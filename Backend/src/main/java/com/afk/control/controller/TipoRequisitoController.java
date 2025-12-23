@@ -1,40 +1,54 @@
-package com.afk.backend.control.controller;
-
-import com.afk.backend.control.dto.TipoRequisitoDto;
-import com.afk.backend.control.service.TipoRequisitoService;
+package com.afk.control.controller;
+import com.afk.control.dto.TipoRequisitoDto;
+import com.afk.control.service.TipoRequisitoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import com.afk.control.dto.JsonResponse;
 import java.util.List;
-
 @RestController
-@RequestMapping("/api/tipos-requisito")
+@RequestMapping("/api/tiposrequisito")
 @RequiredArgsConstructor
 public class TipoRequisitoController {
-
     private final TipoRequisitoService tipoRequisitoService;
-
-    @PostMapping
-    public ResponseEntity<TipoRequisitoDto> crearTipoRequisito(@RequestBody TipoRequisitoDto dto) {
+    @PostMapping("/crear")
+    public ResponseEntity<JsonResponse<TipoRequisitoDto>> crearTipoRequisito(@RequestBody TipoRequisitoDto dto) {
         TipoRequisitoDto creado = tipoRequisitoService.createTipoRequisito(dto);
-        return ResponseEntity.ok(creado);
+        return ResponseEntity.ok(
+                new JsonResponse<>(
+                        true,
+                        "tipo requisito creado exitosamente",
+                                creado,
+                            201
+                )
+        );
     }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<TipoRequisitoDto> obtenerTipoRequisitoPorId(@PathVariable Long id) {
+    @GetMapping("/buscarPorId/{id}")
+    public ResponseEntity<JsonResponse<TipoRequisitoDto>> obtenerTipoRequisitoPorId(@PathVariable Long id) {
         TipoRequisitoDto tipoRequisito = tipoRequisitoService.findTipoRequisitoById(id);
-        return ResponseEntity.ok(tipoRequisito);
+        return ResponseEntity.ok(
+                new JsonResponse<>(
+                        true,
+                        "tipo requisito obtenido por id",
+                        tipoRequisito,
+                        200
+                )
+        );
     }
-
-    @GetMapping
-    public ResponseEntity<List<TipoRequisitoDto>> listarTiposRequisito() {
+    @GetMapping("/listar")
+    public ResponseEntity<JsonResponse<List<TipoRequisitoDto>>> listarTiposRequisito() {
         List<TipoRequisitoDto> lista = tipoRequisitoService.findAllTiposRequisito();
-        return ResponseEntity.ok(lista);
+        return ResponseEntity.ok(
+                new JsonResponse<>(
+                        true,
+                        "lista de tipos de requisitos encontrados",
+                        lista,
+                        200
+                )
+        );
     }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminarTipoRequisito(@PathVariable Long id) {
+    @DeleteMapping("/eliminarPorId/{id}")
+    public ResponseEntity<JsonResponse<Void>> eliminarTipoRequisito(@PathVariable Long id) {
         tipoRequisitoService.deleteTipoRequisitoById(id);
         return ResponseEntity.noContent().build();
     }
