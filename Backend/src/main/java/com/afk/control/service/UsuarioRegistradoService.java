@@ -1,6 +1,6 @@
-package com.afk.backend.control.service;
+package com.afk.control.service;
 
-import com.afk.backend.control.dto.UsuarioRegistradoDto;
+import com.afk.control.dto.UsuarioRegistradoDto;
 
 import java.util.List;
 
@@ -9,4 +9,5 @@ public interface UsuarioRegistradoService {
     UsuarioRegistradoDto findUsuarioRegistradoById(Long id);
     List<UsuarioRegistradoDto> findAllUsuariosRegistrados();
     void deleteUsuarioRegistradoById(Long id);
+    List<UsuarioRegistradoDto> buscarTodosLosUsuarioRegistradosPorUbicacion(String name);
 }

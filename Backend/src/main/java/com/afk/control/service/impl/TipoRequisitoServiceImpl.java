@@ -1,27 +1,27 @@
-package com.afk.backend.control.service.impl;
+package com.afk.control.service.impl;
 
-import com.afk.backend.control.dto.TipoRequisitoDto;
-import com.afk.backend.control.mapper.TipoRequisitoMapper;
-import com.afk.backend.control.service.TipoRequisitoService;
-import com.afk.backend.model.entity.TipoRequisito;
-import com.afk.backend.model.repository.TipoRequistoRepository;
+import com.afk.control.dto.TipoRequisitoDto;
+import com.afk.control.mapper.TipoRequisitoMapper;
+import com.afk.control.service.TipoRequisitoService;
+import com.afk.model.entity.TipoRequisito;
+import com.afk.model.repository.TipoRequisitoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class TipoRequisitoServiceImpl implements TipoRequisitoService {
 
-    private final TipoRequistoRepository tipoRequisitoRepository;
+    private final TipoRequisitoRepository tipoRequisitoRepository;
     @Qualifier("tipoRequisitoMapperImpl")
     private final TipoRequisitoMapper mapper;
 
     @Override
-    @Transactional
     public TipoRequisitoDto createTipoRequisito(TipoRequisitoDto tipoRequisitoDto) {
         TipoRequisito tipoRequisito = mapper.toEntity(tipoRequisitoDto);
         TipoRequisito savedTipoRequisito = tipoRequisitoRepository.save(tipoRequisito);
@@ -39,11 +39,14 @@ public class TipoRequisitoServiceImpl implements TipoRequisitoService {
     @Override
     @Transactional(readOnly = true)
     public List<TipoRequisitoDto> findAllTiposRequisito() {
-        return mapper.toDtoList(tipoRequisitoRepository.findAll());
+        List<TipoRequisito> tipoRequisitos = tipoRequisitoRepository.findAll();
+        if (tipoRequisitos.isEmpty()) {
+            throw new RuntimeException("Tipo de requisitos no encontrados");
+        }
+        return mapper.toDtoList(tipoRequisitos);
     }
 
     @Override
-    @Transactional
     public void deleteTipoRequisitoById(Long id) {
         if (!tipoRequisitoRepository.existsById(id)) {
             throw new RuntimeException("Tipo de requisito no encontrado");

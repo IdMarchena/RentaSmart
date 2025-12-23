@@ -1,6 +1,6 @@
-package com.afk.backend.control.service;
+package com.afk.control.service;
 
-import com.afk.backend.control.dto.TipoRequisitoDto;
+import com.afk.control.dto.TipoRequisitoDto;
 
 import java.util.List;
 
