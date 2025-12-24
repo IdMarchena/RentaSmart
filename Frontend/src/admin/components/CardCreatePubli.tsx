@@ -7,7 +7,7 @@ interface CardCreatePubliProps {
 
 export const CardCreatePubli = ({ onClose }: CardCreatePubliProps) => {
     return (
-        <div className="relative w-[550px] h-[700px] flex flex-col justify-center items-center rounded-[20px] p-6 shadow-[0px_10px_10px_rgba(0,0,0,0.2)] bg-[#FEFCEC] overflow-hidden overflow-y-scroll custom-scrollbar-2">
+        <div className="relative md:w-[550px] h-[700px] w-[350px] flex flex-col justify-center items-center rounded-[20px] p-6 shadow-[0px_10px_10px_rgba(0,0,0,0.2)] bg-[#FEFCEC] overflow-hidden overflow-y-scroll custom-scrollbar-2">
             {/* Botón de cerrar */}
             {onClose && (
                 <button

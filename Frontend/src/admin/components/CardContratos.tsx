@@ -1,34 +1,101 @@
+import { useState } from "react"
 import imgHistory from "../../assets/history.png"
 import imgVista from "../../assets/vista.png"
 import imgEditar from "../../assets/editar.png"
 import imgBorrar from "../../assets/borrar.png"
 import imgFolder from "../../assets/folder.png"
+import CardEditContrato from "./CardEditContrato"
+import CardViewContrato from "./CardViewContrato"
+import { CardConfirmation} from "./CardConfirmation";
 
 export const CardContratos = () => {
+    const [showViewModal, setShowViewModal] = useState(false)
+    const [showEditModal, setShowEditModal] = useState(false)
+    const [showConfirmationModal, setShowConfirmationModal] = useState(false)
+
     return (
-        <div className="w-full h-[105px] flex flex-row items-start justify-between bg-[#E1DFD2] border-[1px] border-[#BCBBB0] rounded-[10px] p-2">
-            <div className="w-[70%] flex flex-row items-start justify-start gap-2 ml-2">
-                <img src={imgFolder} alt="add" className="w-[30px] h-[30px] object-cover rounded-[20px] mt-2"/>
-                <div className="w-[70%] flex flex-col items-start justify-center gap-1 mt-2">
-                    <h1 className="text-[#393939] md:text-[12px] text-[10px] font-bold">Contrato - Apt 123</h1>
-                    <p className="text-[#393939] md:text-[10px] text-[8px] font-medium">Contrato de alquiler de apartamento ubicado en una zona tranquila y de fácil acceso. Cuenta con excelente iluminación natural...</p>
+        <>
+            <div className="w-full h-[105px] flex flex-row items-start justify-between bg-[#E1DFD2] border-[1px] border-[#BCBBB0] rounded-[10px] p-2">
+                <div className="w-[70%] flex flex-row items-start justify-start gap-2 ml-2">
+                    <img src={imgFolder} alt="add" className="w-[30px] h-[30px] object-cover rounded-[20px] mt-2" />
+                    <div className="w-[70%] flex flex-col items-start justify-center gap-1 mt-2">
+                        <h1 className="text-[#393939] md:text-[12px] text-[10px] font-bold">Contrato - Apt 123</h1>
+                        <p className="text-[#393939] md:text-[10px] text-[8px] font-medium">Contrato de alquiler de apartamento ubicado en una zona tranquila y de fácil acceso. Cuenta con excelente iluminación natural...</p>
+                    </div>
+                </div>
+                <div className="w-[30%] flex flex-col items-start justify-end gap-1 flex-nowrap mr-2 mt-1">
+                    <div className="w-full flex flex-row items-start justify-end gap-1 flex-nowrap">
+                        <img src={imgHistory} alt="history" className="w-[15px] h-[15px] object-cover" />
+                        <span className="text-[#393939] text-[8px] font-medium">20 ene 2024</span>
+                    </div>
+                    <div className="w-full flex flex-row items-start justify-end gap-1 flex-nowrap mt-9">
+                        <img
+                            src={imgVista}
+                            alt="vista"
+                            className="md:w-[25px] md:h-[25px] h-[20px] w-[20px] object-cover cursor-pointer hover:opacity-70 transition-opacity"
+                            onClick={() => setShowViewModal(true)}
+                        />
+                        <img
+                            src={imgEditar}
+                            alt="editar"
+                            className="md:w-[25px] md:h-[25px] h-[20px] w-[20px] object-cover cursor-pointer hover:opacity-70 transition-opacity"
+                            onClick={() => setShowEditModal(true)}
+                        />
+                        <img
+                            src={imgBorrar}
+                            alt="borrar"
+                            className="md:w-[25px] md:h-[25px] h-[20px] w-[20px] object-cover cursor-pointer hover:opacity-70 transition-opacity"
+                            onClick={() => setShowConfirmationModal(true)}
+                        />
+                    </div>
                 </div>
             </div>
-            <div className="w-[30%] flex flex-col items-start justify-end gap-1 flex-nowrap mr-2 mt-1">
-                <div className="w-full flex flex-row items-start justify-end gap-1 flex-nowrap">
-                    <img src={imgHistory} alt="history" className="w-[15px] h-[15px] object-cover"/>
-                    <span className="text-[#393939] text-[8px] font-medium">20 ene 2024</span>
 
-                </div>
-                <div className="w-full flex flex-row items-start justify-end gap-1 flex-nowrap mt-9">
-                    <img src={imgVista} alt="vista" className="md:w-[25px] md:h-[25px] h-[20px] w-[20px] object-cover cursor-pointer"/>
-                    <img src={imgEditar} alt="editar" className="md:w-[25px] md:h-[25px] h-[20px] w-[20px] object-cover cursor-pointer"/>
-                    <img src={imgBorrar} alt="borrar" className="md:w-[25px] md:h-[25px] h-[20px] w-[20px] object-cover cursor-pointer"/>
+            {/* Modal Ver Contrato */}
+            {showViewModal && (
+                <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center z-50">
+                    {/* Overlay opaco */}
+                    <div
+                        className="absolute inset-0  bg-opacity-50 backdrop-blur-sm"
+                        onClick={() => setShowViewModal(false)}
+                    ></div>
 
+                    {/* Card de Ver Contrato */}
+                    <div className="relative z-10">
+                        <CardViewContrato onClose={() => setShowViewModal(false)} />
+                    </div>
                 </div>
-            </div>
-           
-            
-        </div>
+            )}
+
+            {/* Modal Editar Contrato */}
+            {showEditModal && (
+                <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center z-50">
+                    {/* Overlay opaco */}
+                    <div
+                        className="absolute inset-0  bg-opacity-50 backdrop-blur-sm"
+                        onClick={() => setShowEditModal(false)}
+                    ></div>
+
+                    {/* Card de Editar Contrato */}
+                    <div className="relative z-10">
+                        <CardEditContrato onClose={() => setShowEditModal(false)} />
+                    </div>
+                </div>
+            )}
+            {showConfirmationModal && (
+                <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center z-50">
+                    {/* Overlay opaco */}
+                    <div
+                        className="absolute inset-0  bg-opacity-50 backdrop-blur-sm"
+                        onClick={() => setShowConfirmationModal(false)}
+                    ></div>
+
+                    {/* Card de Confirmacion */}
+                    <div className="relative z-10">
+                        <CardConfirmation onClose={() => setShowConfirmationModal(false)} />
+                    </div>
+                </div>
+            )}
+        </>
     )
 }
