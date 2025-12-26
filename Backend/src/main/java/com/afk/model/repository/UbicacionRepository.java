@@ -9,4 +9,6 @@ import java.util.Optional;
 @Repository
 public interface UbicacionRepository extends JpaRepository<Ubicacion, Long> {
     Optional<Ubicacion> findByNombre(String nombre);
+    Optional<Ubicacion> findByNombreIgnoreCase(String nombre);
+
 }

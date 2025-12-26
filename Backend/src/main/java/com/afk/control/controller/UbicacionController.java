@@ -1,8 +1,6 @@
-package com.afk.backend.control.controller;
-
-import com.afk.backend.client.external.dto.UbicacionDTO;
-import com.afk.backend.client.external.dto.UbicacionDt;
-import com.afk.backend.control.service.impl.UbicacionServiceImpl;
+package com.afk.control.controller;
+import com.afk.client.external.dto.UbicacionDt;
+import com.afk.control.service.impl.UbicacionServiceImpl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
@@ -23,8 +21,10 @@ public class UbicacionController {
     }
 
     @GetMapping("/coordenadas")
-    public Mono<UbicacionDt> obtenerCoordenadas(@RequestParam String direccion) {
-        return ubicacionService.obtenerCoordenadas(direccion);
+    public Mono<ResponseEntity<UbicacionDt>> obtenerCoordenadas(@RequestParam String direccion) {
+        return ubicacionService.obtenerCoordenadas(direccion)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/{id}")
@@ -34,8 +34,8 @@ public class UbicacionController {
     }
 
     @GetMapping("/sincronizar/{id}")
-    public ResponseEntity<String> sincronizar(@PathVariable Long id) {
-        ubicacionService.sincronizarUbicacion(id);
-        return ResponseEntity.ok("Ubicación sincronizada");
+    public Mono<ResponseEntity<String>> sincronizar(@PathVariable Long id) {
+        return ubicacionService.sincronizarUbicacion(id)
+                .thenReturn(ResponseEntity.ok("Ubicación sincronizada"));
     }
 }

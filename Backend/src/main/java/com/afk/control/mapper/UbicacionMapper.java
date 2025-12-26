@@ -1,6 +1,4 @@
 package com.afk.control.mapper;
-
-
 import com.afk.client.external.dto.UbicacionDt;
 import com.afk.control.dto.UbicacionDto;
 import com.afk.model.entity.Ubicacion;
@@ -20,9 +18,11 @@ public interface UbicacionMapper {
         return u;
     }
     @Named("UbicacionToUbicacionDto")
+    @Mapping(target="padre",source="ubicacion.id")
     UbicacionDt toDto(Ubicacion ubicacion);
 
     @Named("UbicacionDtoToUbicacion")
+    @Mapping(target = "padre",source="id_oadre",qualifiedByName = "ubicacionFromId")
     Ubicacion toEntity(UbicacionDt dto);
 
     @Named("listUbicacionToListUbicacionDto")
