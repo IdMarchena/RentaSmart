@@ -19,9 +19,13 @@ export const CardChart2 = () => {
                     cornerRadius: 5,
                     },
                 ]}
+                colors={['#EB8369', '#A9ADB6', '#393939']}
                 width={200}
                 height={200}
-                colors={['#EB8369', '#A9ADB6', '#393939']}
+                sx={{
+                    width: { auto: 180 },
+                    height: { auto: 180 },
+                }}
             />
         </div>
     )
