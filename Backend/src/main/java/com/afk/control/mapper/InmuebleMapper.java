@@ -5,48 +5,46 @@ import org.mapstruct.*;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring",
+uses = {
+        UbicacionMapper.class,
+        ServicioMapper.class,
+        UsuarioMapper.class,
+})
 public interface InmuebleMapper {
-    @Named("mapU")
-    default Ubicacion mapU(Long id){
-        if(id == null) return null;
-        Ubicacion ubicacion = new Ubicacion();
-        ubicacion.setId(id);
-        return ubicacion;
-    }
-    @Named("mapS")
-    default Servicio mapS(Long id){
-        if(id == null) return null;
-        Servicio servicio = new Servicio();
-        servicio.setId(id);
-        return servicio;
+
+    @Named("inmuebleFromId")
+    default Inmueble fromId(Long id) {
+        if (id == null) return null;
+        Inmueble inmueble = new Inmueble();
+        inmueble.setId(id);
+        return inmueble;
     }
 
-
-    @Mapping(target="descripcion",source="descripcion")
-    @Mapping(target = "ubicacion", source = "idUbicaicon", qualifiedByName = "mapU")
-    @Mapping(target = "areaTotal", source = "areaTotal")
-    @Mapping(target = "estrato", source = "estrato")
-    @Mapping(target = "nombre", source = "nombre")
-    @Mapping(target = "servicio", source = "idServicio", qualifiedByName = "mapS")
+    @Mapping(target = "ubicacion", source = "idUbicaicon", qualifiedByName = "ubicacionFromId")
+    @Mapping(target = "servicio", source = "idServicio", qualifiedByName = "servicioFromId")
+    @Mapping(target = "usuario", source = "idArrendatario", qualifiedByName = "usuarioFromId")
     Inmueble toEntity(InmuebleDto inmuebleDto);
 
-    @Mapping(source="descripcion",target="descripcion")
-    @Mapping(source = "ubicacion.id", target = "idUbicaicon")
-    @Mapping(source = "areaTotal", target = "areaTotal")
-    @Mapping(source = "estrato", target = "estrato")
-    @Mapping(source = "nombre", target = "nombre")
-    @Mapping(source = "servicio.id", target = "idServicio")
+    @Mapping(target = "ubicacion", source = "ubicaicon.id")
+    @Mapping(target = "servicio", source = "servicio.id")
+    @Mapping(target = "usuario", source = "usuario.id")
     InmuebleDto toDto(Inmueble inmueble);
 
+
+    @Named("inmuebleToDtoList")
     default List<InmuebleDto> toDtoList(Iterable<Inmueble> inmuebles) {
         return StreamSupport.stream(inmuebles.spliterator(), false)
                 .map(this::toDto)
                 .collect(Collectors.toList());
     }
 
-
+    @Named("inmuebleToEntityList")
+    default List<Inmueble> toEntityList(Iterable<InmuebleDto> inmuebles) {
+        return StreamSupport.stream(inmuebles.spliterator(),false)
+                .map(this::toEntity)
+                .collect(Collectors.toList());
+    }
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateEntityFromDto(InmuebleDto dto, @MappingTarget Inmueble entity);

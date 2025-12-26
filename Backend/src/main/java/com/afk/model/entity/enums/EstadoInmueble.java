@@ -1,5 +1,5 @@
 package com.afk.model.entity.enums;
 
 public enum EstadoInmueble {
-    AMOBLADO,NOAMOBLADO
+    LIBRE_AMOBLADO,LIBRE_NO_AMOBLADO,OCUPADO,EN_RESERVA
 }

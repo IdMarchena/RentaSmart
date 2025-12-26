@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,9 +23,6 @@ public class CasaServiceImpl implements CasaService {
         if(dto==null){
             throw new IllegalArgumentException("CasaDto cannot be null");
         }
-        casaRepository.findById(dto.id()).ifPresent(casa -> {
-            throw new IllegalStateException("Casa with id " + dto.id() + " already exists");
-        });
         Casa casa = casaMapper.toEntity(dto);
         Casa casaSaved = casaRepository.save(casa);
         return casaMapper.toDto(casaSaved);

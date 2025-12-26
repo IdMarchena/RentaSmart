@@ -7,7 +7,8 @@ public record InmuebleDto(
         Integer areaTotal,
         Integer estrato,
         String nombre,
-        Long idServicio
+        Long idServicio,
+        Long idArrendatario
 
 ) {
 }

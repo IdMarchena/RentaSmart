@@ -37,11 +37,15 @@ public class Inmueble {
     @Enumerated(EnumType.STRING)
     private EstadoInmueble estadoInmueble;
 
-    @Column(name = "nombre", length = 150)
+    @Column(name = "nombre", length = 150,unique=true)
     private String nombre;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_servicio", nullable = true)
+    @JoinColumn(name = "id_servicio")
     private Servicio servicio;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name= "id_arrendatario")
+    private Usuario usuario;
 }
 

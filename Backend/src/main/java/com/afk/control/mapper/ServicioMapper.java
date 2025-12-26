@@ -1,5 +1,6 @@
 package com.afk.control.mapper;
-import com.afk.control.service.dto.ServicioDto;
+
+import com.afk.control.dto.ServicioDto;
 import com.afk.model.entity.*;
 import org.mapstruct.*;
 import java.util.List;
@@ -8,6 +9,14 @@ import java.util.stream.StreamSupport;
 
 @Mapper(componentModel = "spring")
 public interface ServicioMapper {
+
+    @Named("servicioFromId")
+    default Servicio servicioToServicio(Long id) {
+        if (id == null) return null;
+        Servicio servicio = new Servicio();
+        servicio.setId(id);
+        return servicio;
+    }
 
     @Named("mapU")
     default Usuario mapU(Long id){
