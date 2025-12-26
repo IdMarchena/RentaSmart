@@ -1,11 +1,11 @@
-package com.afk.backend.client.external.config;
+package com.afk.client.external.config;
 
 import com.afk.backend.control.dto.JwtResponse;
 import com.afk.backend.control.security.jwt.AuthTokenFilter;
 import com.afk.backend.control.security.jwt.JwtProtocolConfig;
 import com.afk.backend.control.security.jwt.JwtUtil;
-import com.afk.backend.control.security.oauth2.CustomOAuth2UserService;
-import com.afk.backend.control.security.service.UserDetailsServiceImpl;
+import com.afk.control.security.oauth2.CustomOAuth2UserService;
+import com.afk.control.security.service.UserDetailsServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
