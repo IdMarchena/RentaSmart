@@ -20,6 +20,11 @@ public class ServicioController {
     @PostMapping("/crear")
     public ResponseEntity<JsonResponse<ServicioDto>> crearServicio(@RequestBody ServicioDto servicio) {
         ServicioDto servicioDto = service.crearServicio(servicio);
+        if (servicioDto==null) {
+            return ResponseEntity.status(404).body(
+                    new JsonResponse<>(false, "servicio no se pudo crear", null, 404)
+            );
+        }
         return ResponseEntity.ok(
                 new JsonResponse<>(
                         true,
@@ -30,7 +35,7 @@ public class ServicioController {
         );
     }
 
-    @GetMapping("7obtenerPorId/{id}")
+    @GetMapping("/obtenerPorId/{id}")
     public ResponseEntity<JsonResponse<ServicioDto>> getServicioById(@PathVariable Long id) {
         ServicioDto servicioDto = service.getServicioById(id);
         if (servicioDto != null) {
@@ -57,6 +62,11 @@ public class ServicioController {
     @GetMapping("/todos")
     public ResponseEntity<JsonResponse<List<ServicioDto>>> getAllServicios() {
         List<ServicioDto> servicios = service.getAllServicios();
+        if (servicios.isEmpty()) {
+            return ResponseEntity.status(404).body(
+                    new JsonResponse<>(false, "servicios no se pudieron obtener", null, 404)
+            );
+        }
         return ResponseEntity.ok(
                 new JsonResponse<>(
                         true,
@@ -129,6 +139,11 @@ public class ServicioController {
     @GetMapping("/buscarServiciosPorTipo/{tipo}")
     public ResponseEntity<JsonResponse<List<ServicioDto>>> buscarServiciosPorTipo(@PathVariable String tipo) {
         List<ServicioDto> servicios = service.buscarServiciosPorTipo(tipo);
+        if (servicios.isEmpty()) {
+            return ResponseEntity.status(404).body(
+                    new JsonResponse<>(false, "servicio no se pudieron buscar por tipo", null, 404)
+            );
+        }
         return ResponseEntity.ok(
                 new JsonResponse<>(
                         true,
@@ -141,6 +156,11 @@ public class ServicioController {
     @GetMapping("/buscarServiciosPorNombreYPrecios")
     public ResponseEntity<JsonResponse<List<ServicioDto>>> buscarServiciosPorNombreYPrecio(@RequestParam String nombre, @RequestParam Integer precio) {
         List<ServicioDto> servicios = service.buscarServiciosPorNombreYPrecio(nombre, precio);
+        if (servicios.isEmpty()) {
+            return ResponseEntity.status(404).body(
+                    new JsonResponse<>(false, "servicio no se pudieron buscar por nombre y precios", null, 404)
+            );
+        }
         return ResponseEntity.ok(
                 new JsonResponse<>(
                         true,
