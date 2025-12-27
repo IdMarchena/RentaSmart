@@ -2,7 +2,6 @@ package com.afk.control.controller;
 
 import com.afk.control.dto.InmuebleDto;
 import com.afk.control.service.InmuebleService;
-import com.afk.model.entity.enums.EstadoInmueble;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -204,7 +203,7 @@ public class InmuebleController {
                 )
         );
     }
-    @GetMapping("/listarInmueblesPorIdArrendatario/{id}")
+    @GetMapping("/listarInmueblesPorIdArrendatario/{idArrendario}")
     public ResponseEntity<JsonResponse<List<InmuebleDto>>> finInmueblesByIdArrendatario(@PathVariable Long idArrendario) {
         List<InmuebleDto> inmuebleDtos = inmuebleService.finInmueblesByIdArrendatario(idArrendario);
         if(inmuebleDtos.isEmpty()) {
