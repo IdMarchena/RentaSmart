@@ -33,5 +33,8 @@ public class UsuarioRegistrado extends Usuario {
 
     @Column(name="telefono_usuario",nullable = false,length = 10)
     private String telefono;
+
+    @Column(name="cedula",nullable = false,length = 10)
+    private String cedula;
 }
 

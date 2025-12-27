@@ -21,7 +21,6 @@ public class UsuarioRegistradoServiceImpl implements UsuarioRegistradoService {
     private final UsuarioRegistradoRepository usuarioRegistradoRepository;
     private final RolRepository rolRepository;
     private final UbicacionRepository ubicacionRepository;
-    private final UsuarioRolRepository usuarioRolRepository;
 
     @Qualifier("usuarioRegistradoMapperImpl")
     private final UsuarioRegistradoMapper mapper;
@@ -51,27 +50,12 @@ public class UsuarioRegistradoServiceImpl implements UsuarioRegistradoService {
         Ubicacion ubicacion = ubicacionRepository.findById(usuarioDto.ubicacion())
                 .orElseThrow(() -> new RuntimeException("Ubicación no encontrada"));
         UsuarioRegistrado usuario = mapper.toEntity(usuarioDto);
-
         usuario.setRol(rolRepository.getReferenceById(usuarioDto.rol()));
-
         usuario.setUbicacion(ubicacion);
-
         usuario.setFechaRegistro(LocalDateTime.now());
-
         usuario.setTelefono(usuarioDto.telefono());
-
+        usuario.setCedula(usuarioDto.cedula());
         UsuarioRegistrado savedUsuario = usuarioRegistradoRepository.save(usuario);
-
-        UsuarioRol usuarioRol = new UsuarioRol();
-        usuarioRol.setId(savedUsuario.getId());
-        usuarioRol.setUsuarioRegistrado(savedUsuario);
-        usuarioRol.setRol(rolRepository.getReferenceById(usuarioDto.rol()));
-        usuarioRol.setFechaActivacionRol(LocalDateTime.now());
-        usuarioRol.setEstadoUsuarioRol(EstadoUsuarioRol.ASIGNADO);
-        usuarioRol.setFechaFinRol(LocalDateTime.now());
-
-        usuarioRolRepository.save(usuarioRol);
-
         return mapper.toDto(savedUsuario);
     }
 

@@ -14,6 +14,11 @@ public class TipoRequisitoController {
     @PostMapping("/crear")
     public ResponseEntity<JsonResponse<TipoRequisitoDto>> crearTipoRequisito(@RequestBody TipoRequisitoDto dto) {
         TipoRequisitoDto creado = tipoRequisitoService.createTipoRequisito(dto);
+        if (creado==null) {
+            return ResponseEntity.status(404).body(
+                    new JsonResponse<>(false, "requisito no se pudo crear", null, 404)
+            );
+        }
         return ResponseEntity.ok(
                 new JsonResponse<>(
                         true,
@@ -26,6 +31,11 @@ public class TipoRequisitoController {
     @GetMapping("/buscarPorId/{id}")
     public ResponseEntity<JsonResponse<TipoRequisitoDto>> obtenerTipoRequisitoPorId(@PathVariable Long id) {
         TipoRequisitoDto tipoRequisito = tipoRequisitoService.findTipoRequisitoById(id);
+        if (tipoRequisito==null) {
+            return ResponseEntity.status(404).body(
+                    new JsonResponse<>(false, "requisito no se pudo obtener", null, 404)
+            );
+        }
         return ResponseEntity.ok(
                 new JsonResponse<>(
                         true,
@@ -38,6 +48,11 @@ public class TipoRequisitoController {
     @GetMapping("/listar")
     public ResponseEntity<JsonResponse<List<TipoRequisitoDto>>> listarTiposRequisito() {
         List<TipoRequisitoDto> lista = tipoRequisitoService.findAllTiposRequisito();
+        if (lista.isEmpty()) {
+            return ResponseEntity.status(404).body(
+                    new JsonResponse<>(false, "requisitos no se pudieron obtener", null, 404)
+            );
+        }
         return ResponseEntity.ok(
                 new JsonResponse<>(
                         true,
@@ -49,7 +64,15 @@ public class TipoRequisitoController {
     }
     @DeleteMapping("/eliminarPorId/{id}")
     public ResponseEntity<JsonResponse<Void>> eliminarTipoRequisito(@PathVariable Long id) {
-        tipoRequisitoService.deleteTipoRequisitoById(id);
-        return ResponseEntity.noContent().build();
+        try{
+            tipoRequisitoService.deleteTipoRequisitoById(id);
+            return ResponseEntity.ok(
+                    new JsonResponse<>(true, "inmueblse eliminado exitosamente", null, 200)
+            );
+        }catch (Exception e) {
+            return ResponseEntity.status(404).body(
+                    new JsonResponse<>(false, "inmueblse no se pudo eliminar", null, 404)
+            );
+        }
     }
 }

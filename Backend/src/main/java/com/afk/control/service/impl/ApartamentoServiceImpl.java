@@ -36,7 +36,7 @@ public class ApartamentoServiceImpl implements ApartamentoService {
     @Override
     public ApartamentoDto createApartamento(ApartamentoDto apartamentoDto) {
         Apartamento apartamento = apartamentoMapper.toEntity(apartamentoDto);
-        if (apartamento.getId() != null) {
+        if (apartamentoDto== null) {
             throw new RuntimeException("Apartamento ya existe con el ID: " + apartamento.getId());
         }
         Apartamento savedApartamento = apartamentoRepository.save(apartamento);

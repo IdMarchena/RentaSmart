@@ -37,7 +37,6 @@ public class AuthController {
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
     private final RolRepository rolRepository;
-    private final UsuarioRolRepository usuarioRolRepository;
     private final UsuarioRegistradoRepository usuarioRegistradoRepository;
     private final UbicacionRepository ubicacionRepository;
 

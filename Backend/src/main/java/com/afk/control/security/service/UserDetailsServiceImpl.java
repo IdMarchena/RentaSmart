@@ -2,10 +2,8 @@ package com.afk.control.security.service;
 
 import com.afk.model.entity.Rol;
 import com.afk.model.entity.UsuarioRegistrado;
-import com.afk.model.entity.UsuarioRol;
 import com.afk.model.entity.enums.EstadoUsuarioRol;
 import com.afk.model.repository.UsuarioRegistradoRepository;
-import com.afk.model.repository.UsuarioRolRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;

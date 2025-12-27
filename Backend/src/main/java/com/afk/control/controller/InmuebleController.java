@@ -6,7 +6,7 @@ import com.afk.model.entity.enums.EstadoInmueble;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import com.afk.control.dto.JsonResponse;
 import java.util.List;
 
 @RestController
@@ -16,69 +16,224 @@ public class InmuebleController {
 
     private final InmuebleService inmuebleService;
 
-    @PostMapping
-    public ResponseEntity<InmuebleDto> createInmueble(@RequestBody InmuebleDto inmuebleDto) {
+    @PostMapping("/crear")
+    public ResponseEntity<JsonResponse<InmuebleDto>> createInmueble(@RequestBody InmuebleDto inmuebleDto) {
         InmuebleDto savedInmueble = inmuebleService.createInmueble(inmuebleDto);
-        return ResponseEntity.ok(savedInmueble);
+        if (savedInmueble==null) {
+            return ResponseEntity.status(404).body(
+                    new JsonResponse<>(false, "inmueble no se pudo crear", null, 404)
+            );
+        }
+        return ResponseEntity.ok(
+                new JsonResponse<>(
+                        true,
+                        "inmueble creado exitosamente",
+                        savedInmueble,
+                        201
+                )
+        );
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<InmuebleDto> getInmuebleById(@PathVariable Long id) {
+    @GetMapping("/obtenerPorId/{id}")
+    public ResponseEntity<JsonResponse<InmuebleDto>> getInmuebleById(@PathVariable Long id) {
         InmuebleDto inmuebleDto = inmuebleService.findInmuebleById(id);
-        return ResponseEntity.ok(inmuebleDto);
+        if (inmuebleDto==null) {
+            return ResponseEntity.status(404).body(
+                    new JsonResponse<>(false, "inmueble no se pudo obtener", null, 404)
+            );
+        }
+        return ResponseEntity.ok(
+                new JsonResponse<>(
+                        true,
+                        "inmueble obtenido exitosamente",
+                        inmuebleDto,
+                        200
+                )
+        );
     }
 
-    @GetMapping
-    public ResponseEntity<List<InmuebleDto>> getAllInmuebles() {
+    @GetMapping("/listar")
+    public ResponseEntity<JsonResponse<List<InmuebleDto>>> getAllInmuebles() {
         List<InmuebleDto> inmuebleDtos = inmuebleService.findAllInmuebles();
-        return ResponseEntity.ok(inmuebleDtos);
+        if (inmuebleDtos.isEmpty()) {
+            return ResponseEntity.status(404).body(
+                    new JsonResponse<>(false, "inmueblse no se pudieron obtener", null, 404)
+            );
+        }
+        return ResponseEntity.ok(
+                new JsonResponse<>(
+                        true,
+                        "inmuebles obtenidos eitosamente",
+                        inmuebleDtos,
+                        200
+                )
+        );
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteInmuebleById(@PathVariable Long id) {
-        inmuebleService.deleteInmuebleById(id);
-        return ResponseEntity.noContent().build();
+    @DeleteMapping("/eliminarPorId/{id}")
+    public ResponseEntity<JsonResponse<Void>> deleteInmuebleById(@PathVariable Long id) {
+        try{
+            inmuebleService.deleteInmuebleById(id);
+                return ResponseEntity.ok(
+                        new JsonResponse<>(true, "inmueblse eliminado exitosamente", null, 200)
+                );
+        }catch (Exception e) {
+                return ResponseEntity.status(404).body(
+                        new JsonResponse<>(false, "inmueblse no se pudo eliminar", null, 404)
+                );
+        }
     }
 
-    @GetMapping("/ubicacion/{ubicacionId}")
-    public ResponseEntity<List<InmuebleDto>> getInmueblesByUbicacion(@PathVariable Long ubicacionId) {
+    @GetMapping("/listarInmueblesPorUbicacionId/{ubicacionId}")
+    public ResponseEntity<JsonResponse<List<InmuebleDto>>> getInmueblesByUbicacion(@PathVariable Long ubicacionId) {
         List<InmuebleDto> inmuebleDtos = inmuebleService.findInmueblesByUbicacion(ubicacionId);
-        return ResponseEntity.ok(inmuebleDtos);
+        if (inmuebleDtos.isEmpty()) {
+            return ResponseEntity.status(404).body(
+                    new JsonResponse<>(false, "inmueblse no se pudieron obtener por ubicacion", null, 404)
+            );
+        }
+        return ResponseEntity.ok(
+                new JsonResponse<>(
+                        true,
+                        "inmuebles obtenidos eitosamente",
+                        inmuebleDtos,
+                        200
+                )
+        );
     }
 
-    @GetMapping("/estado/{estadoInmueble}")
-    public ResponseEntity<List<InmuebleDto>> getInmueblesByEstado(@PathVariable EstadoInmueble estadoInmueble) {
-        List<InmuebleDto> inmuebleDtos = inmuebleService.findInmueblesByEstado(estadoInmueble);
-        return ResponseEntity.ok(inmuebleDtos);
+    @GetMapping("/listarImueblesPorEstado")
+    public ResponseEntity<JsonResponse<List<InmuebleDto>>> getInmueblesByEstado(@RequestParam String estado) {
+        List<InmuebleDto> inmuebleDtos = inmuebleService.findInmueblesByEstado(estado);
+        if (inmuebleDtos.isEmpty()) {
+            return ResponseEntity.status(404).body(
+                    new JsonResponse<>(false, "inmueblse no se pudieron obtener por estado", null, 404)
+            );
+        }
+        return ResponseEntity.ok(
+                new JsonResponse<>(
+                        true,
+                        "inmuebles obtenidos eitosamente",
+                        inmuebleDtos,
+                        200
+                )
+        );
     }
 
-    @GetMapping("/ubicacion/{ubicacionId}/estado/{estadoInmueble}")
-    public ResponseEntity<List<InmuebleDto>> getInmueblesByUbicacionAndEstado(@PathVariable Long ubicacionId, @PathVariable EstadoInmueble estadoInmueble) {
-        List<InmuebleDto> inmuebleDtos = inmuebleService.findInmueblesByUbicacionAndEstado(ubicacionId, estadoInmueble);
-        return ResponseEntity.ok(inmuebleDtos);
+    @GetMapping("/listarInmueblesPorUbicacionIdYEstado/{ubicacionId}")
+    public ResponseEntity<JsonResponse<List<InmuebleDto>>> getInmueblesByUbicacionAndEstado(@PathVariable Long ubicacionId, @RequestParam String estado) {
+        List<InmuebleDto> inmuebleDtos = inmuebleService.findInmueblesByUbicacionAndEstado(ubicacionId, estado);
+        if (inmuebleDtos.isEmpty()) {
+            return ResponseEntity.status(404).body(
+                    new JsonResponse<>(false, "inmueblse no se pudieron obtener por ubicacion y por estado", null, 404)
+            );
+        }
+        return ResponseEntity.ok(
+                new JsonResponse<>(
+                        true,
+                        "inmuebles obtenidos eitosamente",
+                        inmuebleDtos,
+                        200
+                )
+        );
     }
 
-    @GetMapping("/nombre/{nombre}/estrato/{estrato}")
-    public ResponseEntity<List<InmuebleDto>> getInmueblesByNombreAndEstrato(@PathVariable String nombre, @PathVariable Integer estrato) {
+    @GetMapping("/listarInmueblesPorNombreYEstrado")
+    public ResponseEntity<JsonResponse<List<InmuebleDto>>> getInmueblesByNombreAndEstrato(@RequestParam String nombre, @RequestParam Integer estrato) {
         List<InmuebleDto> inmuebleDtos = inmuebleService.findInmueblesByNombreAndEstrato(nombre, estrato);
-        return ResponseEntity.ok(inmuebleDtos);
+        if (inmuebleDtos.isEmpty()) {
+            return ResponseEntity.status(404).body(
+                    new JsonResponse<>(false, "inmueblse no se pudieron obtener por nombre y estrato", null, 404)
+            );
+        }
+        return ResponseEntity.ok(
+                new JsonResponse<>(
+                        true,
+                        "inmuebles obtenidos eitosamente",
+                        inmuebleDtos,
+                        200
+                )
+        );
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<InmuebleDto> updateInmueble(@PathVariable Long id, @RequestBody InmuebleDto inmuebleDto) {
+    @PutMapping("/actualizar/{id}")
+    public ResponseEntity<JsonResponse<InmuebleDto>> updateInmueble(@PathVariable Long id, @RequestBody InmuebleDto inmuebleDto) {
         InmuebleDto updatedInmueble = inmuebleService.updateInmueble(id, inmuebleDto);
-        return ResponseEntity.ok(updatedInmueble);
+        if(updatedInmueble == null) {
+            return ResponseEntity.status(404).body(
+                    new JsonResponse<>(false, "imueble no se pudo actualizar",null,404)
+            );
+        }
+        return ResponseEntity.ok(
+                new JsonResponse<>(true, "imueble  se pudo actualizar",updatedInmueble,200)
+        );
     }
 
-    @GetMapping("/nombre/{nombre}")
-    public ResponseEntity<List<InmuebleDto>> getInmueblesByNombre(@PathVariable String nombre) {
+    @GetMapping("/listarInmueblesPorNombre")
+    public ResponseEntity<JsonResponse<List<InmuebleDto>>> getInmueblesByNombre(@RequestParam String nombre) {
         List<InmuebleDto> inmuebleDtos = inmuebleService.findInmueblesByNombre(nombre);
-        return ResponseEntity.ok(inmuebleDtos);
+        if(inmuebleDtos.isEmpty()) {
+            return ResponseEntity.status(404).body(
+                    new JsonResponse<>(false,"no se pudo obtener inmuebles por nombre",null,404)
+            );
+        }
+        return ResponseEntity.ok(
+                new JsonResponse<>(
+                        true,
+                        "inmuebles listados por estrato exitosamente",
+                        inmuebleDtos,
+                        200
+                )
+        );
     }
 
-    @GetMapping("/estrato/{estrato}")
-    public ResponseEntity<List<InmuebleDto>> getInmueblesByEstrato(@PathVariable Integer estrato) {
+    @GetMapping("/listarInmueblesPorEstrado")
+    public ResponseEntity<JsonResponse<List<InmuebleDto>>> getInmueblesByEstrato(@RequestParam Integer estrato) {
         List<InmuebleDto> inmuebleDtos = inmuebleService.findInmueblesByEstrato(estrato);
-        return ResponseEntity.ok(inmuebleDtos);
+        if(inmuebleDtos.isEmpty()) {
+            return ResponseEntity.status(404).body(
+                    new JsonResponse<>(false,"no se pudo obtener inmuebles por estrato",null,404)
+            );
+        }
+        return ResponseEntity.ok(
+                new JsonResponse<>(
+                        true,
+                        "inmuebles listados por estrato exitosamente",
+                        inmuebleDtos,
+                        200
+                )
+        );
     }
+    @GetMapping("/listarInmueblesPorIdArrendatario/{id}")
+    public ResponseEntity<JsonResponse<List<InmuebleDto>>> finInmueblesByIdArrendatario(@PathVariable Long idArrendario) {
+        List<InmuebleDto> inmuebleDtos = inmuebleService.finInmueblesByIdArrendatario(idArrendario);
+        if(inmuebleDtos.isEmpty()) {
+            return ResponseEntity.status(404).body(
+                    new JsonResponse<>(false,"no se pudo obtener inmuebles por id arrendatario",null,404)
+            );
+        }
+        return ResponseEntity.ok(
+                new JsonResponse<>(
+                        true,
+                        "inmuebles listados por estrato exitosamente",
+                        inmuebleDtos,
+                        200
+                )
+        );
+    }
+
+    @PutMapping("/cambiarEstadoInmueblePorId/{id}")
+    public ResponseEntity<JsonResponse<Void>> cambiarEstadoInmueble(@PathVariable Long id, @RequestParam String estado) {
+        try {
+            inmuebleService.cambiarEstadoInmueble(id, estado);
+            return ResponseEntity.status(404).body(
+                    new JsonResponse<>(false, "error al cambiar el estado del inmueble por id",null,404)
+            );
+        } catch (Exception e) {
+            return ResponseEntity.ok(
+                    new JsonResponse<>(true, "se pudo cambiar exitosamente el estado del inmueble",null,20)
+            );
+        }
+    }
+
 }
