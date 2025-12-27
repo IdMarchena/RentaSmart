@@ -8,5 +8,6 @@ public record UsuarioRegistradoDto(
         Long rol,
         Long ubicacion,
         EstadoUsuarioRegistrado estado,
-        String telefono
+        String telefono,
+        String cedula
 ) {}

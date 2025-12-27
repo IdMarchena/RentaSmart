@@ -18,6 +18,11 @@ public class CasaController {
     @PostMapping("/crear")
     public ResponseEntity<JsonResponse<CasaDto>> crearCasa(@RequestBody CasaDto casa) {
         CasaDto c = service.createCasa( casa );
+        if (c==null) {
+            return ResponseEntity.status(404).body(
+                    new JsonResponse<>(false, "error al crear la casa", null, 404)
+            );
+        }
         return ResponseEntity.ok(
                 new JsonResponse<>(
                     true,
@@ -30,6 +35,11 @@ public class CasaController {
     @GetMapping("/obtenerPorId/{id}")
     public ResponseEntity<JsonResponse<CasaDto>> findCasaById(@RequestParam Long id){
         CasaDto c = service.findCasaById( id );
+        if (c==null) {
+            return ResponseEntity.status(404).body(
+                    new JsonResponse<>(false, "error al crear la casa", null, 404)
+            );
+        }
         return ResponseEntity.ok(
                 new JsonResponse<>(
                         true,
@@ -43,6 +53,11 @@ public class CasaController {
     @GetMapping("/listar")
     public ResponseEntity<JsonResponse<List<CasaDto>>> findAllCasas(){
         List<CasaDto> lista = service.findAllCasas();
+        if (lista.isEmpty()) {
+            return ResponseEntity.status(404).body(
+                    new JsonResponse<>(false, "error al listar las casas", null, 404)
+            );
+        }
         return ResponseEntity.ok(
                 new JsonResponse<>(
                         true,
@@ -56,6 +71,11 @@ public class CasaController {
     @PutMapping("/actualizar/{id}")
     public ResponseEntity<JsonResponse<CasaDto>> updateCasas(@RequestParam Long id,@RequestBody CasaDto caasa){
         CasaDto c= service.updateCasas( id, caasa );
+        if (c==null) {
+            return ResponseEntity.status(404).body(
+                    new JsonResponse<>(false, "error al actualizar la casa", null, 404)
+            );
+        }
         return ResponseEntity.ok(
                 new JsonResponse<>(
                         true,
@@ -68,7 +88,15 @@ public class CasaController {
 
     @DeleteMapping("/eliminar")
     public ResponseEntity<JsonResponse<Void>> deleteCasasById(@RequestParam Long id){
-        service.deleteCasasById( id );
-        return ResponseEntity.noContent().build();
+        try {
+            service.deleteCasasById( id );
+            return ResponseEntity.ok(
+                    new JsonResponse<>(true, "se elimino la casa exitosamente", null, 200)
+            );
+        } catch (Exception e) {
+            return ResponseEntity.status(404).body(
+                    new JsonResponse<>(false, "error al eliminar la casa", null, 404)
+            );
+        }
     }
 }

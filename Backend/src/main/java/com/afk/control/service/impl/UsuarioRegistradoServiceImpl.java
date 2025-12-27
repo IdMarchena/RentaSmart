@@ -54,6 +54,7 @@ public class UsuarioRegistradoServiceImpl implements UsuarioRegistradoService {
         usuario.setUbicacion(ubicacion);
         usuario.setFechaRegistro(LocalDateTime.now());
         usuario.setTelefono(usuarioDto.telefono());
+        usuario.setCedula(usuarioDto.cedula());
         UsuarioRegistrado savedUsuario = usuarioRegistradoRepository.save(usuario);
         return mapper.toDto(savedUsuario);
     }

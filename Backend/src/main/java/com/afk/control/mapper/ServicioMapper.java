@@ -7,7 +7,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring",
+uses = {UsuarioMapper.class,
+        TipoServicioMapper.class})
 public interface ServicioMapper {
 
     @Named("servicioFromId")
@@ -18,39 +20,26 @@ public interface ServicioMapper {
         return servicio;
     }
 
-    @Named("mapU")
-    default Usuario mapU(Long id){
-        if(id == null) return null;
-        Usuario usuario = new Usuario();
-        usuario.setId(id);
-        return usuario;
-    }
 
-    @Named("mapT")
-    default TipoServicio mapT(Long id){
-        if(id == null) return null;
-        TipoServicio tipoServicio = new TipoServicio();
-        tipoServicio.setId(id);
-        return tipoServicio;
-    }
-
-    @Mapping(target="nombre",source="nombre")
-    @Mapping(target="descripcion",source="descripcion")
-    @Mapping(target = "usuario", source = "idUsuario", qualifiedByName = "mapU")
-    @Mapping(target = "tipo", source = "idTipo", qualifiedByName = "mapT")
-    @Mapping(target = "estado", source = "estado")
+    @Mapping(target = "usuario", source = "idUsuario", qualifiedByName = "usuarioFromId")
+    @Mapping(target = "tipo", source = "idTipo", qualifiedByName = "tipoServicioFromId")
     Servicio toEntity(ServicioDto dto);
 
-    @Mapping(source="nombre",target="nombre")
-    @Mapping(source = "descripcion", target = "descripcion")
-    @Mapping(source = "usuario.id", target = "idUsuario")
-    @Mapping(source = "tipo.id", target = "idTipo")
-    @Mapping(source = "estado", target = "estado")
+    @Mapping(target = "usuario", source = "usuario.id")
+    @Mapping(target = "tipo", source = "tipo.id")
     ServicioDto toDto(Servicio sancion);
 
+    @Named("servicioToDtoList")
     default List<ServicioDto> toDtoList(Iterable<Servicio> servicios) {
         return StreamSupport.stream(servicios.spliterator(), false)
                 .map(this::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Named("servicioToEntityList")
+    default List<Servicio> toEntityList(Iterable<ServicioDto> servicios) {
+        return StreamSupport.stream(servicios.spliterator(),false)
+                .map(this::toEntity)
                 .collect(Collectors.toList());
     }
 
