@@ -1,11 +1,6 @@
 import { useState, useEffect } from 'react';
 
-/**
- * Custom hook para determinar cuántas cards mostrar en el carousel
- * según el tamaño de la pantalla
- * 
- * @returns número de cards a mostrar (1 para móvil, 2 para tablet, 3 para desktop)
- */
+
 export const useResponsiveCards = () => {
     const [cardsToShow, setCardsToShow] = useState(3);
 

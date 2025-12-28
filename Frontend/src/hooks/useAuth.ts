@@ -20,6 +20,7 @@ interface SignupData {
     clave: string;
     cedula: string;
     telefono: string;
+    rol: string;
 }
 
 export const useAuth = () => {
