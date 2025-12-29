@@ -40,4 +40,13 @@ public class Publicacion {
     @OneToMany(mappedBy = "publicacion", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Calificacion> calificaciones = new ArrayList<>();
 
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name="id_usuario",nullable = false)
+    private Usuario usuario;
+
+    @Column(name="precio",nullable = false)
+    private Double precio;
+
+    @OneToMany(mappedBy = "publicacion", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Multimedia> multimedia = new ArrayList<>();
 }

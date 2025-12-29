@@ -29,15 +29,15 @@ public class Calificacion {
     private String comentario;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_usuario_postulante", nullable = true)
+    @JoinColumn(name = "id_usuario_postulante",nullable = false)
     private Usuario usuario;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_Publicacion", nullable = true)
+    @JoinColumn(name = "id_Publicacion")
     private Publicacion publicacion;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="id_servicios",nullable = false)
+    @JoinColumn(name="id_servicios")
     private Servicio servicio;
 
     @Column(name="fecha_creacion",nullable = false)
