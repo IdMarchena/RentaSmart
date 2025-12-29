@@ -209,4 +209,23 @@ public class PublicacionServiceImpl implements PublicacionService {
         p.setEstadoPublicacion(e);
         repository.save(p);
     }
+    @Override
+    public List<PublicacionDto> listarPublicacionesByIdArrendador(Long id){
+        List<Publicacion> listaPublicaciones = repository.findAll();
+        if(listaPublicaciones.isEmpty()) throw new NoSuchElementException("No existe las publicaciones");
+        List<Publicacion> publicacion = listaPublicaciones.stream()
+                .filter(p -> p.getUsuario().getId().equals(id))
+                .toList();
+        return mapper.toDtoList(publicacion);
+
+    }
+    @Override
+    public List<PublicacionDto> listarPublicacionesPorPrecioMayor(Double precioMayor) {
+        List<Publicacion> listaPublicaciones = repository.findAll();
+        if(listaPublicaciones.isEmpty()) throw new NoSuchElementException("No existe las publicaciones");
+        List<Publicacion> listFiltrada = listaPublicaciones.stream()
+                .filter(publicacion -> publicacion.getPrecio()>=precioMayor)
+                .collect(Collectors.toList());
+        return mapper.toDtoList(listFiltrada);
+    }
 }

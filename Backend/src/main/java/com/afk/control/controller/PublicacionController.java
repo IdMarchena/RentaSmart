@@ -243,4 +243,32 @@ public class PublicacionController {
         }
     }
 
+    @GetMapping("/ListarPublicacionesByNombreAndEstrato/{idUsuario}")
+    public ResponseEntity<JsonResponse<List<PublicacionDto>>> ListarPublicacionesByNombreAndEstrato(@PathVariable Long idUsuario){
+        List<PublicacionDto> publicaciones = publicacionService.listarPublicacionesByIdArrendador(idUsuario);
+        if(publicaciones.isEmpty()){
+            return ResponseEntity.status(404).body(
+                    new JsonResponse<>(false, "publicaciones no se pudieron encontrar por el usuario", null, 404)
+            );
+        }else{
+            return ResponseEntity.ok(
+                    new JsonResponse<>(true, "publicaciones encontradas exitosamente por el usuario", publicaciones, 200)
+            );
+        }
+    }
+
+    @GetMapping("/listarPorPrecioMayor")
+    public ResponseEntity<JsonResponse<List<PublicacionDto>>> listarPorPrecioMayor(@RequestParam Double precioMayor){
+        List<PublicacionDto> publicaciones = publicacionService.listarPublicacionesPorPrecioMayor(precioMayor);
+        if(publicaciones.isEmpty()){
+            return ResponseEntity.status(404).body(
+                    new JsonResponse<>(false, "publicaciones no se pudo encontrar por precio menor", null, 404)
+            );
+        }else{
+            return ResponseEntity.ok(
+                    new JsonResponse<>(true, "publicaciones encontradas exitosamente por precio menor", publicaciones, 200)
+            );
+        }
+    }
+
 }

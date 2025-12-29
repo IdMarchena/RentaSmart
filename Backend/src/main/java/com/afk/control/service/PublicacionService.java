@@ -22,4 +22,6 @@ public interface PublicacionService {
     List<PublicacionDto> ListarPublicacionesByNombreAndEstrato(String nombre, Integer estrato);
     List<PublicacionDto> finInmueblesByIdArrendatario(Long idArrendario);
     void cambiarEstadoPublicacion(Long id, String estado);
+    List<PublicacionDto> listarPublicacionesByIdArrendador(Long id);
+    List<PublicacionDto> listarPublicacionesPorPrecioMayor(Double precioMayor);
 }
