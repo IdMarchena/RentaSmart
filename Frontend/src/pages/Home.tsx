@@ -74,9 +74,9 @@ export const Home = () => {
                                         className="w-full h-[20px] rounded-[10px] text-[#393939] text-[12px] font-bold"
                                     >
                                         <option value="">Selecciona un tipo</option>
-                                        <option value="apartamento">Apartamento</option>
-                                        <option value="casa">Casa</option>
-                                        <option value="habitacion">Habitación</option>
+                                        <option value="Apartamento">Apartamento</option>
+                                        <option value="Casa">Casa</option>
+                                        <option value="Habitación">Habitación</option>
                                     </select>
                                     <button onClick={() => setOpenType(false)} className="w-full h-[20px] bg-[#EB8369] rounded-[10px] text-white text-[12px] font-bold">Aplicar</button>
                                 </div>}
@@ -106,9 +106,12 @@ export const Home = () => {
                                     <button onClick={() => setOpenPrice(false)} className="w-full h-[20px] bg-[#EB8369] rounded-[10px] text-white text-[12px] font-bold">Aplicar</button>
                                 </div>}
                         </div>
-                        <button className="w-[55%] md:w-[15%] h-[30px] md:h-full flex flex-col items-center justify-center bg-[#EB8369] md:bg-transparent rounded-[10px] md:rounded-none">
-                            <img src={imgSearch} alt="maps" className="w-[20px] h-[20px] md:w-[30px] md:h-[30px] cursor-pointer" />
-                        </button>
+                            <button className="w-[55%] md:w-[15%] h-[30px] md:h-full flex flex-col items-center justify-center bg-[#EB8369] md:bg-transparent rounded-[10px] md:rounded-none">
+                                <Link
+                                    to="/publications"
+                                    state={{ filters }}
+                                >   <img src={imgSearch} alt="maps" className="w-[20px] h-[20px] md:w-[30px] md:h-[30px] cursor-pointer" /> </Link>
+                            </button>
                     </div>
 
                 </div>
