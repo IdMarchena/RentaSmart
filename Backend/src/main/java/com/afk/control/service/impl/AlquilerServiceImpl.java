@@ -1,10 +1,7 @@
 package com.afk.control.service.impl;
 
-import com.afk.control.dto.AlquilerDto;
-import com.afk.control.mapper.AlquilerMapper;
 import com.afk.control.service.AlquilerService;
 import com.afk.model.entity.Alquiler;
-import com.afk.model.entity.HistorialInquilino;
 import com.afk.model.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;

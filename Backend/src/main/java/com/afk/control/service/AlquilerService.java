@@ -2,8 +2,6 @@ package com.afk.control.service;
 
 
 
-import com.afk.control.dto.AlquilerDto;
-
 import java.util.List;
 
 public interface AlquilerService {

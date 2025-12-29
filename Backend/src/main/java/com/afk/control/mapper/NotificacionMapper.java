@@ -1,6 +1,4 @@
 package com.afk.control.mapper;
-import com.afk.control.dto.NotificacionDto;
-import com.afk.model.entity.Notificacion;
 import com.afk.model.entity.Servicio;
 import com.afk.model.entity.Usuario;
 import org.mapstruct.*;

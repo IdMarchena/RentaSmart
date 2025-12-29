@@ -50,11 +50,10 @@ public class Contrato {
     @Column(name = "precio", nullable = false)
     private Integer precio;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_deposito", nullable = true)
-    private Deposito deposito;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "estado_contrato", nullable = false)
     private EstadoContrato estadoContrato;
+
+    @Column(name="deposito")
+    private Double deposito;
 }

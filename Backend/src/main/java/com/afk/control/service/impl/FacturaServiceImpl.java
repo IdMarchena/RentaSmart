@@ -6,7 +6,6 @@ import com.afk.model.entity.*;
 import com.afk.model.entity.enums.EstadoPago;
 import com.afk.model.repository.FacturaRepository;
 import com.afk.model.repository.UsuarioRepository;
-import com.afk.model.repository.ReporteMantenimientoRepository;
 import com.afk.model.repository.ContratoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

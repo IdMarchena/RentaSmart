@@ -1,6 +1,5 @@
 package com.afk.backend.control.controller;
 
-import com.afk.backend.control.dto.OfertaLaboralDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

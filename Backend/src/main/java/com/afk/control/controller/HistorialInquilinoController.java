@@ -1,7 +1,5 @@
 package com.afk.control.controller;
 
-import com.afk.control.dto.HistorialInquilinoDto;
-import com.afk.control.service.HistorialInquilinoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
