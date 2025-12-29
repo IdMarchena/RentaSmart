@@ -7,35 +7,59 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring",
+        uses = {PublicacionMapper.class
+                }
+        )
 public interface MultimediaMapper {
-    @Named("mapP")
-    default Usuario mapP(Long id){
-        if(id == null) return null;
-        Usuario usuario = new Usuario();
-        usuario.setId(id);
-        return usuario;
+
+    @Named("multimediaFromId")
+    default Multimedia multimediaFromId(Long id) {
+        if (id == null) return null;
+        Multimedia multimedia = new Multimedia();
+        multimedia.setId(id);
+        return multimedia;
     }
-    @Named("mapT")
-    default Inmueble mapT(Long id){
-        if(id == null) return null;
-        Inmueble inmueble = new Inmueble();
-        inmueble.setId(id);
-        return inmueble;
+
+    @Named("calificacioFromId")
+    default Multimedia fromId(Long id) {
+        if (id == null) return null;
+        Multimedia multimedia = new Multimedia();
+        multimedia.setId(id);
+        return multimedia;
     }
-    @Mapping(target="url",source="url")
-    @Mapping(target = "tipo", source = "idTIpo", qualifiedByName = "mapT")
-    @Mapping(target = "publicacion", source = "idPublicacion", qualifiedByName = "mapP")
+
+    @Named("multimediasFromIds")
+    default List<Multimedia> multimediasFromIds(List<Long> ids) {
+        if (ids == null) return null;
+        return ids.stream().map(this::multimediaFromId).collect(Collectors.toList());
+    }
+
+    @Named("multimediasToIds")
+    default List<Long> calificacionesToIds(List<Calificacion> calificaciones) {
+        if (calificaciones == null) return List.of();
+        return calificaciones.stream()
+                .map(Calificacion::getId)
+                .collect(Collectors.toList());
+    }
+
+    @Mapping(target = "publicacion", source = "idPublicacion", qualifiedByName = "publicacionFromId")
     Multimedia toEntity(MultimediaDto multimediaDto);
 
-    @Mapping(source = "url", target = "url")
-    @Mapping(source = "tipo.id", target = "idTIpo")
-    @Mapping(source = "publicacion.id", target = "idPublicacion")
+    @Mapping(target="idPublicacion",source="publicacion.id")
     MultimediaDto toDto(Multimedia multimedia);
 
+    @Named("multimediToDtoList")
     default List<MultimediaDto> toDtoList(Iterable<Multimedia> multimedia) {
         return StreamSupport.stream(multimedia.spliterator(), false)
                 .map(this::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Named("multimediaToEntityList")
+    default List<Multimedia> toEntityList(Iterable<MultimediaDto> multimedias) {
+        return StreamSupport.stream(multimedias.spliterator(),false)
+                .map(this::toEntity)
                 .collect(Collectors.toList());
     }
 

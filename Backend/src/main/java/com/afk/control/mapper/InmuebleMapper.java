@@ -26,9 +26,9 @@ public interface InmuebleMapper {
     @Mapping(target = "usuario", source = "idArrendatario", qualifiedByName = "usuarioFromId")
     Inmueble toEntity(InmuebleDto inmuebleDto);
 
-    @Mapping(target = "ubicacion", source = "ubicaicon.id")
-    @Mapping(target = "servicio", source = "servicio.id")
-    @Mapping(target = "usuario", source = "usuario.id")
+    @Mapping(target = "idUbicacion", source = "ubicaicon.id")
+    @Mapping(target = "idServicio", source = "servicio.id")
+    @Mapping(target = "idUsuario", source = "usuario.id")
     InmuebleDto toDto(Inmueble inmueble);
 
 

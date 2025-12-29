@@ -1,64 +1,58 @@
 package com.afk.control.mapper;
 import com.afk.control.dto.PublicacionDto;
 import com.afk.model.entity.Calificacion;
-import com.afk.model.entity.Inmueble;
 import com.afk.model.entity.Publicacion;
 import org.mapstruct.*;
-
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring",
+        uses = {InmuebleMapper.class,
+                UsuarioMapper.class,
+                CalificacionMapper.class,
+                MultimediaMapper.class})  // Asegúrate de incluir MultimediaMapper
 public interface PublicacionMapper {
-    @Named("mapI")
-    default Inmueble mapI(Long id){
-        if(id == null) return null;
-        Inmueble inmueble = new Inmueble();
-        inmueble.setId(id);
-        return inmueble;
-    }
-    default String parseFecha(LocalDateTime fecha) {
-        return fecha != null ? fecha.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) : null;
+
+    @Named("publicacionFromId")
+    default Publicacion publicacionFromId(Long id) {
+        if (id == null) return null;
+        Publicacion publicacion = new Publicacion();
+        publicacion.setId(id);
+        return publicacion;
     }
 
-    default LocalDateTime parseFecha(String fecha) {
-        return fecha != null ? LocalDateTime.parse(fecha, DateTimeFormatter.ISO_LOCAL_DATE_TIME) : null;
-    }
-
-    @Mapping(target="titulo",source = "titulo")
-    @Mapping(target="descripcion",source = "descripcion")
-    @Mapping(target = "inmueble", source = "idInmueble", qualifiedByName = "mapI")
-    @Mapping(target = "fechaPublicacion", expression = "java(parseFecha(dto.fechaPublicacion()))")
-    @Mapping(target="estadoPublicacion",source = "estadoPublicacion")
-    @Mapping(target = "calificaciones", ignore = true)
+    @Mapping(target = "inmueble", source = "idInmueble", qualifiedByName = "inmuebleFromId")
+    @Mapping(target = "calificaciones", source = "calificacionesIds", qualifiedByName = "calificacionesFromIds")
+    @Mapping(target = "usuario", source = "idUsuario", qualifiedByName = "usuarioFromId")
+    @Mapping(target = "multimedia", source = "multimediaIds", qualifiedByName = "multimediasFromIds")
     Publicacion toEntity(PublicacionDto dto);
 
-    @Mapping(source="titulo",target = "titulo")
-    @Mapping(source="descripcion",target = "descripcion")
-    @Mapping(source = "inmueble.id", target = "idInmueble")
-    @Mapping(source = "estadoPublicacion", target = "estado_publiccaion")
-    @Mapping(target = "calificacionesIds", expression = "java(mapCalificaciones(publicacion.getCalificaciones()))")
+    @Mapping(target = "idInmueble", source = "inmueble.id")
+    @Mapping(target = "calificacionesIds", source = "calificaciones", qualifiedByName = "calificacionesToIds")
+    @Mapping(target = "idUsuario", source = "usuario.id")
+    @Mapping(target = "multimediaIds", source = "multimedia", qualifiedByName = "multimediasToIds")
     PublicacionDto toDto(Publicacion publicacion);
 
+    @Named("publicacionToDtoList")
     default List<PublicacionDto> toDtoList(Iterable<Publicacion> publicaciones) {
         return StreamSupport.stream(publicaciones.spliterator(), false)
                 .map(this::toDto)
                 .collect(Collectors.toList());
     }
 
-    default List<Long> mapCalificaciones(List<Calificacion> calificaciones) {
-        return calificaciones.stream()
-                .map(Calificacion::getId)
+    @Named("publicacionToEntityList")
+    default List<Publicacion> toEntityList(Iterable<PublicacionDto> publicacionesDto) {
+        return StreamSupport.stream(publicacionesDto.spliterator(), false)
+                .map(this::toEntity)
                 .collect(Collectors.toList());
     }
+
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "vacante", ignore = true)
+    @Mapping(target = "inmueble", ignore = true)
     @Mapping(target = "calificaciones", ignore = true)
+    @Mapping(target = "usuario", ignore = true)
+    @Mapping(target = "multimedia", ignore = true)
     void updateEntityFromDto(@MappingTarget Publicacion entity, PublicacionDto dto);
-
-
 }

@@ -10,5 +10,8 @@ public record PublicacionDto(
         Long idInmueble,
         LocalDateTime fechaPublicacion,
         EstadoPublicacion estadoPublicacion,
-        List<Long> calificacionesIds
+        List<Long> calificacionesIds,
+        Long idUsuario,
+        Double precio,
+        List<Long> multimediaIds
 ) {}

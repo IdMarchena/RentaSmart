@@ -35,8 +35,7 @@ public interface RequisitoMapper {
     @Mapping(target="tipo",source="idTipo",qualifiedByName = "TipoRequisitoFromId")
     Requisito toEntity(RequisitoDto dto);
 
-    @Mapping(target = "tipo", source = "tipo.id")
-
+    @Mapping(target = "idTIpo", source = "tipo.id")
     RequisitoDto toDto(Requisito requisito);
 
     @Named("requisitoToDtoList")

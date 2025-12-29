@@ -9,7 +9,8 @@ import java.util.stream.StreamSupport;
 
 @Mapper(componentModel = "spring",
 uses = {UsuarioMapper.class,
-        TipoServicioMapper.class})
+        TipoServicioMapper.class,
+        PublicacionMapper.class})
 public interface ServicioMapper {
 
     @Named("servicioFromId")
@@ -23,10 +24,12 @@ public interface ServicioMapper {
 
     @Mapping(target = "usuario", source = "idUsuario", qualifiedByName = "usuarioFromId")
     @Mapping(target = "tipo", source = "idTipo", qualifiedByName = "tipoServicioFromId")
+    @Mapping(target = "calificaciones", source = "calificacionesIds", qualifiedByName = "calificacionesFromIds")
     Servicio toEntity(ServicioDto dto);
 
-    @Mapping(target = "usuario", source = "usuario.id")
-    @Mapping(target = "tipo", source = "tipo.id")
+    @Mapping(target = "idUsuario", source = "usuario.id")
+    @Mapping(target = "idTipo", source = "tipo.id")
+    @Mapping(target = "calificacionesIds", source = "calificaciones", qualifiedByName = "calificacionesToIds")
     ServicioDto toDto(Servicio sancion);
 
     @Named("servicioToDtoList")
