@@ -1,9 +1,12 @@
 package com.afk.control.service.impl;
 import com.afk.control.dto.ServicioDto;
 import com.afk.control.mapper.ServicioMapper;
+import com.afk.control.service.CalificacionService;
 import com.afk.control.service.ServicioService;
+import com.afk.model.entity.Calificacion;
 import com.afk.model.entity.Servicio;
 import com.afk.model.entity.enums.EstadoServicio;
+import com.afk.model.repository.CalificacionRepository;
 import com.afk.model.repository.ServicioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,6 +21,9 @@ public class ServicioServiceImpl implements ServicioService {
     private final ServicioRepository repository;
 
     private final ServicioMapper mapper;
+
+    private final CalificacionService cService;
+    private final CalificacionRepository cRepo;
 
 
     @Override
@@ -64,6 +70,8 @@ public class ServicioServiceImpl implements ServicioService {
         sExistente.setTipo(s.getTipo());
         sExistente.setPrecio(s.getPrecio());
         sExistente.setEstado(s.getEstado());
+        List<Calificacion> c = cRepo.findAllById(servicio.servicioIds());
+        sExistente.setCalificacion(c);
         repository.save(sExistente);
     }
 

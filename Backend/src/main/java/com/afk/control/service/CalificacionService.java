@@ -1,7 +1,5 @@
 package com.afk.control.service;
-
-import com.afk.backend.control.dto.CalificacionDto;
-
+import com.afk.control.dto.CalificacionDto;
 import java.util.List;
 
 public interface CalificacionService {
@@ -10,4 +8,8 @@ public interface CalificacionService {
     List<CalificacionDto> findAllCalificaciones();
     CalificacionDto updateCalificacion(Long id, CalificacionDto calificacion);
     void deleteCalificacionById(Long id);
+    List<CalificacionDto> encontrarCalificacionesPorId(List<Long> id);
+    List<CalificacionDto> encontrarCalificacionesPorServicioId(Long idServicio);
+    List<CalificacionDto> encontrarCalificacionesPorPublicacionId(Long idPublicacion);
+
 }

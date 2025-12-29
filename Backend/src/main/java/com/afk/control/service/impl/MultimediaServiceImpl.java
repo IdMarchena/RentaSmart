@@ -1,10 +1,7 @@
 package com.afk.control.service.impl;
-
-import com.afk.control.dto.ApartamentoDto;
 import com.afk.control.dto.MultimediaDto;
 import com.afk.control.mapper.MultimediaMapper;
 import com.afk.control.service.MultimediaService;
-import com.afk.model.entity.Apartamento;
 import com.afk.model.entity.Multimedia;
 import com.afk.model.repository.MultimediaRepository;
 import lombok.RequiredArgsConstructor;
@@ -74,5 +71,14 @@ public class MultimediaServiceImpl implements MultimediaService {
         multimediaMapper.updateEntityFromDto(multimediaDto,existingMultimedia);
         Multimedia updatedMultimedia = multimediaRepository.save(existingMultimedia);
         return multimediaMapper.toDto(updatedMultimedia);
+    }
+
+    @Override
+    public List<MultimediaDto> findAllMultimediasByIds(List<Long> ids) {
+        if(ids == null || ids.isEmpty()) {
+            throw new NoSuchElementException("no se encontraron ids a buscar");
+        }
+        List<Multimedia> multimedias = multimediaRepository.findAllById(ids);
+        return multimediaMapper.toDtoList(multimedias);
     }
 }
