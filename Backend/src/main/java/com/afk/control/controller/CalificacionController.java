@@ -1,47 +1,116 @@
-package com.afk.backend.control.controller;
+package com.afk.control.controller;
 
-import com.afk.backend.control.dto.CalificacionDto;
-import com.afk.backend.control.service.CalificacionService;
+import com.afk.control.service.CalificacionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import com.afk.control.dto.CalificacionDto;
 import java.util.List;
+import com.afk.control.dto.JsonResponse;
 
 @RestController
-@RequestMapping("/api/v1/calificaciones")
+@RequestMapping("/api/calificaciones")
 @RequiredArgsConstructor
 public class CalificacionController {
 
     private final CalificacionService calificacionService;
 
-    @PostMapping
-    public ResponseEntity<CalificacionDto> crearCalificacion(@RequestBody CalificacionDto calificacionDto) {
+    @PostMapping("/crear")
+    public ResponseEntity<JsonResponse<CalificacionDto>> crearCalificacion(@RequestBody CalificacionDto calificacionDto) {
         CalificacionDto creada = calificacionService.createCalificacion(calificacionDto);
-        return ResponseEntity.ok(creada);
+        if(creada==null) {
+            return ResponseEntity.status(404).body(
+                    new JsonResponse<>(false,"calificacion no pudo ser creada",null,404)
+            );
+        }else{
+            return ResponseEntity.ok(
+                    new JsonResponse<>(true,"calificacion creada exitosamente",creada,200)
+            );
+        }
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<CalificacionDto> obtenerPorId(@PathVariable Long id) {
+    @GetMapping("/obtenerPorId/{id}")
+    public ResponseEntity<JsonResponse<CalificacionDto>> obtenerPorId(@PathVariable Long id) {
         CalificacionDto calificacion = calificacionService.findCalificacionById(id);
-        return ResponseEntity.ok(calificacion);
+        if(calificacion==null) {
+            return ResponseEntity.status(404).body(
+                    new JsonResponse<>(false,"calificacion no pudo ser obtenida por id",null,404)
+            );
+        }else{
+            return ResponseEntity.ok(
+                    new JsonResponse<>(true,"calificacion obtenida exitosamente",calificacion,200)
+            );
+        }
     }
 
-    @GetMapping
-    public ResponseEntity<List<CalificacionDto>> listarTodas() {
+    @GetMapping("/listar")
+    public ResponseEntity<JsonResponse<List<CalificacionDto>>> listarTodas() {
         List<CalificacionDto> calificaciones = calificacionService.findAllCalificaciones();
-        return ResponseEntity.ok(calificaciones);
+        if(calificaciones.isEmpty()){
+            return ResponseEntity.status(404).body(
+                    new JsonResponse<>(false,"error al intentar encontrar las calificaciones",null,404)
+            );
+        }else{
+            return ResponseEntity.ok(
+                    new JsonResponse<>(true,"calificaciones obtenidas exitosamente",calificaciones,200)
+            );
+        }
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<CalificacionDto> actualizarCalificacion(@PathVariable Long id, @RequestBody CalificacionDto dto) {
+    @PutMapping("/actualizarPorId/{id}")
+    public ResponseEntity<JsonResponse<CalificacionDto>> actualizarCalificacion(@PathVariable Long id, @RequestBody CalificacionDto dto) {
         CalificacionDto actualizada = calificacionService.updateCalificacion(id, dto);
-        return ResponseEntity.ok(actualizada);
+        if(actualizada==null) {
+            return ResponseEntity.status(404).body(
+                    new JsonResponse<>(false,"calificacion no pudo ser actualizada por id",null,404)
+            );
+        }else{
+            return ResponseEntity.ok(
+                    new JsonResponse<>(true,"calificacion actualizada exitosamente",actualizada,200)
+            );
+        }
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminarCalificacion(@PathVariable Long id) {
-        calificacionService.deleteCalificacionById(id);
-        return ResponseEntity.noContent().build();
+    @DeleteMapping("/eliminarPorId/{id}")
+    public ResponseEntity<JsonResponse<Void>> eliminarCalificacion(@PathVariable Long id) {
+        try{
+            calificacionService.deleteCalificacionById(id);
+            return ResponseEntity.ok(
+                    new JsonResponse<>(true,"calificacion eliminada exitosamente",null,200)
+            );
+        } catch (Exception e) {
+            return ResponseEntity.status(4044).body(
+                    new JsonResponse<>(true,"calificacion eliminada exitosamente",null,404)
+            );
+        }
     }
+
+    @GetMapping("/encontrarCalificacionesPorServicioId/{idServicio}")
+    public ResponseEntity<JsonResponse<List<CalificacionDto>>> encontrarCalificacionesPorServicioId(@PathVariable Long idServicio) {
+        List<CalificacionDto> calificaciones = calificacionService.encontrarCalificacionesPorServicioId(idServicio);
+        if(calificaciones.isEmpty()){
+            return ResponseEntity.status(404).body(
+                    new JsonResponse<>(false,"error al intentar encontrar las calificaciones",null,404)
+            );
+        }else{
+            return ResponseEntity.ok(
+                    new JsonResponse<>(true,"calificaciones obtenidas exitosamente",calificaciones,200)
+            );
+        }
+    }
+    @GetMapping("/encontrarCalificacionesPorPublicacionId/{idPublicacion}")
+    public ResponseEntity<JsonResponse<List<CalificacionDto>>> encontrarCalificacionesPorPublicacionId(@PathVariable Long idPublicacion) {
+        List<CalificacionDto> calificaciones = calificacionService.encontrarCalificacionesPorPublicacionId(idPublicacion);
+        if(calificaciones.isEmpty()){
+            return ResponseEntity.status(404).body(
+                    new JsonResponse<>(false,"error al intentar encontrar las calificaciones",null,404)
+            );
+        }else{
+            return ResponseEntity.ok(
+                    new JsonResponse<>(true,"calificaciones obtenidas exitosamente",calificaciones,200)
+            );
+        }
+    }
+
+
 }

@@ -1,9 +1,11 @@
 package com.afk.control.dto;
+import com.afk.model.entity.enums.EstadoMultimedia;
 
 public record MultimediaDto(
         Long id,
         String url,
-        Long idTipo,
-        Long idPublicacion
+        EstadoMultimedia tipo,
+        Long idPublicacion,
+        Integer orden
 ) {
 }

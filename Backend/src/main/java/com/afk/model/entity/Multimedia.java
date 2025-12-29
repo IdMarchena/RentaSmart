@@ -1,5 +1,6 @@
 package com.afk.model.entity;
 
+import com.afk.model.entity.enums.EstadoMultimedia;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,11 +20,14 @@ public class Multimedia {
     @Column(name = "url", nullable = false)
     private String url;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="id_tipo_multimedia", nullable = false)
-    private TipoMultimedia tipo;
+
+    @Column(name = "tipo", nullable = false)
+    private EstadoMultimedia tipo;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_publicacion", nullable = false)
     private Publicacion publicacion;
+
+    @Column(nullable = false)
+    private Integer orden;
 }
