@@ -10,7 +10,12 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Getter
 @Setter
-@Table(name = "favoritos")
+@Table(
+        name = "favoritos",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"id_usuario", "id_publicacion"})
+        }
+)
 @Builder
 @Data
 public class Favorito {
@@ -18,14 +23,15 @@ public class Favorito {
     @GeneratedValue(strategy =  GenerationType.AUTO)
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_usuario", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "id_usuario")
     private Usuario usuario;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_publicacion", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "id_publicacion")
     private Publicacion publicacion;
 
+
     @Column(name="fecha_favorito",nullable = false)
-    private LocalDateTime fecha_favorito;
+    private LocalDateTime fecha;
 }

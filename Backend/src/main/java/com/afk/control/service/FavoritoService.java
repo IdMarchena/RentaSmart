@@ -1,8 +1,5 @@
 package com.afk.control.service;
-
 import com.afk.control.dto.FavoritoDto;
-import com.afk.control.dto.UsuarioDto;
-
 import java.util.List;
 
 public interface FavoritoService {
@@ -11,6 +8,6 @@ public interface FavoritoService {
     List<FavoritoDto> findAllFavoritos();
     void deleteFavoritoById(Long id);
     List<FavoritoDto> findFavoritosByUsuario(Long idUsuario);
-    List<FavoritoDto> findMutualMatches(Long idUsuario);
+
 
 }

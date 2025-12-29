@@ -1,37 +1,50 @@
 package com.afk.control.mapper;
-
 import com.afk.control.dto.FavoritoDto;
 import com.afk.model.entity.Favorito;
-import com.afk.model.entity.Usuario;
-import com.afk.model.entity.Publicacion;
 import org.mapstruct.*;
 import org.springframework.stereotype.Component;
 
-@Mapper(componentModel = "spring")
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
+@Mapper(componentModel = "spring",
+        uses = {UsuarioMapper.class,
+                PublicacionMapper.class})
 @Component
 public interface FavoritoMapper {
-    @Named("mapU")
-    default Usuario mapUsuario(Long id) {
+
+    @Named("favoritoFromId")
+    default Favorito fromId(Long id) {
         if (id == null) return null;
-        Usuario usuario = new Usuario();
-        usuario.setId(id);
-        return usuario;
-    }
-    @Named("mapP")
-    default Publicacion mapPublicacion(Long id) {
-        if (id == null) return null;
-        Publicacion pub = new Publicacion();
-        pub.setId(id);
-        return pub;
+        Favorito favorito = new Favorito();
+        favorito.setId(id);
+        return favorito;
     }
 
-    @Mapping(target = "usuario.id", source = "idUsuario")
-    @Mapping(target = "publicacion.id", source = "idPublicacion")
+    @Mapping(target = "idUsuario", source = "usuario.id")
+    @Mapping(target = "idPublicacion", source = "publicacion.id")
     FavoritoDto toDto(Favorito favorito);
 
-    @Mapping(source = "usuario",  target = "idUsuario", qualifiedByName = "mapU")
-    @Mapping(source = "publicacion", target = "idPublicacion", qualifiedByName = "mapP")
+    @Mapping(source = "usuario",  target = "idUsuario", qualifiedByName = "usuarioFromId")
+    @Mapping(source = "publicacion", target = "idPublicacion", qualifiedByName = "publicacionFromId")
     Favorito toEntity(FavoritoDto favoritoDto);
+
+    @Named("favoritoToDtoList")
+    default List<FavoritoDto> toDtoList(Iterable<Favorito> favoritos) {
+        if (favoritos == null) return null;
+        return StreamSupport.stream(favoritos.spliterator(),false)
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Named("favoritoToEntityList")
+    default List<Favorito> toEntityList(Iterable<FavoritoDto> favoritoDtos) {
+        if (favoritoDtos == null) return null;
+        return StreamSupport.stream(favoritoDtos.spliterator(),false)
+                .map(this::toEntity)
+                .collect(Collectors.toList());
+    }
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateEntityFromDto(FavoritoDto dto, @MappingTarget Favorito entity);
