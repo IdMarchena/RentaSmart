@@ -30,6 +30,6 @@ public class Habitacion {
     private Estado estado;
 
     @ManyToOne
-    @JoinColumn(name="id_apartamento")
-    private Apartamento apartamento;
+    @JoinColumn(name="id_inmueble")
+    private Inmueble inmueble;
 }

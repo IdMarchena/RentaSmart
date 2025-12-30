@@ -24,11 +24,13 @@ public interface InmuebleMapper {
     @Mapping(target = "ubicacion", source = "idUbicaicon", qualifiedByName = "ubicacionFromId")
     @Mapping(target = "servicio", source = "idServicio", qualifiedByName = "servicioFromId")
     @Mapping(target = "usuario", source = "idArrendatario", qualifiedByName = "usuarioFromId")
+    @Mapping(target = "habitaciones", source = "idsHabitaciones",qualifiedByName = "habitacionesFromIds")
     Inmueble toEntity(InmuebleDto inmuebleDto);
 
     @Mapping(target = "idUbicacion", source = "ubicaicon.id")
     @Mapping(target = "idServicio", source = "servicio.id")
     @Mapping(target = "idUsuario", source = "usuario.id")
+    @Mapping(target = "idsHabitaciones", source = "habitaciones", qualifiedByName = "habitacionesToIds")
     InmuebleDto toDto(Inmueble inmueble);
 
 

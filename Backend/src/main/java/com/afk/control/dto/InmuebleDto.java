@@ -1,5 +1,7 @@
 package com.afk.control.dto;
 
+import java.util.List;
+
 public record InmuebleDto(
         Long id,
         String descripcion,
@@ -8,7 +10,8 @@ public record InmuebleDto(
         Integer estrato,
         String nombre,
         Long idServicio,
-        Long idArrendatario
+        Long idArrendatario,
+        List<Long> idsHabitaciones
 
 ) {
 }
