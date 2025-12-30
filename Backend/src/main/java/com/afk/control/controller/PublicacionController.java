@@ -199,6 +199,20 @@ public class PublicacionController {
         }
     }
 
+    @GetMapping("/obtener6MejoresPublicaciones")
+    public ResponseEntity<JsonResponse<List<PublicacionDto>>> obtenerTop6Publicaciones(){
+        List<PublicacionDto> publicaciones = publicacionService.obtenerTop6Publicaciones();
+        if(publicaciones.isEmpty()){
+            return ResponseEntity.status(404).body(
+                    new JsonResponse<>(false, "publicaciones no se pudieron encontrar por idUbicacion y estado", null, 404)
+            );
+        }else{
+            return ResponseEntity.ok(
+                    new JsonResponse<>(true, "publicaciones encontradas exitosamente por idUbicacion y estado", publicaciones, 200)
+            );
+        }
+    }
+
     @GetMapping("/ListarPublicacionesByNombreAndEstrato")
     public ResponseEntity<JsonResponse<List<PublicacionDto>>> ListarPublicacionesByNombreAndEstrato(@RequestParam String nombre,
                                                                                                     @RequestParam Integer estrato){
