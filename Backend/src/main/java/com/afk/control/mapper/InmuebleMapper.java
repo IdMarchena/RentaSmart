@@ -10,6 +10,7 @@ uses = {
         UbicacionMapper.class,
         ServicioMapper.class,
         UsuarioMapper.class,
+        HabitacionMapper.class
 })
 public interface InmuebleMapper {
 
@@ -27,7 +28,7 @@ public interface InmuebleMapper {
     @Mapping(target = "habitaciones", source = "idsHabitaciones",qualifiedByName = "habitacionesFromIds")
     Inmueble toEntity(InmuebleDto inmuebleDto);
 
-    @Mapping(target = "idUbicacion", source = "ubicaicon.id")
+    @Mapping(target = "idUbicacion", source = "ubicacion.id")
     @Mapping(target = "idServicio", source = "servicio.id")
     @Mapping(target = "idUsuario", source = "usuario.id")
     @Mapping(target = "idsHabitaciones", source = "habitaciones", qualifiedByName = "habitacionesToIds")

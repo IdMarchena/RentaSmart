@@ -5,7 +5,7 @@ import java.util.List;
 public record InmuebleDto(
         Long id,
         String descripcion,
-        Long idUbicaicon,
+        Long idUbicacion,
         Integer areaTotal,
         Integer estrato,
         String nombre,

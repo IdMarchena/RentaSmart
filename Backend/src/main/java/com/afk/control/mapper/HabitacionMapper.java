@@ -11,9 +11,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-@Mapper(componentModel = "spring",
-        uses = {ApartamentoMapper.class}
-)
+@Mapper(componentModel = "spring")
 public interface HabitacionMapper {
 
     @Named("habitacionFromId")
@@ -51,16 +49,13 @@ public interface HabitacionMapper {
                 habitacion.getId(),
                 habitacion.getCapacidad(),
                 habitacion.getPrecio(),
-                habitacion.getEstado(),
-                habitacion.getApartamento().getId()
+                habitacion.getEstado()
         );
         return dto;
     }
 
-    @Mapping(target = "apartamento", source = "idApartamento",qualifiedByName = "apartamentoFromId")
     Habitacion toEntity(HabitacionDto chatRequest);
 
-    @Mapping(target = "apartamento.id",source="idApartamento")
     HabitacionDto toDto(Habitacion chat);
 
     @Named("habitacionToDtoList")

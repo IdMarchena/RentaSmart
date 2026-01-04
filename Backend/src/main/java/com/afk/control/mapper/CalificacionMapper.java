@@ -11,7 +11,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring",
+        uses = {UsuarioMapper.class,
+        PublicacionMapper.class,
+        ServicioMapper.class})
 @Component
 public interface CalificacionMapper {
 

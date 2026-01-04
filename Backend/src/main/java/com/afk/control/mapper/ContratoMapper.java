@@ -2,9 +2,6 @@ package com.afk.control.mapper;
 import com.afk.control.dto.ContratoDto;
 import com.afk.model.entity.*;
 import org.mapstruct.*;
-
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;

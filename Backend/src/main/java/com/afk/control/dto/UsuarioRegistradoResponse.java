@@ -1,6 +1,6 @@
-package com.afk.backend.control.dto;
+package com.afk.control.dto;
 
-import com.afk.backend.model.entity.enm.EstadoUsuarioRegistrado;
+import com.afk.model.entity.enums.EstadoUsuarioRegistrado;
 
 import java.time.LocalDateTime;
 
