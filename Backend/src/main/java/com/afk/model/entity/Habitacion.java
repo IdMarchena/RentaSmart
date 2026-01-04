@@ -6,7 +6,6 @@ import lombok.*;
 
 @Entity
 @Table(name = "habitaciones")
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

@@ -10,7 +10,6 @@ import lombok.*;
 @Getter
 @Setter
 @Builder
-@Data
 @Table(name = "ubicaciones")
 public class Ubicacion {
     @Id

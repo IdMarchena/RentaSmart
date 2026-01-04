@@ -2,21 +2,15 @@ package com.afk.model.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
-import javax.lang.model.type.NullType;
 import java.time.LocalDateTime;
-import java.util.List;
-
-import com.afk.model.entity.Publicacion;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Setter
 @Table(name = "calificaciones")
 @Builder
-@Data
+@Getter
+@Setter
 public class Calificacion {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

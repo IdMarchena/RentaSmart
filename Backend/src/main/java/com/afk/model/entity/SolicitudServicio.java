@@ -6,7 +6,6 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "solicitudes_servicio")
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

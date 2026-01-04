@@ -11,11 +11,10 @@ import java.util.List;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Setter
 @Table(name = "publicaciones")
 @Builder
-@Data
+@Getter
+@Setter
 public class Publicacion {
     @Id
     @GeneratedValue(strategy =  GenerationType.AUTO)

@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 @Setter
 @Table(name = "citas")
 @Builder
-@Data
 public class Cita {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

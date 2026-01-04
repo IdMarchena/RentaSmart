@@ -10,7 +10,6 @@ import lombok.*;
 @Setter
 @Table(name = "tipos_reporte_financiero")
 @Builder
-@Data
 public class TipoReporte {
 
     @Id

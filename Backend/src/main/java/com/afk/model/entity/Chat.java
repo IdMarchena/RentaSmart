@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 @Setter
 @Table(name = "chats")
 @Builder
-@Data
 public class Chat {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

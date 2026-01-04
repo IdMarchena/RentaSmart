@@ -3,17 +3,15 @@ package com.afk.model.entity;
 import com.afk.model.entity.enums.EstadoInmueble;
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 
 import java.util.List;
 
 @Entity
 @Table(name = "inmuebles")
-@Inheritance(strategy = InheritanceType.JOINED)
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@SuperBuilder
 @Builder
 public class Inmueble {
 

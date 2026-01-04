@@ -5,7 +5,6 @@ import lombok.*;
 
 @Entity
 @Table(name = "tipos_requisito")
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

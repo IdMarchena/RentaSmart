@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 @Setter
 @Table(name = "facturas")
 @Builder
-@Data
 public class Factura {
 
     @Id
@@ -30,10 +29,6 @@ public class Factura {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_usuario", nullable = false)
     private Usuario usuario;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_reporte_mantenimiento",nullable = false)
-    private ReporteMantenimiento reporteMantenimiento;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_pago", nullable = false)
