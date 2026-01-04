@@ -1,6 +1,6 @@
-package com.afk.backend.control.dto;
+package com.afk.control.dto;
 
-import com.afk.backend.model.entity.enm.EstadoChat;
+import com.afk.model.entity.enums.EstadoChat;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;

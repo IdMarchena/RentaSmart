@@ -1,4 +1,4 @@
-package com.afk.backend.client.external.config;
+package com.afk.client.external.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

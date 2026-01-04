@@ -3,7 +3,9 @@ package com.afk.control.service.impl;
 import com.afk.control.dto.*;
 import com.afk.control.mapper.*;
 import com.afk.control.service.*;
+import com.afk.model.entity.Calificacion;
 import com.afk.model.entity.Inmueble;
+import com.afk.model.entity.Multimedia;
 import com.afk.model.entity.Publicacion;
 import com.afk.model.entity.enums.EstadoPublicacion;
 import com.afk.model.repository.PublicacionRepository;
@@ -11,9 +13,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Service
 @RequiredArgsConstructor
@@ -208,5 +212,77 @@ public class PublicacionServiceImpl implements PublicacionService {
         };
         p.setEstadoPublicacion(e);
         repository.save(p);
+    }
+    @Override
+    public List<PublicacionDto> listarPublicacionesByIdArrendador(Long id){
+        List<Publicacion> listaPublicaciones = repository.findAll();
+        if(listaPublicaciones.isEmpty()) throw new NoSuchElementException("No existe las publicaciones");
+        List<Publicacion> publicacion = listaPublicaciones.stream()
+                .filter(p -> p.getUsuario().getId().equals(id))
+                .toList();
+        return mapper.toDtoList(publicacion);
+
+    }
+    @Override
+    public List<PublicacionDto> listarPublicacionesPorPrecioMayor(Double precioMayor) {
+        List<Publicacion> listaPublicaciones = repository.findAll();
+        if(listaPublicaciones.isEmpty()) throw new NoSuchElementException("No existe las publicaciones");
+        List<Publicacion> listFiltrada = listaPublicaciones.stream()
+                .filter(publicacion -> publicacion.getPrecio()>=precioMayor)
+                .collect(Collectors.toList());
+        return mapper.toDtoList(listFiltrada);
+    }
+
+    @Override
+    public List<PublicacionDto> obtenerTop6Publicaciones() {
+        List<Publicacion> publicaciones = repository.findAll();
+        List<PublicacionDto> publicacionesConPromedio = publicaciones.stream()
+                .map(publicacion -> {
+                    double promedio = 0;
+                    List<Calificacion> calificaciones = publicacion.getCalificaciones();
+                    if (!calificaciones.isEmpty()) {
+                        promedio = calificaciones.stream()
+                                .mapToInt(Calificacion::getPuntaje)
+                                .average()
+                                .orElse(0);
+                    }
+                    return new PublicacionDto(
+                            publicacion.getId(),
+                            publicacion.getTitulo(),
+                            publicacion.getDesripcion(),
+                            publicacion.getInmueble().getId(),
+                            publicacion.getFechaPublicacion(),
+                            publicacion.getEstadoPublicacion(),
+                            obtenerIdsCalificaciones(publicacion.getCalificaciones()),
+                            publicacion.getUsuario().getId(),
+                            publicacion.getPrecio(),
+                            obtenerIdsMultimedias(publicacion.getMultimedia())
+                    );
+                })
+                .sorted(Comparator.comparingDouble(this::calcularPromedio).reversed())
+                .limit(6)
+                .collect(Collectors.toList());
+
+        return publicacionesConPromedio;
+    }
+
+    private double calcularPromedio(PublicacionDto publicacionDto) {
+        Publicacion p = mapper.toEntity(publicacionDto);
+        List<Calificacion> calificaciones = p.getCalificaciones();
+        if (calificaciones.isEmpty()) return 0;
+        return calificaciones.stream()
+                .mapToInt(Calificacion::getPuntaje)
+                .average()
+                .orElse(0);
+    }
+    private List<Long> obtenerIdsCalificaciones(List<Calificacion> calificaciones) {
+        return calificaciones.stream()
+                .map(Calificacion::getId)
+                .collect(Collectors.toList());
+    }
+    private List<Long> obtenerIdsMultimedias(List<Multimedia> multimedias) {
+        return multimedias.stream()
+                .map(Multimedia::getId)
+                .collect(Collectors.toList());
     }
 }

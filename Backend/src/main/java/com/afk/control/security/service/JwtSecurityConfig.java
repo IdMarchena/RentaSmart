@@ -1,16 +1,13 @@
-package com.afk.backend.control.security.service;
+package com.afk.control.security.service;
 
-import com.afk.backend.control.security.jwt.JwtProtocolConfig;
+import com.afk.control.security.jwt.JwtProtocolConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
 
-/**
- * Configuración centralizada de seguridad JWT refactorizada
- * Elimina configuraciones duplicadas y usa protocolo estricto
- */
+
 @Configuration
 @RequiredArgsConstructor
 @Slf4j

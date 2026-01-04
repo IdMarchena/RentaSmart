@@ -1,17 +1,13 @@
 package com.afk.control.mapper;
-
-import com.afk.control.dto.TipoReporteDto;
 import com.afk.control.dto.TipoRequisitoDto;
-import com.afk.model.entity.TipoReporte;
 import com.afk.model.entity.TipoRequisito;
 import org.mapstruct.*;
-
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Mapper(componentModel = "spring")
 public interface TipoRequisitoMapper {
+
     @Named("TipoRequisitoFromId")
     default TipoRequisito fromId(Long id){
         if(id == null) return null;

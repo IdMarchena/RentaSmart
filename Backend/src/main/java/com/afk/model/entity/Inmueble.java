@@ -1,18 +1,17 @@
 package com.afk.model.entity;
 
-import com.afk.model.entity.enums.EstadoChat;
 import com.afk.model.entity.enums.EstadoInmueble;
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
+
+import java.util.List;
 
 @Entity
 @Table(name = "inmuebles")
-@Inheritance(strategy = InheritanceType.JOINED)
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@SuperBuilder
 @Builder
 public class Inmueble {
 
@@ -47,5 +46,8 @@ public class Inmueble {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name= "id_arrendatario")
     private Usuario usuario;
+
+    @OneToMany(mappedBy = "apartamento", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Habitacion> habitaciones;
 }
 

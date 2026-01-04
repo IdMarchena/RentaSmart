@@ -1,8 +1,6 @@
 package com.afk.control.mapper;
 
 import com.afk.control.dto.TipoMultimediaDto;
-import com.afk.control.service.dto.SolicitudServicioDto;
-import com.afk.model.entity.SolicitudServicio;
 import com.afk.model.entity.TipoMultimedia;
 import org.mapstruct.*;
 

@@ -6,7 +6,6 @@ import com.afk.model.entity.*;
 import com.afk.model.entity.enums.EstadoPago;
 import com.afk.model.repository.FacturaRepository;
 import com.afk.model.repository.UsuarioRepository;
-import com.afk.model.repository.ReporteMantenimientoRepository;
 import com.afk.model.repository.ContratoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,7 +21,6 @@ public class FacturaServiceImpl implements FacturaService {
 
     private final FacturaRepository facturaRepository;
     private final UsuarioRepository usuarioRepository;
-    private final ReporteMantenimientoRepository reporteMantenimientoRepository;
     private final ContratoRepository contratoRepository;
     private final FacturaMapper facturaMapper;
 
@@ -87,13 +85,11 @@ public class FacturaServiceImpl implements FacturaService {
     public FacturaDto generateFacturaForContrato(Long idContrato) {
         Contrato contrato = contratoRepository.findById(idContrato)
                 .orElseThrow(() -> new RuntimeException("Contrato no encontrado"));
-        ReporteMantenimiento reporteMantenimiento = reporteMantenimientoRepository.findByContratoId(contrato.getId());
 
         Factura newFactura = Factura.builder()
                 .fechaEmision(LocalDateTime.now())
                 .detalle("Factura generada automáticamente para contrato " + contrato.getId())
                 .usuario(contrato.getUsuarioArrendatario())
-                .reporteMantenimiento(reporteMantenimiento)
                 .contrato(contrato)
                 .servicio(contrato.getInmueble().getServicio())
                 .build();

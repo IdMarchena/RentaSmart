@@ -2,7 +2,6 @@ package com.afk.control.mapper;
 import com.afk.control.dto.FinanciacionDto;
 import com.afk.model.entity.Financiacion;
 import org.mapstruct.*;
-
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;

@@ -2,12 +2,10 @@ package com.afk.model.entity;
 import com.afk.model.entity.enums.EstadoCita;
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "solicitudes_servicio")
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

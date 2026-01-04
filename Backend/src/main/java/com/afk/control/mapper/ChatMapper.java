@@ -5,7 +5,6 @@ import com.afk.client.external.dto.ChatResponse;
 import com.afk.model.entity.Chat;
 import com.afk.model.entity.Usuario;
 import org.mapstruct.*;
-
 import java.time.LocalDateTime;
 import java.util.List;
 

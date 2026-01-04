@@ -10,7 +10,6 @@ import lombok.*;
 @Setter
 @Table(name = "tipos_pago")
 @Builder
-@Data
 public class TipoPago {
 
     @Id

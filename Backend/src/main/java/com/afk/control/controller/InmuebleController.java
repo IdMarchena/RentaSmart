@@ -1,5 +1,6 @@
 package com.afk.control.controller;
 
+import com.afk.control.dto.HabitacionDto;
 import com.afk.control.dto.InmuebleDto;
 import com.afk.control.service.InmuebleService;
 import lombok.RequiredArgsConstructor;
@@ -231,6 +232,66 @@ public class InmuebleController {
         } catch (Exception e) {
             return ResponseEntity.ok(
                     new JsonResponse<>(true, "se pudo cambiar exitosamente el estado del inmueble",null,20)
+            );
+        }
+    }
+    @GetMapping("listarHabitacionesPorIdInmueble/{id}")
+    public ResponseEntity<JsonResponse<List<HabitacionDto>>> findHabitacionesByInmuebleId(@PathVariable Long id){
+        try {
+            List<HabitacionDto> i= inmuebleService.findHabitacionesByInmuebleId(id);
+            return ResponseEntity.ok(
+                    new JsonResponse<>(true, "habitaciones del inmueble obtenidas exitosamente",i,404)
+            );
+        } catch (Exception e) {
+            return ResponseEntity.ok(
+                    new JsonResponse<>(true, "se pudo cambiar exitosamente el estado del inmueble",null,20)
+            );
+        }
+    }
+    @DeleteMapping("/eliminarHabitacionDeUnInmueblePorHabitacionId/{idInmueble}/{idHabitacion}")
+    public ResponseEntity<JsonResponse<Void>> eliminarHabitacionDeUnInmueblePorHabitacionId(
+            @PathVariable Long idInmueble,
+            @PathVariable Long idHabitacion) {
+        try {
+            inmuebleService.eliminarHabitacionDeUnInmueblePorHabitacionId(idInmueble, idHabitacion);
+            return ResponseEntity.ok(
+                    new JsonResponse<>(true, "Habitación eliminada del inmueble exitosamente", null, 200)
+            );
+        } catch (Exception e) {
+            return ResponseEntity.status(404).body(
+                    new JsonResponse<>(false, "Error al eliminar la habitación del inmueble", null, 404)
+            );
+        }
+    }
+
+    @PutMapping("/actualizarHabitacionDeUnInmueblePorHabitacionId/{idHabitacion}/{idInmueble}")
+    public ResponseEntity<JsonResponse<Void>> actualizarHabitacionDeUnInmueblePorHabitacionId(
+            @RequestBody HabitacionDto habitacion,
+            @PathVariable Long idHabitacion,
+            @PathVariable Long idInmueble,
+            @RequestParam String estado) {
+        try {
+            inmuebleService.actualizarHabitacionDeUnInmueblePorHabitacionId(habitacion,idHabitacion,idInmueble,estado);
+            return ResponseEntity.ok(
+                    new JsonResponse<>(true, "Habitación actualizada exitosamente", null, 200)
+            );
+        } catch (Exception e) {
+            return ResponseEntity.status(404).body(
+                    new JsonResponse<>(false, "Error al actualizar la habitación del inmueble", null, 404)
+            );
+        }
+    }
+
+    @GetMapping("/contarHabitaciones/{id}")
+    public ResponseEntity<JsonResponse<Integer>> contarHabitacionesPorInmuebleId(@PathVariable Long id) {
+        try {
+            Integer count = inmuebleService.contarHabitacionesPorInmuebleId(id);
+            return ResponseEntity.ok(
+                    new JsonResponse<>(true, "Número de habitaciones obtenido exitosamente", count, 200)
+            );
+        } catch (Exception e) {
+            return ResponseEntity.status(404).body(
+                    new JsonResponse<>(false, "Error al contar habitaciones del inmueble", null, 404)
             );
         }
     }

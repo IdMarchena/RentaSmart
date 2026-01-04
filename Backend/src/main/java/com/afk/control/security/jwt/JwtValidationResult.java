@@ -1,4 +1,4 @@
-package com.afk.backend.control.security.jwt;
+package com.afk.control.security.jwt;
 
 import io.jsonwebtoken.Claims;
 import lombok.Builder;

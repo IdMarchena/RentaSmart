@@ -1,6 +1,6 @@
-package com.afk.backend.control.security.jwt;
+package com.afk.control.security.jwt;
 
-import com.afk.backend.control.security.service.UserDetailsImpl;
+import com.afk.control.security.service.UserDetailsImpl;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -11,17 +11,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-
 import java.security.Key;
-import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Utilidad JWT refactorizada siguiendo protocolo estricto
- * Elimina todas las inconsistencias del sistema anterior
- */
 @Component
 @RequiredArgsConstructor
 @Slf4j

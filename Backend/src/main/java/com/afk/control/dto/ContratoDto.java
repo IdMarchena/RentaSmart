@@ -1,7 +1,5 @@
 package com.afk.control.dto;
-
 import com.afk.model.entity.enums.EstadoContrato;
-
 import java.time.LocalDateTime;
 
 public record ContratoDto(
@@ -14,7 +12,7 @@ public record ContratoDto(
         LocalDateTime fechaInicio,
         LocalDateTime fechaFinalizacion,
         Integer precio,
-        Long idDeposito,
-        EstadoContrato estadoContrato
+        EstadoContrato estadoContrato,
+        Double deposito
 ) {
 }

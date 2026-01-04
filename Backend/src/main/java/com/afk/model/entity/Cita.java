@@ -3,9 +3,6 @@ package com.afk.model.entity;
 import com.afk.model.entity.enums.EstadoCita;
 import jakarta.persistence.*;
 import lombok.*;
-import com.afk.model.entity.enums.Estado;
-
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -15,28 +12,31 @@ import java.time.LocalDateTime;
 @Setter
 @Table(name = "citas")
 @Builder
-@Data
 public class Cita {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column(name="fecha_cita",nullable = false)
-    private LocalDate fecha ;
+    @Column(name="fecha_cita", nullable = false)
+    private LocalDateTime fecha;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_usuario_postulante",nullable = false)
-    private Usuario usuario;
-
-    @Enumerated(EnumType.STRING)
-    private EstadoCita estado_cita;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_empresa",nullable = false)
+    @JoinColumn(name = "id_usuario_cita", nullable = false)
+    private Usuario usuario;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_usuario_remitente", nullable = false)
+    private Usuario usuarioRemitente;
+
+    @Enumerated(EnumType.STRING)
+    private EstadoCita estado;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_servicio")
     private Servicio servicio;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_solicitud_servicio", nullable = false)
-    private SolicitudServicio solicitudServicio;
-
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_publicacion")
+    private Publicacion publicacion;
 }

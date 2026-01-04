@@ -1,5 +1,8 @@
 package com.afk.control.service;
+import com.afk.control.dto.HabitacionDto;
 import com.afk.control.dto.InmuebleDto;
+import com.afk.model.entity.Habitacion;
+
 import java.util.List;
 public interface InmuebleService {
 
@@ -16,4 +19,9 @@ public interface InmuebleService {
     List<InmuebleDto> findInmueblesByNombreAndEstrato(String nombre, Integer estrato);
     List<InmuebleDto> finInmueblesByIdArrendatario(Long idArrendario);
     void cambiarEstadoInmueble(Long id, String estado);
+
+    List<HabitacionDto> findHabitacionesByInmuebleId(Long id);
+    void eliminarHabitacionDeUnInmueblePorHabitacionId(Long idInmueble, Long idHabitacion);
+    void actualizarHabitacionDeUnInmueblePorHabitacionId(HabitacionDto habitacion, Long idHabitacion,Long idInmueble, String estado);
+    Integer contarHabitacionesPorInmuebleId(Long id);
 }

@@ -1,6 +1,5 @@
 package com.afk.control.mapper;
 
-import com.afk.control.dto.ContratoDto;
 import com.afk.control.dto.FacturaDto;
 import com.afk.model.entity.*;
 import org.mapstruct.*;
@@ -20,13 +19,6 @@ public interface FacturaMapper {
         Usuario usuario = new Usuario();
         usuario.setId(id);
         return usuario;
-    }
-    @Named("mapR")
-    default ReporteMantenimiento mapR(Long id){
-        if(id == null) return null;
-        ReporteMantenimiento reporteMantenimiento = new ReporteMantenimiento();
-        reporteMantenimiento.setId(id);
-        return reporteMantenimiento;
     }
     @Named("mapP")
     default Pago mapP(Long id){

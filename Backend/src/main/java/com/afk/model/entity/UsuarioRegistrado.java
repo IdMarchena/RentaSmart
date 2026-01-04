@@ -8,7 +8,8 @@ import lombok.experimental.SuperBuilder;
 import java.time.LocalDateTime;
 
 @EqualsAndHashCode(callSuper = true)
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @SuperBuilder
 @Entity

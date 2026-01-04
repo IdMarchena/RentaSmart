@@ -17,7 +17,6 @@ import java.time.LocalDateTime;
         }
 )
 @Builder
-@Data
 public class Favorito {
     @Id
     @GeneratedValue(strategy =  GenerationType.AUTO)

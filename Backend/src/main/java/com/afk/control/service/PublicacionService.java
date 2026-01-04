@@ -1,6 +1,6 @@
 package com.afk.control.service;
 
-import com.afk.control.dto.InmuebleDto;
+
 import com.afk.control.dto.PublicacionDto;
 
 import java.util.List;
@@ -22,4 +22,10 @@ public interface PublicacionService {
     List<PublicacionDto> ListarPublicacionesByNombreAndEstrato(String nombre, Integer estrato);
     List<PublicacionDto> finInmueblesByIdArrendatario(Long idArrendario);
     void cambiarEstadoPublicacion(Long id, String estado);
+    List<PublicacionDto> listarPublicacionesByIdArrendador(Long id);
+    List<PublicacionDto> listarPublicacionesPorPrecioMayor(Double precioMayor);
+
+    List<PublicacionDto> obtenerTop6Publicaciones();
+
+
 }

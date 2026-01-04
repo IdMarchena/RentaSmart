@@ -1,5 +1,5 @@
-package com.afk.backend.control.dto;
-import com.afk.backend.model.entity.enm.Roles;
+package com.afk.control.dto;
+import com.afk.model.entity.enums.Roles;
 
 public record SignUpRequest(String nombre,
                             String apellido,

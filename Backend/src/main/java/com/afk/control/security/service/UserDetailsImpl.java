@@ -1,7 +1,7 @@
-package com.afk.backend.control.security.service;
+package com.afk.control.security.service;
 
-import com.afk.backend.model.entity.Rol;
-import com.afk.backend.model.entity.UsuarioRegistrado;
+import com.afk.model.entity.Rol;
+import com.afk.model.entity.UsuarioRegistrado;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -34,7 +34,7 @@ public class UserDetailsImpl implements UserDetails, OAuth2User {
         return new UserDetailsImpl(
                 user.getId(),
                 user.getCorreo(),
-                user.getContrasenia(),
+                user.getClave(),
                 authorities,
                 null // Atributos null para autenticación normal
         );
@@ -47,7 +47,7 @@ public class UserDetailsImpl implements UserDetails, OAuth2User {
         return new UserDetailsImpl(
                 user.getId(),
                 user.getCorreo(),
-                user.getContrasenia(),
+                user.getClave(),
                 authorities,
                 attributes
         );
