@@ -4,8 +4,6 @@ import com.stripe.exception.StripeException;
 import com.stripe.model.PaymentIntent;
 import com.stripe.param.PaymentIntentCreateParams;
 
-import java.util.List;
-
 public class StripeService {
     public PaymentIntent crearPago(Integer monto, String moneda) throws StripeException {
         PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()

@@ -1,9 +1,9 @@
 package com.afk.client.external.config;
 
 import com.afk.backend.control.dto.JwtResponse;
-import com.afk.backend.control.security.jwt.AuthTokenFilter;
-import com.afk.backend.control.security.jwt.JwtProtocolConfig;
-import com.afk.backend.control.security.jwt.JwtUtil;
+import com.afk.control.security.jwt.AuthTokenFilter;
+import com.afk.control.security.jwt.JwtProtocolConfig;
+import com.afk.control.security.jwt.JwtUtil;
 import com.afk.control.security.oauth2.CustomOAuth2UserService;
 import com.afk.control.security.service.UserDetailsServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;

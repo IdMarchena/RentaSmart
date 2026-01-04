@@ -1,10 +1,9 @@
 package com.afk.control.controller;
 
 import com.afk.backend.control.dto.JwtResponse;
-import com.afk.backend.control.security.service.UserDetailsImpl;
+import com.afk.control.security.service.UserDetailsImpl;
 import com.afk.model.entity.*;
 import com.afk.model.entity.enums.EstadoUsuarioRegistrado;
-import com.afk.model.entity.enums.EstadoUsuarioRol;
 import com.afk.model.entity.enums.Roles;
 import com.afk.model.repository.*;
 import jakarta.servlet.http.Cookie;
@@ -16,8 +15,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Optional;
@@ -27,17 +24,19 @@ import java.util.Optional;
 public class OAuth2SuccessController {
 
     private final UsuarioRegistradoRepository usuarioRegistradoRepository;
-    private final UsuarioRepository usuarioRepository;
     private final RolRepository rolRepository;
-    private final UsuarioRolRepository usuarioRolRepository;
     private final UbicacionRepository ubicacionRepository;
 
     @GetMapping("/loginSuccess")
     @ResponseBody
-    public ResponseEntity<?> loginSuccess(HttpServletRequest request, @AuthenticationPrincipal UserDetailsImpl principal) {
+    public ResponseEntity<?> loginSuccess(
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserDetailsImpl principal
+    ) {
+
         if (principal == null) {
-            System.out.println("❌ No hay usuario autenticado.");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No autenticado.");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("No autenticado");
         }
 
         String jwt = null;
@@ -51,66 +50,51 @@ public class OAuth2SuccessController {
         }
 
         if (jwt == null) {
-            return ResponseEntity.status(500).body("❌ Token JWT no disponible en cookies");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("JWT no encontrado en cookies");
         }
 
         String email = principal.getUsername();
-        String name = principal.getName();
+        String nombre = principal.getName();
 
-        System.out.println("✅ Login con Google exitoso");
-        System.out.println("📧 Email: " + email);
-        System.out.println("👤 Nombre: " + name);
+        Optional<UsuarioRegistrado> existente =
+                usuarioRegistradoRepository.findByCorreo(email);
 
-        Optional<UsuarioRegistrado> existingUser = usuarioRegistradoRepository.findByCorreo(email);
+        UsuarioRegistrado usuario;
 
-        if (existingUser.isEmpty()) {
-            System.out.println("🆕 Usuario no encontrado, creando nuevo usuario con OAuth");
-
-            Usuario usuario = Usuario.builder()
-                    .correo(email)
-                    .nombre(name)
-                    .contrasenia("oauth2") // Dummy password
-                    .build();
-            usuario = usuarioRepository.save(usuario);
+        if (existente.isPresent()) {
+            usuario = existente.get();
+        } else {
 
             Rol rol = rolRepository.findByRole(Roles.USER)
-                    .orElseThrow(() -> new RuntimeException("Rol User no encontrado"));
+                    .orElseThrow(() -> new RuntimeException("Rol USER no encontrado"));
 
             Ubicacion ubicacion = ubicacionRepository.findById(1L)
                     .orElseThrow(() -> new RuntimeException("Ubicación por defecto no encontrada"));
 
-            UsuarioRegistrado registrado = UsuarioRegistrado.builder()
-                    .nombre(name)
+            usuario = UsuarioRegistrado.builder()
+                    .nombre(nombre)
                     .correo(email)
-                    .contrasenia("oauth2")
-                    .fecha_registro(LocalDateTime.now())
-                    .estado_usuario_registrado(EstadoUsuarioRegistrado.ACTIVO)
-                    .telefono_usuario("0000000000")
+                    .clave("OAUTH2") // dummy, NO se usa
+                    .rol(rol)
                     .ubicacion(ubicacion)
-                    .rol(rol)
+                    .telefono("0000000000")
+                    .cedula("0000000000")
+                    .estado(EstadoUsuarioRegistrado.ACTIVO)
+                    .fechaRegistro(LocalDateTime.now())
                     .build();
-            registrado = usuarioRegistradoRepository.save(registrado);
 
-            UsuarioRol usuarioRol = UsuarioRol.builder()
-                    .usuarioRegistrado(registrado)
-                    .rol(rol)
-                    .estadoUsuarioRol(EstadoUsuarioRol.ACTIVO)
-                    .fechaActivacionRol(LocalDateTime.now())
-                    .build();
-            usuarioRolRepository.save(usuarioRol);
-
-            System.out.println("✅ Usuario registrado con éxito a través de Google OAuth2");
-            return ResponseEntity.ok(
-                    new JwtResponse(
-                            jwt,
-                            "Bearer",
-                            usuario.getCorreo(),
-                            Collections.singletonList(usuario.getContrasenia())
-                    )
-            );
-        } else {
-            System.out.println("🔁 Usuario ya existe, no se crea uno nuevo");
-            return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("/home")).build();
+            usuario = usuarioRegistradoRepository.save(usuario);
         }
+
+        return ResponseEntity.ok(
+                new JwtResponse(
+                        jwt,
+                        "Bearer",
+                        usuario.getCorreo(),
+                        Collections.singletonList(usuario.getRol().getRole().name())
+                )
+        );
     }
 }
+

@@ -1,11 +1,9 @@
 package com.afk.control.security.oauth2;
-
-import com.afk.backend.control.security.service.UserDetailsImpl;
+import com.afk.control.security.service.UserDetailsImpl;
 import com.afk.model.entity.Rol;
 import com.afk.model.entity.Ubicacion;
 import com.afk.model.entity.UsuarioRegistrado;
 import com.afk.model.entity.enums.EstadoUsuarioRegistrado;
-import com.afk.model.entity.enums.EstadoUsuarioRol;
 import com.afk.model.entity.enums.Roles;
 import com.afk.model.repository.RolRepository;
 import com.afk.model.repository.UbicacionRepository;
@@ -24,10 +22,6 @@ import org.springframework.web.client.RestTemplate;
 import java.time.LocalDateTime;
 import java.util.*;
 
-/**
- * Servicio OAuth2 optimizado siguiendo protocolo JWT
- * Elimina dependencias innecesarias y mejora la gestión de usuarios
- */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -35,7 +29,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private final UsuarioRegistradoRepository usuarioRepository;
     private final RolRepository rolRepository;
-    private final UsuarioRolRepository usuarioRolRepository;
     private final UbicacionRepository ubicacionRepository;
 
     @Override
@@ -43,25 +36,17 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     public OAuth2User loadUser(OAuth2UserRequest userRequest) {
         OAuth2User oAuth2User = super.loadUser(userRequest);
         Map<String, Object> attributes = oAuth2User.getAttributes();
-
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
         log.debug("Procesando usuario OAuth2 desde: {}", registrationId);
-
         String correo = extractEmail(userRequest, attributes, registrationId);
         String nombre = extractName(attributes, registrationId);
 
         if (correo == null) {
             throw new RuntimeException("No se pudo obtener el correo del proveedor OAuth2: " + registrationId);
         }
-
-        // Modificar atributos para incluir el correo correcto
         Map<String, Object> modifiedAttributes = new HashMap<>(attributes);
         modifiedAttributes.put("email", correo);
-
-        // Buscar o crear usuario
         UsuarioRegistrado user = findOrCreateUser(correo, nombre);
-
-        // Obtener roles activos
         List<SimpleGrantedAuthority> authorities = getUserAuthorities(user);
 
         log.info("Usuario OAuth2 procesado exitosamente: {}", correo);
@@ -69,9 +54,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         return UserDetailsImpl.build(user, authorities, modifiedAttributes);
     }
 
-    /**
-     * Extrae el email del usuario según el proveedor OAuth2
-     */
     private String extractEmail(OAuth2UserRequest userRequest, Map<String, Object> attributes, String registrationId) {
         String correo = null;
 
@@ -79,8 +61,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             correo = (String) attributes.get("email");
         } else if ("github".equals(registrationId)) {
             correo = (String) attributes.get("email");
-
-            // Si GitHub no proporciona email público, intentar obtener el primario
             if (correo == null) {
                 correo = fetchGithubPrimaryEmail(userRequest);
                 if (correo == null) {
@@ -88,20 +68,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 }
             }
         }
-
         return correo;
     }
 
-    /**
-     * Extrae el nombre del usuario según el proveedor OAuth2
-     */
     private String extractName(Map<String, Object> attributes, String registrationId) {
         return (String) attributes.get("name");
     }
 
-    /**
-     * Busca un usuario existente o crea uno nuevo
-     */
     private UsuarioRegistrado findOrCreateUser(String correo, String nombre) {
         Optional<UsuarioRegistrado> existente = usuarioRepository.findByCorreo(correo);
 
@@ -114,9 +87,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         return createNewUser(correo, nombre);
     }
 
-    /**
-     * Crea un nuevo usuario con configuración por defecto
-     */
     private UsuarioRegistrado createNewUser(String correo, String nombre) {
         Rol rolDefault = rolRepository.findByRole(Roles.ARRENDATARIO)
                 .orElseThrow(() -> new RuntimeException("Rol ROLE_POSTULANTE no encontrado"));
@@ -127,54 +97,38 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         UsuarioRegistrado user = UsuarioRegistrado.builder()
                 .nombre(nombre != null ? nombre : "Usuario OAuth2")
                 .correo(correo)
-                .clave("oauth2_user") // Password placeholder para usuarios OAuth2
-                .(LocalDateTime.now())
-                .estado_usuario_registrado(EstadoUsuarioRegistrado.ACTIVO)
-                .telefono_usuario("0000000000") // Teléfono placeholder
+                .clave("OAUTH2") // placeholder
                 .rol(rolDefault)
                 .ubicacion(ubicacionDefault)
+                .telefono("0000000000")
+                .cedula("0000000000")
+                .estado(EstadoUsuarioRegistrado.ACTIVO)
+                .fechaRegistro(LocalDateTime.now())
                 .build();
 
-        user = usuarioRepository.save(user);
+        log.info("Usuario OAuth2 creado: {}", correo);
+        return usuarioRepository.save(user);
 
-        // Crear relación usuario-rol
-        UsuarioRol usuarioRol = UsuarioRol.builder()
-                .usuarioRegistrado(user)
-                .rol(rolDefault)
-                .estadoUsuarioRol(EstadoUsuarioRol.ACTIVO)
-                .fechaActivacionRol(LocalDateTime.now())
-                .build();
-
-        usuarioRolRepository.save(usuarioRol);
-
-        log.info("✅ Usuario OAuth2 creado exitosamente: {}", correo);
-        return user;
     }
 
-    /**
-     * Obtiene las autoridades del usuario
-     */
     private List<SimpleGrantedAuthority> getUserAuthorities(UsuarioRegistrado user) {
-        Optional<UsuarioRol> rolesActivos = usuarioRolRepository
-                .findByUsuarioRegistradoAndEstadoUsuarioRol(user, EstadoUsuarioRol.ACTIVO);
-
-        return rolesActivos.stream()
-                .map(ur -> new SimpleGrantedAuthority(ur.getRol().getRole().name()))
-                .toList();
+        if (user.getRol() == null) {
+            throw new RuntimeException("El usuario no tiene rol asignado");
+        }
+        return List.of(
+                new SimpleGrantedAuthority(
+                        user.getRol().getRole().name()
+                )
+        );
     }
 
-    /**
-     * Obtiene el email primario de GitHub usando la API
-     */
     private String fetchGithubPrimaryEmail(OAuth2UserRequest userRequest) {
         String token = userRequest.getAccessToken().getTokenValue();
-
         try {
             RestTemplate restTemplate = new RestTemplate();
             HttpHeaders headers = new HttpHeaders();
             headers.add("Authorization", "token " + token);
             headers.add("Accept", "application/vnd.github.v3+json");
-
             HttpEntity<Void> entity = new HttpEntity<>(headers);
             ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
                     "https://api.github.com/user/emails",
@@ -182,25 +136,20 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                     entity,
                     (Class<List<Map<String, Object>>>) (Class<?>) List.class
             );
-
             if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
                 List<Map<String, Object>> emails = response.getBody();
-
                 for (Map<String, Object> emailEntry : emails) {
                     Boolean primary = (Boolean) emailEntry.get("primary");
                     Boolean verified = (Boolean) emailEntry.get("verified");
                     String email = (String) emailEntry.get("email");
-
                     if (Boolean.TRUE.equals(primary) && Boolean.TRUE.equals(verified)) {
                         log.debug("Email primario de GitHub obtenido: {}", email);
                         return email;
                     }
                 }
             }
-
             log.warn("No se encontró email primario verificado en GitHub");
             return null;
-
         } catch (Exception e) {
             log.error("Error al obtener email primario de GitHub: {}", e.getMessage());
             return null;

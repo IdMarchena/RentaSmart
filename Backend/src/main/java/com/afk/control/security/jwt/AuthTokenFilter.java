@@ -1,4 +1,4 @@
-package com.afk.backend.control.security.jwt;
+package com.afk.control.security.jwt;
 
 import io.micrometer.common.lang.NonNull;
 import jakarta.servlet.FilterChain;
@@ -15,13 +15,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-
 import java.io.IOException;
 
-/**
- * Filtro JWT refactorizado siguiendo protocolo estricto
- * Elimina todas las inconsistencias y duplicaciones del sistema anterior
- */
 @Component
 @RequiredArgsConstructor
 @Slf4j
