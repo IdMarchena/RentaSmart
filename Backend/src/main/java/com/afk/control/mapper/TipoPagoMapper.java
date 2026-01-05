@@ -1,7 +1,5 @@
 package com.afk.control.mapper;
-import com.afk.control.dto.TipoMultimediaDto;
 import com.afk.control.dto.TipoPagoDto;
-import com.afk.model.entity.TipoMultimedia;
 import com.afk.model.entity.TipoPago;
 import org.mapstruct.*;
 
@@ -11,6 +9,15 @@ import java.util.stream.StreamSupport;
 
 @Mapper(componentModel = "spring")
 public interface TipoPagoMapper {
+
+    @Named("tipoPagoFromId")
+    default TipoPago tipoPagoFromId(Long id) {
+        if (id == null) return null;
+        TipoPago tipoPago = new TipoPago();
+        tipoPago.setId(id);
+        return tipoPago;
+    }
+
     @Mapping(target="id",source="id")
     @Mapping(target = "descripcion", source = "descripcion")
     TipoPago toEntity(TipoPagoDto tipo);

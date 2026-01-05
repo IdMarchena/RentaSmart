@@ -22,7 +22,7 @@ public interface InmuebleMapper {
         return inmueble;
     }
 
-    @Mapping(target = "ubicacion", source = "idUbicaicon", qualifiedByName = "ubicacionFromId")
+    @Mapping(target = "ubicacion", source = "idUbicacion", qualifiedByName = "ubicacionFromId")
     @Mapping(target = "servicio", source = "idServicio", qualifiedByName = "servicioFromId")
     @Mapping(target = "usuario", source = "idArrendatario", qualifiedByName = "usuarioFromId")
     @Mapping(target = "habitaciones", source = "idsHabitaciones",qualifiedByName = "habitacionesFromIds")
@@ -30,10 +30,9 @@ public interface InmuebleMapper {
 
     @Mapping(target = "idUbicacion", source = "ubicacion.id")
     @Mapping(target = "idServicio", source = "servicio.id")
-    @Mapping(target = "idUsuario", source = "usuario.id")
+    @Mapping(target = "idArrendatario", source = "usuario.id")
     @Mapping(target = "idsHabitaciones", source = "habitaciones", qualifiedByName = "habitacionesToIds")
     InmuebleDto toDto(Inmueble inmueble);
-
 
     @Named("inmuebleToDtoList")
     default List<InmuebleDto> toDtoList(Iterable<Inmueble> inmuebles) {
@@ -49,6 +48,10 @@ public interface InmuebleMapper {
                 .collect(Collectors.toList());
     }
 
+    @Mapping(target = "ubicacion", source = "idUbicacion", qualifiedByName = "ubicacionFromId")
+    @Mapping(target = "servicio", source = "idServicio", qualifiedByName = "servicioFromId")
+    @Mapping(target = "usuario", source = "idArrendatario", qualifiedByName = "usuarioFromId")
+    @Mapping(target = "habitaciones", source = "idsHabitaciones",qualifiedByName = "habitacionesFromIds")
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateEntityFromDto(InmuebleDto dto, @MappingTarget Inmueble entity);
 }

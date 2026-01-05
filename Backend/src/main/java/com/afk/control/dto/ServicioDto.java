@@ -1,7 +1,5 @@
 package com.afk.control.dto;
-
 import com.afk.model.entity.enums.EstadoServicio;
-
 import java.util.List;
 
 public record ServicioDto(
@@ -12,6 +10,6 @@ public record ServicioDto(
         Long idTipo,
         Integer precio,
         EstadoServicio estado,
-        List<Long>servicioIds
+        List<Long> calificacionesIds
 ) {
 }

@@ -1,5 +1,4 @@
 package com.afk.control.mapper;
-
 import com.afk.control.dto.ServicioDto;
 import com.afk.model.entity.*;
 import org.mapstruct.*;
@@ -9,8 +8,7 @@ import java.util.stream.StreamSupport;
 
 @Mapper(componentModel = "spring",
 uses = {UsuarioMapper.class,
-        TipoServicioMapper.class,
-        PublicacionMapper.class})
+        TipoServicioMapper.class})
 public interface ServicioMapper {
 
     @Named("servicioFromId")
@@ -19,6 +17,23 @@ public interface ServicioMapper {
         Servicio servicio = new Servicio();
         servicio.setId(id);
         return servicio;
+    }
+    @Named("calificacionesFromIds")
+    default List<Calificacion> calificacionesFromIds(List<Long> ids) {
+        if (ids == null) return null;
+        return ids.stream().map(id -> {
+            Calificacion c = new Calificacion();
+            c.setId(id);
+            return c;
+        }).collect(Collectors.toList());
+    }
+
+    @Named("calificacionesToIds")
+    default List<Long> calificacionesToIds(List<Calificacion> calificaciones) {
+        if (calificaciones == null) return List.of();
+        return calificaciones.stream()
+                .map(Calificacion::getId)
+                .collect(Collectors.toList());
     }
 
 
@@ -46,6 +61,9 @@ public interface ServicioMapper {
                 .collect(Collectors.toList());
     }
 
+    @Mapping(target = "usuario", source = "idUsuario", qualifiedByName = "usuarioFromId")
+    @Mapping(target = "tipo", source = "idTipo", qualifiedByName = "tipoServicioFromId")
+    @Mapping(target = "calificaciones", source = "calificacionesIds", qualifiedByName = "calificacionesFromIds")
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateEntityFromDto(ServicioDto dto, @MappingTarget Servicio entity);
 }

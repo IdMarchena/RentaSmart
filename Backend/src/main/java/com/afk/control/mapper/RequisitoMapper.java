@@ -35,7 +35,7 @@ public interface RequisitoMapper {
     @Mapping(target="tipo",source="idTipo",qualifiedByName = "TipoRequisitoFromId")
     Requisito toEntity(RequisitoDto dto);
 
-    @Mapping(target = "idTIpo", source = "tipo.id")
+    @Mapping(target = "idTipo", source = "tipo.id")
     RequisitoDto toDto(Requisito requisito);
 
     @Named("requisitoToDtoList")
@@ -50,6 +50,8 @@ public interface RequisitoMapper {
                 .map(this::toEntity)
                 .collect(Collectors.toList());
     }
+
+    @Mapping(target="tipo",source="idTipo",qualifiedByName = "TipoRequisitoFromId")
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateEntityFromDto(RequisitoDto dto, @MappingTarget Requisito entity);
 }

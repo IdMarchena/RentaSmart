@@ -1,5 +1,7 @@
 package com.afk.control.dto;
 
+import com.afk.model.entity.enums.EstadoInmueble;
+
 import java.util.List;
 
 public record InmuebleDto(
@@ -8,6 +10,7 @@ public record InmuebleDto(
         Long idUbicacion,
         Integer areaTotal,
         Integer estrato,
+        EstadoInmueble estadoInmueble,
         String nombre,
         Long idServicio,
         Long idArrendatario,

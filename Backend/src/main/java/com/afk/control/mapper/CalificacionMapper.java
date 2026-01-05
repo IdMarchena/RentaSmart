@@ -1,21 +1,15 @@
 package com.afk.control.mapper;
-
 import com.afk.control.dto.CalificacionDto;
 import com.afk.model.entity.Calificacion;
 import com.afk.model.entity.Publicacion;
+import com.afk.model.entity.Servicio;
 import com.afk.model.entity.Usuario;
 import org.mapstruct.*;
-import org.springframework.stereotype.Component;
-
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-@Mapper(componentModel = "spring",
-        uses = {UsuarioMapper.class,
-        PublicacionMapper.class,
-        ServicioMapper.class})
-@Component
+@Mapper(componentModel = "spring")
 public interface CalificacionMapper {
 
 
@@ -49,6 +43,14 @@ public interface CalificacionMapper {
         return usuario;
     }
 
+    @Named("mapS")
+    default Servicio mapS(Long id){
+        if(id == null) return null;
+        Servicio servicio = new Servicio();
+        servicio.setId(id);
+        return servicio;
+    }
+
     @Named("mapP")
     default Publicacion mapP(Long id){
         if(id == null) return null;
@@ -57,9 +59,9 @@ public interface CalificacionMapper {
         return publicacion;
     }
 
-    @Mapping(target = "usuario",source = "idUsuarioPostulante", qualifiedByName = "usuarioFromId")
-    @Mapping(target = "publicacion",source = "idPublicacion", qualifiedByName = "publicacionFromId")
-    @Mapping(target = "servicio",source = "idServicio", qualifiedByName = "servicioFromId")
+    @Mapping(target = "usuario",source = "idUsuarioPostulante", qualifiedByName = "mapU")
+    @Mapping(target = "publicacion",source = "idPublicacion", qualifiedByName = "mapP")
+    @Mapping(target = "servicio",source = "idServicio", qualifiedByName = "mapS")
     Calificacion toEntity(CalificacionDto calificacionDto);
 
     @Mapping(target = "idUsuarioPostulante", source = "usuario.id")
@@ -83,6 +85,11 @@ public interface CalificacionMapper {
                 .collect(Collectors.toList());
 
     }
+
+    @Mapping(target = "usuario",source = "idUsuarioPostulante", qualifiedByName = "mapU")
+    @Mapping(target = "publicacion",source = "idPublicacion", qualifiedByName = "mapP")
+    @Mapping(target = "servicio",source = "idServicio", qualifiedByName = "mapS")
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateEntityFromDto(CalificacionDto dto, @MappingTarget Calificacion entity);
+
 }
