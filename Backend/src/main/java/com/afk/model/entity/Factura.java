@@ -42,7 +42,6 @@ public class Factura {
     @JoinColumn(name="id_servicio",nullable = false)
     private Servicio servicio;
 
-
     @Enumerated(EnumType.STRING)
     private EstadoPago estado;
 
