@@ -7,10 +7,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-@Mapper(componentModel = "spring",
-        uses = {PublicacionMapper.class
-                }
-        )
+@Mapper(componentModel = "spring")
 public interface MultimediaMapper {
 
     @Named("multimediaFromId")
@@ -36,11 +33,19 @@ public interface MultimediaMapper {
     }
 
     @Named("multimediasToIds")
-    default List<Long> calificacionesToIds(List<Calificacion> calificaciones) {
-        if (calificaciones == null) return List.of();
-        return calificaciones.stream()
-                .map(Calificacion::getId)
+    default List<Long> multimediasToIds(List<Multimedia> multimedia) {
+        if (multimedia == null) return List.of();
+        return multimedia.stream()
+                .map(Multimedia::getId)
                 .collect(Collectors.toList());
+    }
+
+    @Named("publicacionFromId")
+    default Publicacion publicacionFromId(Long id) {
+        if (id == null) return null;
+        Publicacion publicacion = new Publicacion();
+        publicacion.setId(id);
+        return publicacion;
     }
 
     @Mapping(target = "publicacion", source = "idPublicacion", qualifiedByName = "publicacionFromId")
@@ -63,6 +68,7 @@ public interface MultimediaMapper {
                 .collect(Collectors.toList());
     }
 
+    @Mapping(target = "publicacion", source = "idPublicacion", qualifiedByName = "publicacionFromId")
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateEntityFromDto(MultimediaDto dto, @MappingTarget Multimedia entity);
 }

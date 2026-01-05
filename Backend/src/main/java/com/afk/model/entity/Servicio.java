@@ -3,7 +3,6 @@ package com.afk.model.entity;
 import com.afk.model.entity.enums.EstadoServicio;
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,6 +41,7 @@ public class Servicio {
     @Column(name = "estado_servicio", nullable = false)
     private EstadoServicio estado;
 
+    @Builder.Default
     @OneToMany(mappedBy = "servicio", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Calificacion> calificacion = new ArrayList<>();
+    private List<Calificacion> calificaciones = new ArrayList<>();
 }

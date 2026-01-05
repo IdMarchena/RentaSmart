@@ -49,6 +49,10 @@ public interface CitaMapper {
                 .collect(Collectors.toList());
     }
 
+    @Mapping(target = "usuario", source = "idUsuarioCita", qualifiedByName = "usuarioFromId")
+    @Mapping(target = "usuarioRemitente", source = "idUsuarioRemitente", qualifiedByName = "usuarioFromId")
+    @Mapping(target = "servicio", source = "idServicio", qualifiedByName = "servicioFromId")
+    @Mapping(target = "publicacion", source = "idPublicacion", qualifiedByName = "publicacionFromId")
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateEntityFromDto(CitaDto dto, @MappingTarget Cita entity);
 }

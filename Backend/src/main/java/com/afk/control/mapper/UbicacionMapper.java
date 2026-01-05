@@ -17,13 +17,14 @@ public interface UbicacionMapper {
         u.setId(id);
         return u;
     }
-    @Named("UbicacionToUbicacionDto")
-    @Mapping(target="padre",source="ubicacion.id")
+
+    @Mapping(target = "padre",source="id_padre",qualifiedByName = "ubicacionFromId")
+    Ubicacion toEntity(UbicacionDt dto);
+
+    @Mapping(target="id_padre",source="padre.id")
     UbicacionDt toDto(Ubicacion ubicacion);
 
-    @Named("UbicacionDtoToUbicacion")
-    @Mapping(target = "padre",source="id_oadre",qualifiedByName = "ubicacionFromId")
-    Ubicacion toEntity(UbicacionDt dto);
+
 
     @Named("listUbicacionToListUbicacionDto")
     List<UbicacionDto> toDtoList(List<Ubicacion> ubicaciones);
@@ -31,6 +32,7 @@ public interface UbicacionMapper {
     @Named("listUbicacionDtoToListUbicacion")
     List<Ubicacion> toEntityList(List<UbicacionDt> dtos);
 
+    @Mapping(target = "padre",source="id_padre",qualifiedByName = "ubicacionFromId")
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateEntityFromDto(UbicacionDt dto, @MappingTarget Ubicacion entity);
 }

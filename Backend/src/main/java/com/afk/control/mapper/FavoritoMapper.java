@@ -22,13 +22,15 @@ public interface FavoritoMapper {
         return favorito;
     }
 
+    @Mapping(target = "usuario",  source = "idUsuario", qualifiedByName = "usuarioFromId")
+    @Mapping(target = "publicacion", source = "idPublicacion", qualifiedByName = "publicacionFromId")
+    Favorito toEntity(FavoritoDto favoritoDto);
+
     @Mapping(target = "idUsuario", source = "usuario.id")
     @Mapping(target = "idPublicacion", source = "publicacion.id")
     FavoritoDto toDto(Favorito favorito);
 
-    @Mapping(source = "usuario",  target = "idUsuario", qualifiedByName = "usuarioFromId")
-    @Mapping(source = "publicacion", target = "idPublicacion", qualifiedByName = "publicacionFromId")
-    Favorito toEntity(FavoritoDto favoritoDto);
+
 
     @Named("favoritoToDtoList")
     default List<FavoritoDto> toDtoList(Iterable<Favorito> favoritos) {
@@ -46,6 +48,8 @@ public interface FavoritoMapper {
                 .collect(Collectors.toList());
     }
 
+    @Mapping(target = "usuario", source = "idUsuario", qualifiedByName = "usuarioFromId")
+    @Mapping(target = "publicacion", source = "idPublicacion", qualifiedByName = "publicacionFromId")
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateEntityFromDto(FavoritoDto dto, @MappingTarget Favorito entity);
 }

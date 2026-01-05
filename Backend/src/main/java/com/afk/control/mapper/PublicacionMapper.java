@@ -1,6 +1,7 @@
 package com.afk.control.mapper;
 import com.afk.control.dto.PublicacionDto;
 import com.afk.model.entity.Calificacion;
+import com.afk.model.entity.Inmueble;
 import com.afk.model.entity.Publicacion;
 import org.mapstruct.*;
 import java.util.List;
@@ -8,10 +9,8 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 @Mapper(componentModel = "spring",
-        uses = {InmuebleMapper.class,
-                UsuarioMapper.class,
-                CalificacionMapper.class,
-                MultimediaMapper.class})  // Asegúrate de incluir MultimediaMapper
+        uses = {UsuarioMapper.class,
+                MultimediaMapper.class})
 public interface PublicacionMapper {
 
     @Named("publicacionFromId")
@@ -21,8 +20,32 @@ public interface PublicacionMapper {
         publicacion.setId(id);
         return publicacion;
     }
+    @Named("mapInmueble")
+    default Inmueble mapInmueble(Long id) {
+        if (id == null) return null;
+        Inmueble i = new Inmueble();
+        i.setId(id);
+        return i;
+    }
+    @Named("calificacionesFromIds")
+    default List<Calificacion> calificacionesFromIds(List<Long> ids) {
+        if (ids == null) return null;
+        return ids.stream().map(id -> {
+            Calificacion c = new Calificacion();
+            c.setId(id);
+            return c;
+        }).collect(Collectors.toList());
+    }
 
-    @Mapping(target = "inmueble", source = "idInmueble", qualifiedByName = "inmuebleFromId")
+    @Named("calificacionesToIds")
+    default List<Long> calificacionesToIds(List<Calificacion> calificaciones) {
+        if (calificaciones == null) return List.of();
+        return calificaciones.stream()
+                .map(Calificacion::getId)
+                .collect(Collectors.toList());
+    }
+
+    @Mapping(target = "inmueble", source = "idInmueble", qualifiedByName = "mapInmueble")
     @Mapping(target = "calificaciones", source = "calificacionesIds", qualifiedByName = "calificacionesFromIds")
     @Mapping(target = "usuario", source = "idUsuario", qualifiedByName = "usuarioFromId")
     @Mapping(target = "multimedia", source = "multimediaIds", qualifiedByName = "multimediasFromIds")

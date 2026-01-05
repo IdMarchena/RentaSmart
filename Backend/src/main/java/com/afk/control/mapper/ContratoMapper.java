@@ -6,7 +6,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring",
+        uses = {UsuarioMapper.class,
+                InmuebleMapper.class,
+                FinanciacionMapper.class})
 public interface ContratoMapper {
 
     @Named("contratoFromId")
@@ -24,8 +27,8 @@ public interface ContratoMapper {
     Contrato toEntity(ContratoDto contratoDto);
 
 
-    @Mapping(target = "idUsuarioArrendatario",source = "usuario.id")
-    @Mapping(target = "idUsuarioArrendador",source = "usuario.id")
+    @Mapping(target = "idUsuarioArrendatario",source = "usuarioArrendatario.id")
+    @Mapping(target = "idUsuarioArrendador",source = "usuarioArrendador.id")
     @Mapping(source = "inmueble.id", target = "idInmueble")
     @Mapping(source = "financiacion.id", target = "idFinanciacion")
     ContratoDto toDto(Contrato contrato);
@@ -44,6 +47,10 @@ public interface ContratoMapper {
                 .collect(Collectors.toList());
     }
 
+    @Mapping(target = "usuarioArrendatario", source = "idUsuarioArrendatario", qualifiedByName = "usuarioFromId")
+    @Mapping(target = "usuarioArrendador", source = "idUsuarioArrendador", qualifiedByName = "usuarioFromId")
+    @Mapping(target = "inmueble", source = "idInmueble", qualifiedByName = "inmuebleFromId")
+    @Mapping(target = "financiacion", source = "idFinanciacion", qualifiedByName = "financiacionFromId")
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateEntityFromDto(ContratoDto dto, @MappingTarget Contrato entity);
 }

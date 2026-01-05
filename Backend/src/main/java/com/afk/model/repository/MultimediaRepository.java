@@ -10,5 +10,4 @@ import java.util.List;
 public interface MultimediaRepository extends JpaRepository<Multimedia, Long> {
     List<Multimedia> findByPublicacionId(Long publicacionId);
 
-    List<Multimedia> findByTipoId(Long tipoMultimediaId);
 }

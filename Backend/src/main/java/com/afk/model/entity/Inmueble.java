@@ -3,7 +3,7 @@ package com.afk.model.entity;
 import com.afk.model.entity.enums.EstadoInmueble;
 import jakarta.persistence.*;
 import lombok.*;
-
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -43,11 +43,12 @@ public class Inmueble {
     @JoinColumn(name = "id_servicio")
     private Servicio servicio;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name= "id_arrendatario")
     private Usuario usuario;
 
-    @OneToMany(mappedBy = "apartamento", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Habitacion> habitaciones;
+    @Builder.Default
+    @OneToMany(mappedBy = "inmueble", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Habitacion> habitaciones = new ArrayList<>();
 }
 

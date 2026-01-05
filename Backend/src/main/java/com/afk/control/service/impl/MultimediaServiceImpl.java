@@ -3,6 +3,7 @@ import com.afk.control.dto.MultimediaDto;
 import com.afk.control.mapper.MultimediaMapper;
 import com.afk.control.service.MultimediaService;
 import com.afk.model.entity.Multimedia;
+import com.afk.model.entity.enums.EstadoMultimedia;
 import com.afk.model.repository.MultimediaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -57,11 +58,19 @@ public class MultimediaServiceImpl implements MultimediaService {
     }
 
     @Override
-    public List<MultimediaDto> findMultimediasByTipo(Long tipoMultimediaId) {
-        List<Multimedia> multimedias = multimediaRepository.findByTipoId(tipoMultimediaId);
-        return multimedias.stream()
-                .map(multimediaMapper::toDto)
+    public List<MultimediaDto> findMultimediasByTipo(String tipo) {
+        EstadoMultimedia e = switch (tipo) {
+            case "VIDEO" -> EstadoMultimedia.VIDEO;
+            case "FOTO" -> EstadoMultimedia.FOTO;
+            case "DOCUMENTO" -> EstadoMultimedia.DOCUMENTO;
+            default -> throw new NoSuchElementException("Tipo de multimedia no encontrado");
+        };
+        List<Multimedia> multimedias = multimediaRepository.findAll();
+        if(multimedias.isEmpty()) throw new NoSuchElementException("Multimedia no encontrado");
+        List<Multimedia> listaFiltrada = multimedias.stream()
+                                        .filter(m -> m.getTipo().equals(e))
                 .collect(Collectors.toList());
+        return multimediaMapper.toDtoList(listaFiltrada);
     }
 
     @Override

@@ -46,6 +46,9 @@ public interface SolicitudServicioMapper {
                 .collect(Collectors.toList());
     }
 
+    @Mapping(target = "servicio", source = "idServicio", qualifiedByName = "servicioFromId")
+    @Mapping(target = "usuario", source = "idUsuario", qualifiedByName = "usuarioFromId")
+    @Mapping(target = "inmueble", source = "idInmueble", qualifiedByName = "inmuebleFromId")
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateEntityFromDto(SolicitudDeServicioDto dto, @MappingTarget SolicitudServicio entity);
 }

@@ -16,7 +16,7 @@ public interface MultimediaService {
 
     List<MultimediaDto> findMultimediasByPublicacion(Long publicacionId);
 
-    List<MultimediaDto> findMultimediasByTipo(Long tipoMultimediaId);
+    List<MultimediaDto> findMultimediasByTipo(String tipo);
 
     MultimediaDto updateMultimedia(Long id, MultimediaDto multimediaDto);
 

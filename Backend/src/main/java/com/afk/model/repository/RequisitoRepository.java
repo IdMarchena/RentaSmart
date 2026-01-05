@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface RequisitoRepository extends JpaRepository<Requisito, Long> {
-    List<Requisito> findByVacanteId(Long idInmbuele);
+
 }

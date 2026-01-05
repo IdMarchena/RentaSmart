@@ -45,9 +45,9 @@ public class MultimediaController {
         return ResponseEntity.ok(multimediaDtos);
     }
 
-    @GetMapping("/tipo/{tipoMultimediaId}")
-    public ResponseEntity<List<MultimediaDto>> getMultimediasByTipo(@PathVariable Long tipoMultimediaId) {
-        List<MultimediaDto> multimediaDtos = multimediaService.findMultimediasByTipo(tipoMultimediaId);
+    @GetMapping("/tipo/{tipo}")
+    public ResponseEntity<List<MultimediaDto>> getMultimediasByTipo(@PathVariable String tipo) {
+        List<MultimediaDto> multimediaDtos = multimediaService.findMultimediasByTipo(tipo);
         return ResponseEntity.ok(multimediaDtos);
     }
     @PutMapping("/{id}")

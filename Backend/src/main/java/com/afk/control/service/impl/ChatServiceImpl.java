@@ -1,77 +1,84 @@
 package com.afk.control.service.impl;
-import com.afk.client.external.dto.ChatRequest;
-import com.afk.client.external.dto.ChatResponse;
+import com.afk.control.dto.ChattDto;
+import com.afk.control.mapper.ChatMapper;
 import com.afk.control.service.ChatService;
 import com.afk.model.entity.Chat;
-import com.afk.model.entity.Usuario;
 import com.afk.model.entity.enums.EstadoChat;
 import com.afk.model.repository.ChatRepository;
-import com.afk.model.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class ChatServiceImpl implements ChatService {
 
     private final ChatRepository chatRepository;
-    private final UsuarioRepository usuarioRepository;
+    private final ChatMapper mapper;
 
     @Override
     @Transactional
-    public ChatResponse createChat(ChatRequest chatRequest) {
-        Usuario sender = usuarioRepository.findById(chatRequest.senderId())
-                .orElseThrow(() -> new RuntimeException("Usuario remitente no encontrado"));
+    public ChattDto crearChat(ChattDto chattDto) {
+        if (chattDto == null) throw new IllegalArgumentException("El DTO no puede ser nulo");
 
-        Usuario receiver = usuarioRepository.findById(chatRequest.receiverId())
-                .orElseThrow(() -> new RuntimeException("Usuario destinatario no encontrado"));
+        // 1. Validar si ya existe un chat entre estos dos usuarios (Pareja única)
+        Optional<Chat> chatExistente = chatRepository.findByUsuarios(chattDto.idUsuarioA(), chattDto.idUsuarioB());
 
-        Chat chat = Chat.builder()
-                .usuarioa(sender)
-                .usuariob(receiver)
-                .mensaje(chatRequest.message())
-                .estado_chat(chatRequest.status() != null ? chatRequest.status() : EstadoChat.ENVIADO)
-                .fechaCreacion(LocalDateTime.now())
-                .build();
-
-        Chat savedChat = chatRepository.save(chat);
-        return toChatResponse(savedChat);
-    }
-
-    @Override
-    public ChatResponse getChatById(Long id) {
-        Chat chat = chatRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Chat no encontrado"));
-        return toChatResponse(chat);
-    }
-
-    @Override
-    public List<ChatResponse> getAllChats() {
-        return chatRepository.findAll().stream()
-                .map(this::toChatResponse)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    @Transactional
-    public ChatResponse updateChat(Long id, ChatRequest chatRequest) {
-        Chat chat = chatRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Chat no encontrado"));
-
-        if (chatRequest.message() != null) {
-            chat.setMensaje(chatRequest.message());
-        }
-        if (chatRequest.status() != null) {
-            chat.setEstado_chat(chatRequest.status());
+        if (chatExistente.isPresent()) {
+            // En lugar de lanzar error, devolvemos el chat que ya existe (comportamiento estándar de chat)
+            return mapper.toDto(chatExistente.get());
         }
 
-        Chat updatedChat = chatRepository.save(chat);
-        return toChatResponse(updatedChat);
+        // 2. Si no existe, lo creamos
+        Chat nuevoChat = mapper.toEntity(chattDto);
+        nuevoChat.setFechaCreacion(LocalDateTime.now());
+        nuevoChat.setEstado_chat(EstadoChat.ACTIVO);
+        return mapper.toDto(chatRepository.save(nuevoChat));
+    }
+
+    @Override
+    public void cambiarEstadoChat(Long id,String estado){
+        EstadoChat e = switch (estado) {
+            case "LEIDO" -> EstadoChat.LEIDO;
+            case "NO_LEIDO" -> EstadoChat.NO_LEIDO;
+            case "ENVIADO" -> EstadoChat.ENVIADO;
+            case "ENTREGADO" -> EstadoChat.ENTREGADO;
+            case "ACTIVO" -> EstadoChat.ACTIVO;
+            case "INACTIVO" -> EstadoChat.INACTIVO;
+            case "ARCHIVADO" -> EstadoChat.ARCHIVADO;
+            case "BLOQUEADO" -> EstadoChat.BLOQUEADO;
+            default -> throw new IllegalArgumentException("El estado '" + estado + "' no es valido");
+        };
+        Chat chat = chatRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("El id del chat no existe"));
+        chat.setEstado_chat(e);
+        chatRepository.save(chat);
+    }
+
+    @Override
+    public List<ChattDto> listarChats(){
+        List<Chat> chats = chatRepository.findAll();
+        if(chats.isEmpty()) throw new IllegalArgumentException("El atributo 'chats' no existe");
+        return mapper.toDtoList(chats);
+    }
+
+    @Override
+    public ChattDto buscarChatPorId(Long id){
+        Chat chat = chatRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("El id del chat no existe"));
+        return mapper.toDto(chat);
+    }
+
+    @Override
+    public ChattDto buscarChatPorNombre(String nombre) {
+        Chat chat = chatRepository.findByNombre(nombre);
+        if (chat == null) throw new NoSuchElementException("No se encontró un chat con el nombre: " + nombre);
+        return mapper.toDto(chat);
     }
 
     @Override
@@ -80,38 +87,5 @@ public class ChatServiceImpl implements ChatService {
             throw new RuntimeException("Chat no encontrado");
         }
         chatRepository.deleteById(id);
-    }
-
-    @Override
-    public List<ChatResponse> getChatsByUser(Long userId) {
-        return chatRepository.findByUsuarioId(userId).stream()
-                .map(this::toChatResponse)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<ChatResponse> getChatsBetweenUsers(Long user1Id, Long user2Id) {
-        return chatRepository.findChatsBetweenUsers(user1Id, user2Id).stream()
-                .map(this::toChatResponse)
-                .collect(Collectors.toList());
-    }
-
-    private ChatResponse toChatResponse(Chat chat) {
-        return new ChatResponse(
-                chat.getId(),
-                chat.getUsuarioa().getId(),
-                chat.getUsuariob().getId(),
-                chat.getMensaje(),
-                chat.getEstado_chat(),
-                chat.getFechaCreacion()
-        );
-    }
-    @Override
-    @Transactional
-    public void updateChatStatus(Long chatId, EstadoChat status) {
-        Chat chat = chatRepository.findById(chatId)
-                .orElseThrow(() -> new RuntimeException("Chat no encontrado"));
-        chat.setEstado_chat(status); // Actualiza el estado
-        chatRepository.save(chat); // Guarda el cambio
     }
 }

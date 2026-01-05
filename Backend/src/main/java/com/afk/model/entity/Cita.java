@@ -1,5 +1,4 @@
 package com.afk.model.entity;
-
 import com.afk.model.entity.enums.EstadoCita;
 import jakarta.persistence.*;
 import lombok.*;

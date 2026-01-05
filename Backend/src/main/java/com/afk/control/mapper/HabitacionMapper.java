@@ -2,6 +2,7 @@ package com.afk.control.mapper;
 
 import com.afk.control.dto.HabitacionDto;
 import com.afk.model.entity.Habitacion;
+import com.afk.model.entity.Inmueble;
 import org.mapstruct.*;
 
 import java.util.ArrayList;
@@ -49,13 +50,24 @@ public interface HabitacionMapper {
                 habitacion.getId(),
                 habitacion.getCapacidad(),
                 habitacion.getPrecio(),
-                habitacion.getEstado()
+                habitacion.getEstado(),
+                habitacion.getInmueble().getId()
         );
         return dto;
     }
 
+    @Named("inmuebleFromId")
+    default Inmueble inmuebleFromId(Long id){
+        if (id == null) return null;
+        Inmueble inmueble = new Inmueble();
+        inmueble.setId(id);
+        return inmueble;
+    }
+
+    @Mapping(target = "inmueble", source = "idInmueble", qualifiedByName = "inmuebleFromId")
     Habitacion toEntity(HabitacionDto chatRequest);
 
+    @Mapping(target = "idInmueble",source="inmueble.id")
     HabitacionDto toDto(Habitacion chat);
 
     @Named("habitacionToDtoList")
@@ -72,10 +84,7 @@ public interface HabitacionMapper {
                 .collect(Collectors.toList());
     }
 
+    @Mapping(target = "inmueble", source = "idInmueble", qualifiedByName = "inmuebleFromId")
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "capacidad", ignore = true)
-    @Mapping(target = "precio", ignore = true)
-    @Mapping(target = "estado", ignore = true)
     void updateEntityFromDto(@MappingTarget Habitacion entity, HabitacionDto dto);
 }
