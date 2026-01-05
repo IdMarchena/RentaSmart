@@ -7,14 +7,13 @@ import com.afk.control.mapper.CalificacionMapper;
 import com.afk.control.mapper.PublicacionMapper;
 import com.afk.control.mapper.ServicioMapper;
 import com.afk.control.service.CalificacionService;
-import com.afk.control.service.PublicacionService;
-import com.afk.control.service.ServicioService;
 import com.afk.model.entity.Calificacion;
 import com.afk.model.entity.Publicacion;
 import com.afk.model.entity.Servicio;
 import com.afk.model.repository.CalificacionRepository;
+import com.afk.model.repository.PublicacionRepository;
+import com.afk.model.repository.ServicioRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,10 +28,11 @@ public class CalificacionServiceImpl implements CalificacionService {
     private final CalificacionRepository repository;
     private final CalificacionMapper mapper;
 
-    private final ServicioService sService;
+
+    private final ServicioRepository servicioRepository;
     private final ServicioMapper sMapper;
 
-    private final PublicacionService pService;
+    private final PublicacionRepository publicacionRepository;
     private final PublicacionMapper pMapper;
 
 
@@ -86,10 +86,10 @@ public class CalificacionServiceImpl implements CalificacionService {
     @Override
     public List<CalificacionDto> encontrarCalificacionesPorServicioId(Long idServicio) {
         if(idServicio<0 || idServicio==null) throw new IllegalArgumentException("el id no puede ser nulo o negativo");
-        ServicioDto s = sService.getServicioById(idServicio);
+        Servicio s = servicioRepository.findById(idServicio).
+                orElseThrow(() -> new NoSuchElementException("Servicio con ID " + idServicio + " no encontrada"));
         if(s == null) throw new NoSuchElementException("el servicio con ese id no fue encontrado");
-        Servicio sEntity = sMapper.toEntity(s);
-        List<Calificacion> calificaciones = sEntity.getCalificacion();
+        List<Calificacion> calificaciones = s.getCalificaciones();
         if(calificaciones.isEmpty()) throw new NoSuchElementException("no se encontraron calificaciones asociadas a este servicio");
         return mapper.toDtoList(calificaciones);
     }
@@ -97,10 +97,10 @@ public class CalificacionServiceImpl implements CalificacionService {
     @Override
     public List<CalificacionDto> encontrarCalificacionesPorPublicacionId(Long idPublicacion) {
         if(idPublicacion<0 || idPublicacion==null) throw new IllegalArgumentException("el id no puede ser nulo o negativo");
-        PublicacionDto p = pService.obtenerPublicacionPorId(idPublicacion);
+        Publicacion p = publicacionRepository.findById(idPublicacion)
+                .orElseThrow(() -> new NoSuchElementException("publicacion con ID " + idPublicacion + " no encontrada"));
         if(p == null) throw new NoSuchElementException("la publicacion  con ese id"+idPublicacion+" no fue encontrado");
-        Publicacion pEntity = pMapper.toEntity(p);
-        List<Calificacion> calificaciones = pEntity.getCalificaciones();
+        List<Calificacion> calificaciones = p.getCalificaciones();
         if(calificaciones.isEmpty()) throw new NoSuchElementException("no se encontraron calificaciones asociadas a esta publicacion");
         return mapper.toDtoList(calificaciones);
     }

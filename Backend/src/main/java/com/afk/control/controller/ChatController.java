@@ -1,11 +1,10 @@
 package com.afk.control.controller;
-import com.afk.client.external.dto.ChatRequest;
-import com.afk.client.external.dto.ChatResponse;
+import com.afk.control.dto.ChattDto;
 import com.afk.control.service.ChatService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
@@ -15,42 +14,35 @@ public class ChatController {
 
     private final ChatService chatService;
 
-    @PostMapping
-    public ResponseEntity<ChatResponse> crearChat(@RequestBody ChatRequest request) {
-        ChatResponse chat = chatService.createChat(request);
-        return ResponseEntity.ok(chat);
+    @PostMapping("/crear")
+    public ResponseEntity<ChattDto> crearChat(@RequestBody ChattDto chattDto) {
+        return new ResponseEntity<>(chatService.crearChat(chattDto), HttpStatus.CREATED);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ChatResponse> obtenerChatPorId(@PathVariable Long id) {
-        return ResponseEntity.ok(chatService.getChatById(id));
+    @GetMapping("/obtenerPorId/{id}")
+    public ResponseEntity<ChattDto> obtenerChatPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(chatService.buscarChatPorId(id));
     }
 
-    @GetMapping
-    public ResponseEntity<List<ChatResponse>> listarTodosLosChats() {
-        return ResponseEntity.ok(chatService.getAllChats());
+    @GetMapping("/obtenerPorNombre/{nombre}")
+    public ResponseEntity<ChattDto> obtenerChatPorNombre(@PathVariable String nombre) {
+        return ResponseEntity.ok(chatService.buscarChatPorNombre(nombre));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<ChatResponse> actualizarChat(@PathVariable Long id, @RequestBody ChatRequest request) {
-        return ResponseEntity.ok(chatService.updateChat(id, request));
+    @GetMapping("/listar")
+    public ResponseEntity<List<ChattDto>> listarTodosLosChats() {
+        return ResponseEntity.ok(chatService.listarChats());
     }
 
-    @DeleteMapping("/{id}")
+    @PatchMapping("/cambiarEstadoChat/{id}")
+    public ResponseEntity<Void> cambiarEstado(@PathVariable Long id, @RequestParam String estado) {
+        chatService.cambiarEstadoChat(id, estado);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/eliminarPorId/{id}")
     public ResponseEntity<Void> eliminarChat(@PathVariable Long id) {
         chatService.deleteChat(id);
         return ResponseEntity.noContent().build();
-    }
-
-    @GetMapping("/usuario/{userId}")
-    public ResponseEntity<List<ChatResponse>> obtenerChatsPorUsuario(@PathVariable Long userId) {
-        return ResponseEntity.ok(chatService.getChatsByUser(userId));
-    }
-
-    @GetMapping("/entre/{user1Id}/{user2Id}")
-    public ResponseEntity<List<ChatResponse>> obtenerChatsEntreUsuarios(
-            @PathVariable Long user1Id,
-            @PathVariable Long user2Id) {
-        return ResponseEntity.ok(chatService.getChatsBetweenUsers(user1Id, user2Id));
     }
 }

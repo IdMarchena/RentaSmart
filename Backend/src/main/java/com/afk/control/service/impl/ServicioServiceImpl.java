@@ -1,7 +1,6 @@
 package com.afk.control.service.impl;
 import com.afk.control.dto.ServicioDto;
 import com.afk.control.mapper.ServicioMapper;
-import com.afk.control.service.CalificacionService;
 import com.afk.control.service.ServicioService;
 import com.afk.model.entity.Calificacion;
 import com.afk.model.entity.Servicio;
@@ -18,11 +17,10 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class ServicioServiceImpl implements ServicioService {
-    private final ServicioRepository repository;
 
+    private final ServicioRepository repository;
     private final ServicioMapper mapper;
 
-    private final CalificacionService cService;
     private final CalificacionRepository cRepo;
 
 
@@ -70,8 +68,8 @@ public class ServicioServiceImpl implements ServicioService {
         sExistente.setTipo(s.getTipo());
         sExistente.setPrecio(s.getPrecio());
         sExistente.setEstado(s.getEstado());
-        List<Calificacion> c = cRepo.findAllById(servicio.servicioIds());
-        sExistente.setCalificacion(c);
+        List<Calificacion> c = cRepo.findAllById(servicio.calificacionesIds());
+        sExistente.setCalificaciones(c);
         repository.save(sExistente);
     }
 

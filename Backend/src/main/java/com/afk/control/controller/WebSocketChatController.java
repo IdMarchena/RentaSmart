@@ -1,69 +1,56 @@
 package com.afk.control.controller;
-import com.afk.client.external.dto.ChatRequest;
-import com.afk.client.external.dto.ChatResponse;
+
+import com.afk.control.dto.MensajeDto;
 import com.afk.control.service.ChatService;
+import com.afk.control.service.MensajeService;
 import com.afk.model.entity.enums.EstadoChat;
-import com.afk.model.repository.UsuarioRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 @AllArgsConstructor
 @Controller
 public class WebSocketChatController {
 
-    private final UsuarioRepository usuarioRepository;
+    private final MensajeService mensajeService;
     private final ChatService chatService;
+    private final SimpMessagingTemplate messagingTemplate;
 
-
-
-    @MessageMapping("/chat.send")
-    @SendTo("/topic/public")
-    public ChatResponse handlePublicMessage(@Payload ChatRequest message) {
-        ChatResponse savedMessage = chatService.createChat(message);
-        return savedMessage;
-    }
-
-    @MessageMapping("/chat.private.{userId}")
-    @SendTo("/topic/private.{userId}")
-    public ChatResponse handlePrivateMessage(
-            @Payload ChatRequest message,
-            @DestinationVariable Long userId) {
-        Optional usuario= usuarioRepository.findById(userId);
-        //quede por aca
-        ChatRequest privateMessage = new ChatRequest(
-                message.senderId(),
-                userId,
-                message.message(),
-                message.status()
-        );
-        ChatResponse savedMessage = chatService.createChat(privateMessage);
-        return savedMessage;
-    }
-
-    @MessageMapping("/chat.addUser")
-    @SendTo("/topic/public")
-    public ChatResponse addUser(@Payload ChatRequest message,
-                                SimpMessageHeaderAccessor headerAccessor) {
-        headerAccessor.getSessionAttributes().put("username", message.senderId());
-        return new ChatResponse(
+    @MessageMapping("/chat.send.{chatId}")
+    public void handlePrivateMessage(
+            @Payload MensajeDto mensajeDto,
+            @DestinationVariable Long chatId) {
+        MensajeDto mensajeParaGuardar = new MensajeDto(
                 null,
-                message.senderId(),
-                null,
-                "Usuario conectado",
-                EstadoChat.ENTREGADO,
+                chatId,
+                mensajeDto.idEmisor(),
+                mensajeDto.contenido(),
+                EstadoChat.ENVIADO,
                 LocalDateTime.now()
         );
+        MensajeDto savedMessage = mensajeService.crearMensaje(mensajeParaGuardar);
+        messagingTemplate.convertAndSend("/topic/chat." + chatId, savedMessage);
     }
-    @MessageMapping("/chat.markAsRead/{chatId}")
-    public void markAsRead(@DestinationVariable Long chatId) {
-        chatService.updateChatStatus(chatId,EstadoChat.LEIDO);
+
+    @MessageMapping("/chat.addUser.{chatId}")
+    @SendTo("/topic/chat.{chatId}")
+    public MensajeDto addUser(
+            @Payload MensajeDto mensajeDto,
+            @DestinationVariable Long chatId) {
+        return mensajeDto;
+    }
+
+    @MessageMapping("/chat.markAsRead.{chatId}.{usuarioId}")
+    public void markAsRead(
+            @DestinationVariable Long chatId,
+            @DestinationVariable Long usuarioId) {
+        mensajeService.marcarMensajesComoLeidos(chatId, usuarioId);
+        messagingTemplate.convertAndSend("/topic/chat." + chatId + ".status", "LEIDO");
     }
 }

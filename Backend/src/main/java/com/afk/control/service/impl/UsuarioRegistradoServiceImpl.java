@@ -4,10 +4,8 @@ import com.afk.control.dto.UsuarioRegistradoDto;
 import com.afk.control.mapper.UsuarioRegistradoMapper;
 import com.afk.control.service.UsuarioRegistradoService;
 import com.afk.model.entity.*;
-import com.afk.model.entity.enums.EstadoUsuarioRol;
 import com.afk.model.repository.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,7 +20,6 @@ public class UsuarioRegistradoServiceImpl implements UsuarioRegistradoService {
     private final RolRepository rolRepository;
     private final UbicacionRepository ubicacionRepository;
 
-    @Qualifier("usuarioRegistradoMapperImpl")
     private final UsuarioRegistradoMapper mapper;
 
 
@@ -43,14 +40,14 @@ public class UsuarioRegistradoServiceImpl implements UsuarioRegistradoService {
 
     @Override
     public UsuarioRegistradoDto createUsuarioRegistrado(UsuarioRegistradoDto usuarioDto) {
-        if (usuarioDto.rol() != null) {
-            Rol rol = rolRepository.findById(usuarioDto.rol())
+        if (usuarioDto.idRol() != null) {
+            Rol rol = rolRepository.findById(usuarioDto.idRol())
                     .orElseThrow(() -> new RuntimeException("Rol no encontrado"));
         }
-        Ubicacion ubicacion = ubicacionRepository.findById(usuarioDto.ubicacion())
+        Ubicacion ubicacion = ubicacionRepository.findById(usuarioDto.idUbicacion())
                 .orElseThrow(() -> new RuntimeException("Ubicación no encontrada"));
         UsuarioRegistrado usuario = mapper.toEntity(usuarioDto);
-        usuario.setRol(rolRepository.getReferenceById(usuarioDto.rol()));
+        usuario.setRol(rolRepository.getReferenceById(usuarioDto.idRol()));
         usuario.setUbicacion(ubicacion);
         usuario.setFechaRegistro(LocalDateTime.now());
         usuario.setTelefono(usuarioDto.telefono());

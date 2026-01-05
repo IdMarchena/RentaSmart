@@ -3,12 +3,9 @@ package com.afk.control.service.impl;
 import com.afk.control.dto.*;
 import com.afk.control.mapper.*;
 import com.afk.control.service.*;
-import com.afk.model.entity.Calificacion;
-import com.afk.model.entity.Inmueble;
-import com.afk.model.entity.Multimedia;
-import com.afk.model.entity.Publicacion;
+import com.afk.model.entity.*;
 import com.afk.model.entity.enums.EstadoPublicacion;
-import com.afk.model.repository.PublicacionRepository;
+import com.afk.model.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,24 +14,24 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Service
 @RequiredArgsConstructor
 public class PublicacionServiceImpl implements PublicacionService {
+
     private final PublicacionRepository repository;
     private final PublicacionMapper mapper;
 
-    private final InmuebleService iService;
     private final InmuebleMapper iMapper;
+    private final InmuebleRepository iRepository;
 
-    private final CalificacionService cService;
+    private final CalificacionRepository calificacionRepository;
     private final CalificacionMapper cMapper;
 
-    private final UsuarioService uService;
+    private final UsuarioRepository usuarioRepository;
     private final UsuarioMapper uMapper;
 
-    private final MultimediaService mService;
+    private final MultimediaRepository multimediaRepository;
     private final MultimediaMapper mMapper;
 
 
@@ -52,25 +49,24 @@ public class PublicacionServiceImpl implements PublicacionService {
         Publicacion p = repository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("El id no existe en el sistema"));
         p.setTitulo(publicacionDto.titulo());
-        p.setDesripcion(publicacionDto.descripcion());
+        p.setDescripcion(publicacionDto.descripcion());
 
-        InmuebleDto i = iService.findInmuebleById(publicacionDto.idInmueble());
-        Inmueble iE=iMapper.toEntity(i);
+        Inmueble i = iRepository.findById(publicacionDto.idInmueble())
+                .orElseThrow(() -> new NoSuchElementException("El id no existe en el sistema"));
 
-        p.setInmueble(iE);
+
+        p.setInmueble(i);
         p.setFechaPublicacion(publicacionDto.fechaPublicacion());
         p.setEstadoPublicacion(publicacionDto.estadoPublicacion());
 
-        List<CalificacionDto> calificaciones = cService.encontrarCalificacionesPorId(publicacionDto.calificacionesIds());
-        p.setCalificaciones(cMapper.toEntityList(calificaciones));
-
-        UsuarioDto u = uService.findUsuarioById(publicacionDto.idUsuario());
-        p.setUsuario(uMapper.toEntity(u));
-
+        List<Calificacion> calificaciones = calificacionRepository.findAllById(publicacionDto.calificacionesIds());
+        p.setCalificaciones(calificaciones);
+        Usuario u = usuarioRepository.findById(publicacionDto.idUsuario())
+                .orElseThrow(() -> new NoSuchElementException("El id no existe en el sistema"));
+        p.setUsuario(u);
         p.setPrecio(publicacionDto.precio());
-
-        List<MultimediaDto> m = mService.findAllMultimediasByIds(publicacionDto.multimediaIds());
-        p.setMultimedia(mMapper.toEntityList(m));
+        List<Multimedia> m = multimediaRepository.findAllById(publicacionDto.multimediaIds());
+        p.setMultimedia(m);
         return mapper.toDto(repository.save(p));
     }
 
@@ -249,7 +245,7 @@ public class PublicacionServiceImpl implements PublicacionService {
                     return new PublicacionDto(
                             publicacion.getId(),
                             publicacion.getTitulo(),
-                            publicacion.getDesripcion(),
+                            publicacion.getDescripcion(),
                             publicacion.getInmueble().getId(),
                             publicacion.getFechaPublicacion(),
                             publicacion.getEstadoPublicacion(),

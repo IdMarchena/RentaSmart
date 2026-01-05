@@ -156,7 +156,7 @@ public class PublicacionController {
         }
     }
 
-    @GetMapping("/listarPublicacionesPorNombreInmueble")
+    @GetMapping("/listarPublicacionesPorUbicacionInmueble")
     public ResponseEntity<JsonResponse<List<PublicacionDto>>> listarPublicacionesPorUbicacionInmueble(@RequestParam String ubicaciion){
         List<PublicacionDto> publicaciones = publicacionService.listarPublicacionesPorUbicacionInmueble(ubicaciion);
         if(publicaciones.isEmpty()){
