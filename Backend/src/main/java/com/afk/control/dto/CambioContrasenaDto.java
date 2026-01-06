@@ -1,4 +1,4 @@
-package com.afk.backend.control.dto;
+package com.afk.control.dto;
 
 public record CambioContrasenaDto(
         String contraseniaActual,

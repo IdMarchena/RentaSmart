@@ -111,8 +111,6 @@ public class AuthController {
         }
     }
 
-
-
     @GetMapping("/login")
     public ResponseEntity<String> loginGetFallback() {
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)

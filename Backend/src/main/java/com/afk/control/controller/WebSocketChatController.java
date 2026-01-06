@@ -12,6 +12,7 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
 
 @AllArgsConstructor
@@ -25,7 +26,8 @@ public class WebSocketChatController {
     @MessageMapping("/chat.send.{chatId}")
     public void handlePrivateMessage(
             @Payload MensajeDto mensajeDto,
-            @DestinationVariable Long chatId) {
+            @DestinationVariable Long chatId,
+            Principal principal) {
         MensajeDto mensajeParaGuardar = new MensajeDto(
                 null,
                 chatId,
