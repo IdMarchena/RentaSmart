@@ -102,7 +102,6 @@ public class FacturaServiceImpl implements FacturaService {
     public String getFacturaPagoStatus(Long id) {
         Factura factura = facturaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Factura no encontrada"));
-
         return factura.getPago() != null && factura.getPago().getEstado().equals(EstadoPago.COMPLETADO) ? "Pagado" : "Pendiente";
     }
 

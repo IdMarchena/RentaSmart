@@ -36,11 +36,10 @@ public class UserDetailsImpl implements UserDetails, OAuth2User {
                 user.getCorreo(),
                 user.getClave(),
                 authorities,
-                null // Atributos null para autenticación normal
+                null
         );
     }
 
-    // Método para autenticación OAuth2
     public static UserDetailsImpl build(UsuarioRegistrado user,
                                         Collection<? extends GrantedAuthority> authorities,
                                         Map<String, Object> attributes) {
