@@ -1,8 +1,6 @@
 package com.afk.control.mapper;
 
-import com.afk.control.dto.TipoPagoDto;
 import com.afk.control.dto.TipoReporteDto;
-import com.afk.model.entity.TipoPago;
 import com.afk.model.entity.TipoReporte;
 import org.mapstruct.*;
 

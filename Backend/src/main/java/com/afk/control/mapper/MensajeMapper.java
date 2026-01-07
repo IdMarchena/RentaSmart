@@ -11,7 +11,6 @@ import java.util.stream.StreamSupport;
 
 @Mapper(componentModel = "spring",
         uses = {UsuarioMapper.class})
-@Component
 public interface MensajeMapper {
 
     @Named("mensajeFromId")
