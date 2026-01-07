@@ -3,7 +3,6 @@ package com.afk.model.entity;
 import com.afk.model.entity.enums.EstadoPago;
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.LocalDateTime;
 
 @Entity

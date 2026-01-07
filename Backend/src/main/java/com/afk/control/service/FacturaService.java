@@ -1,6 +1,8 @@
 package com.afk.control.service;
 
 import com.afk.control.dto.FacturaDto;
+import com.afk.control.dto.PagoDto;
+
 import java.util.List;
 
 public interface FacturaService {
@@ -13,4 +15,5 @@ public interface FacturaService {
     List<FacturaDto> getFacturasByContrato(Long idContrato);
     FacturaDto generateFacturaForContrato(Long idContrato);
     String getFacturaPagoStatus(Long id);
+    FacturaDto generarFacturaDesdePago(PagoDto pago);
 }

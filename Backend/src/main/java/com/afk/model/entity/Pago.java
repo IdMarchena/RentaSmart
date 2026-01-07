@@ -33,4 +33,17 @@ public class Pago {
     @Enumerated(EnumType.STRING)
     @Column(name = "estado_pago", nullable = false)
     private EstadoPago estado;
+
+    @Column(name = "moneda")
+    private String moneda;
+
+    @Column(name = "stripeId")
+    private String stripePaymentIntentId;
+
+    @Column(name="origen_pago_id")
+    private Long origenId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="id_usuario",nullable = false)
+    private Usuario usuario;
 }
