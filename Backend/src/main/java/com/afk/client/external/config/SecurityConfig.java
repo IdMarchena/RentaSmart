@@ -78,7 +78,8 @@ public class SecurityConfig {
                                 "/api/v1/auth/**",
                                 "/oauth2/**",  // Add this line for OAuth2 callback
                                 "/login/oauth2/**",
-                                "/hello"
+                                "/hello",
+                                "/api/webhooks/stripe"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
