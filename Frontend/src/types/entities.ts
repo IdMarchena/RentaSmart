@@ -1,289 +1,321 @@
-import {
-  Estado,
-  EstadoChat,
-  EstadoCita,
-  EstadoContrato,
-  EstadoInmueble,
-  EstadoNotificacion,
-  EstadoPago,
-  EstadoPublicacion,
-  EstadoReporteFinanciero,
-  EstadoReporteMantenimiento,
-  EstadoSancion,
-  EstadoServicio,
-  EstadoUbicacion,
-  EstadoUsuarioRegistrado,
-  Roles
-} from './enums';
 
-// Tipos base
 export interface Usuario {
-  id: number;
-  nombre: string;
-  correo: string;
-  clave: string;
-}
-
-export interface UsuarioRegistrado extends Usuario {
-  cedula: string;
-  rol?: Rol;
-  ubicacion?: Ubicacion;
-  fechaRegistro: string; 
-  estado: EstadoUsuarioRegistrado;
-  telefono: string;
-}
-
-export interface Rol {
-  id: number;
-  role: Roles;
-}
-
-export interface Ubicacion {
-  id: number;
-  padre?: Ubicacion;
-  nombre: string;
-  latitud?: number;
-  longitud?: number;
-  estado?: EstadoUbicacion;
+    id: string; 
+    nombre: string;
+    correo: string;
+    cedula: string;
+    telefono: string;
+    rol: 'user' | 'admin' | 'arrendador' | 'arrendatario' | 'prestador_servicio';
+    ciudad?: string;
+    departamento?: string;
+    direccion?: string;
+    avatar_url?: string;
+    estado: 'activo' | 'inactivo' | 'bloqueado'; 
+    created_at: string;
+    updated_at: string;
 }
 
 export interface Inmueble {
-  id: number;
-  descripcion?: string;
-  ubicacion?: Ubicacion;
-  areaTotal: number;
-  estrato: number;
-  estadoInmueble: EstadoInmueble;
-  nombre?: string;
-  servicio?: Servicio;
-}
+    id: number;
+    tipo: 'apartamento' | 'casa' | 'habitacion'; 
+    titulo: string;
+    descripcion: string;
 
-export interface Apartamento extends Inmueble {
-  habitaciones?: Habitacion[];
-  descripcion: string;
-}
+    ciudad: string;
+    departamento: string;
+    direccion: string;
+    latitud?: number;
+    longitud?: number;
 
-export interface Casa extends Inmueble {
-  numeroPisos?: number;
-}
+    area_total: number; 
+    num_habitaciones?: number;
+    num_banos?: number;
+    num_pisos?: number; 
+    capacidad_personas?: number;
+    amoblado: boolean; 
 
-export interface Habitacion {
-  id: number;
-  capacidad: number;
-  precio: number;
-  estado: Estado;
-  apartamento?: Apartamento;
+    precio_mensual: number;
+    precio_diario?: number;
+
+    propietario_id: string; 
+
+
+    estado: 'disponible' | 'ocupado' | 'mantenimiento' | 'inactivo';
+
+    created_at: string;
+    updated_at: string;
 }
 
 export interface Publicacion {
-  id: number;
-  titulo: string;
-  desripcion: string; 
-  inmueble?: Inmueble;
-  fechaPublicacion: string; 
-  estadoPublicacion: EstadoPublicacion;
-  calificaciones?: Calificacion[];
+    id: number;
+    inmueble_id: number;
+    usuario_id: string; 
+
+    titulo: string;
+    descripcion: string;
+
+    estado: 'borrador' | 'publicada' | 'pausada' | 'eliminada';
+
+    vistas: number;
+    clicks: number;
+
+    fecha_publicacion: string;
+    fecha_vencimiento?: string;
+
+    created_at: string;
+    updated_at: string;
 }
 
-export interface Alquiler {
-  id: number;
-  fechaInicio: string;
-  fechaFin: string;
-  historialInquilinos?: HistorialInquilino[];
-  factura?: Factura[];
-  servicios?: Servicio[];
-  calificacion?: Calificacion[];
-  citas?: Cita[];
-  favorito?: Favorito[];
-  publicacions?: Publicacion[];
-  inmuebles?: Inmueble[];
-  solicitudServicios?: SolicitudServicio[];
-  chats?: Chat[];
+export interface MultimediaPublicacion {
+    id: number;
+    publicacion_id: number;
+    url: string;
+    tipo: 'imagen' | 'video' | 'tour_360'; 
+    orden: number; 
+    es_portada: boolean;
+    created_at: string;
 }
 
 export interface Contrato {
-  id: number;
-  contenido: string;
-  usuarioArrendatario?: Usuario;
-  usuarioArrendador?: Usuario;
-  inmueble?: Inmueble;
-  financiacion?: Financiacion;
-  fechaInicio: string;
-  fechaFinalizacion?: string;
-  precio: number;
-  deposito?: Deposito;
-  estadoContrato: EstadoContrato;
-}
+    id: number;
+    publicacion_id: number;
+    inmueble_id: number;
 
-export interface Calificacion {
-  id: number;
-  puntaje: number;
-  comentario: string;
-  usuario?: Usuario;
-  publicacion?: Publicacion;
-  servicio?: Servicio;
-  fecha: string;
-}
+    arrendador_id: string; 
+    arrendatario_id: string; 
 
-export interface Chat {
-  id: number;
-  usuarioa?: Usuario;
-  usuariob?: Usuario;
-  mensaje: string;
-  estado_chat: EstadoChat;
-  fechaCreacion: string;
-}
+    fecha_inicio: string;
+    fecha_fin: string;
 
-export interface Cita {
-  id: number;
-  fecha: string;
-  usuario?: Usuario;
-  estado_cita: EstadoCita;
-  servicio?: Servicio;
-  solicitudServicio?: SolicitudServicio;
-}
+    precio_mensual: number;
+    deposito_seguridad: number;
+    dia_pago: number; 
+    terminos_condiciones: string;
+    clausulas_especiales?: string;
 
-export interface Deposito {
-  id: number;
-  montoTotal?: number;
-}
+    estado: 'pendiente' | 'activo' | 'finalizado' | 'cancelado';
 
-export interface Factura {
-  id: number;
-  fechaEmision: string;
-  detalle: string;
-  usuario?: Usuario;
-  reporteMantenimiento?: ReporteMantenimiento;
-  pago?: Pago;
-  contrato?: Contrato;
-  servicio?: Servicio;
-  estado: EstadoPago;
-}
+    firma_arrendador?: string; 
+    firma_arrendatario?: string;
+    fecha_firma?: string;
 
-export interface Favorito {
-  id: number;
-  usuario?: Usuario;
-  publicacion?: Publicacion;
-  fecha_favorito: string;
-}
-
-export interface Financiacion {
-  id: number;
-  numeroCuotas: number;
-  valorCuota: number;
-  montoTotal: number;
-  interes: number;
-}
-
-export interface HistorialInquilino {
-  id: number;
-  fecha_historial_postulante: string;
-  contrato?: Contrato;
-  usuario?: Usuario;
-}
-
-export interface Multimedia {
-  id: number;
-  url: string;
-  tipo?: TipoMultimedia;
-  publicacion?: Publicacion;
-}
-
-export interface Notificacion {
-  id: number;
-  mensaje: string;
-  fecha: string;
-  usuario?: Usuario;
-  servicio?: Servicio;
-  estado: EstadoNotificacion;
+    created_at: string;
+    updated_at: string;
 }
 
 export interface Pago {
-  id: number;
-  fecha: string;
-  monto: number;
-  tipo?: TipoPago;
-  estado: EstadoPago;
-}
+    id: number;
+    contrato_id: number;
+    usuario_id: string; 
 
-export interface ReporteFinanciero {
-  id: number;
-  usuario?: Usuario;
-  inmueble?: Inmueble;
-  contenido: string;
-  fecha: string;
-  tipo?: TipoReporte;
-  estado: EstadoReporteFinanciero;
-}
+    monto: number;
+    concepto: string;
+    tipo: 'arriendo' | 'deposito' | 'servicio' | 'mantenimiento' | 'otro';
+    metodo_pago: 'efectivo' | 'transferencia' | 'tarjeta' | 'paypal' | 'otro';
 
-export interface ReporteMantenimiento {
-  id: number;
-  descripcion: string;
-  fecha: string;
-  servicio?: Servicio;
-  usuarioProfesional?: Usuario;
-  ususarioGenerador?: Usuario;
-  estado: EstadoReporteMantenimiento;
-  severidad: string;
-  tipoReporte?: TipoReporte;
-}
+    fecha_pago: string;
+    fecha_vencimiento?: string;
 
-export interface Requisito {
-  id: number;
-  descripcion: string;
-  tipo?: TipoRequisito;
-}
+    estado: 'pendiente' | 'completado' | 'fallido' | 'reembolsado';
 
-export interface Sancion {
-  id: number;
-  descripcion: string;
-  usuario?: Usuario;
-  publicacion?: Publicacion;
-  fecha: string;
-  estado: EstadoSancion;
+    referencia?: string;
+    comprobante_url?: string;
+
+    created_at: string;
+    updated_at: string;
 }
 
 export interface Servicio {
-  id: number;
-  nombre: string;
-  descripcion: string;
-  usuario?: Usuario;
-  tipo?: TipoServicio;
-  precio: number;
-  estado: EstadoServicio;
+    id: number;
+    prestador_id: string; 
+
+    nombre: string;
+    descripcion: string;
+    categoria: 'limpieza' | 'mantenimiento' | 'plomeria' | 'electricidad' | 'pintura' | 'jardineria' | 'mudanza' | 'otro';
+
+    precio: number;
+    unidad_precio: 'hora' | 'dia' | 'servicio' | 'metro_cuadrado';
+
+    disponibilidad: string; 
+    ciudad: string;
+
+    estado: 'activo' | 'pausado' | 'inactivo';
+
+    calificacion_promedio: number; 
+    total_servicios: number;
+
+    created_at: string;
+    updated_at: string;
 }
 
 export interface SolicitudServicio {
-  id: number;
-  servicio?: Servicio;
-  usuario?: Usuario;
-  inmueble?: Inmueble;
-  fecha?: string;
-  estado: EstadoCita;
+    id: number;
+    servicio_id: number;
+    solicitante_id: string; // UUID
+    inmueble_id?: number;
+
+    descripcion_problema: string;
+    fecha_preferida: string;
+    urgencia: 'baja' | 'media' | 'alta' | 'urgente';
+
+    estado: 'solicitada' | 'confirmada' | 'en_progreso' | 'completada' | 'cancelada';
+
+    precio_acordado?: number;
+    calificacion?: number; // 1-5
+    comentario_calificacion?: string;
+
+    created_at: string;
+    updated_at: string;
 }
 
-export interface TipoMultimedia {
-  id: number;
-  tipo: string;
+
+
+export interface Calificacion {
+    id: number;
+    usuario_id: string; 
+
+    publicacion_id?: number;
+    servicio_id?: number;
+    contrato_id?: number;
+
+    puntaje: number; 
+    comentario: string;
+
+    fecha: string;
+    created_at: string;
 }
 
-export interface TipoPago {
-  id: number;
-  descripcion: string;
+export interface Favorito {
+    id: number;
+    usuario_id: string; 
+    publicacion_id: number;
+    created_at: string;
 }
 
-export interface TipoReporte {
-  id: number;
-  descripcion: string;
-  tipo: string;
+
+
+export interface Chat {
+    id: number;
+    usuario_a_id: string; 
+    usuario_b_id: string; 
+    publicacion_id?: number; 
+
+    ultimo_mensaje: string;
+    ultimo_mensaje_fecha: string;
+
+    
+    no_leidos_a: number; 
+    no_leidos_b: number; 
+
+    estado: 'activo' | 'archivado' | 'bloqueado';
+
+    created_at: string;
+    updated_at: string;
 }
 
-export interface TipoRequisito {
-  id: number;
-  nombre: string;
+export interface Mensaje {
+    id: number;
+    chat_id: number;
+    remitente_id: string; 
+
+    contenido: string;
+    tipo: 'texto' | 'imagen' | 'archivo' | 'ubicacion';
+    archivo_url?: string;
+
+    leido: boolean;
+    fecha_lectura?: string;
+
+    created_at: string;
 }
 
-export interface TipoServicio {
-  id: number;
-  descripcion: string;
+export interface Notificacion {
+    id: number;
+    usuario_id: string; 
+
+    titulo: string;
+    mensaje: string;
+    tipo: 'info' | 'advertencia' | 'error' | 'exito';
+    categoria: 'pago' | 'contrato' | 'servicio' | 'mensaje' | 'sistema' | 'otro';
+
+    
+    accion_url?: string; 
+    referencia_id?: number; 
+
+    leida: boolean;
+    fecha_lectura?: string;
+
+    created_at: string;
+}
+
+
+export interface ReporteMantenimiento {
+    id: number;
+    inmueble_id: number;
+    reportado_por_id: string; 
+    asignado_a_id?: string; 
+
+    titulo: string;
+    descripcion: string;
+    categoria: 'plomeria' | 'electricidad' | 'pintura' | 'limpieza' | 'estructural' | 'otro';
+    prioridad: 'baja' | 'media' | 'alta' | 'urgente';
+
+    estado: 'reportado' | 'en_revision' | 'asignado' | 'en_progreso' | 'completado' | 'cancelado';
+
+    costo_estimado?: number;
+    costo_real?: number;
+
+    fecha_reporte: string;
+    fecha_asignacion?: string;
+    fecha_completado?: string;
+
+    imagenes?: string[]; 
+    notas_tecnico?: string;
+
+    created_at: string;
+    updated_at: string;
+}
+
+export interface ReporteFinanciero {
+    id: number;
+    generado_por_id: string; 
+
+    periodo_inicio: string;
+    periodo_fin: string;
+
+    tipo: 'ingresos' | 'egresos' | 'balance' | 'ocupacion';
+
+    
+    total_ingresos: number;
+    total_egresos: number;
+    balance: number;
+
+    
+    detalles: any; // JSON con breakdown detallado
+
+    created_at: string;
+}
+
+
+// Para respuestas de autenticación
+export interface AuthResponse {
+    token: string;
+    user: Usuario;
+}
+
+// Para filtros en el frontend
+export interface FiltrosPublicacion {
+    ciudad?: string;
+    tipo_inmueble?: 'apartamento' | 'casa' | 'habitacion';
+    precio_min?: number;
+    precio_max?: number;
+    num_habitaciones?: number;
+    amoblado?: boolean;
+}
+
+export interface FiltrosServicio {
+    nombre?: string;
+    categoria?: string;
+    precio_min?: number;
+    precio_max?: number;
+    ciudad?: string;
 }

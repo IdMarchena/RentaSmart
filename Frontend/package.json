@@ -17,6 +17,7 @@
     "@mui/styled-engine-sc": "^7.2.0",
     "@mui/x-charts": "^8.9.0",
     "@radix-ui/react-slot": "^1.2.3",
+    "@supabase/supabase-js": "^2.90.0",
     "@tailwindcss/vite": "^4.1.11",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

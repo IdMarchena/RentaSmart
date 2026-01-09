@@ -3,11 +3,12 @@ import { Link } from "react-router-dom"
 import { CardLogin } from "../components/CardLogin.tsx";
 import { useAuthModal } from "../context/AuthModalContext";
 import { useAuthContext } from "../context/AuthContext";
+import imgUser from "../assets/User.png"
 
 export const Header = () => {
     const { isAuthenticated } = useAuthContext();
     const { openLoginModal, closeModal, isOpenLogin } = useAuthModal();  
- 
+    const { user } = useAuthContext(); 
 
     return (
         <>
@@ -20,7 +21,11 @@ export const Header = () => {
                     <Link to="/"><h1 className="text-[#393939] text-[15px] md:text-[18px] font-semibold">Inicio</h1></Link>
                     <Link to="/publications"><h1 className="text-[#393939] text-[15px] md:text-[18px] font-semibold">Publicaciones</h1></Link>
                     {isAuthenticated ? (
-                        <button className="text-[#EB8369] text-[11px] md:text-[16px] font-semibold border-[1px] border-[#EB8369] rounded-[10px] w-[80px] md:w-[150px] h-[28px] cursor-pointer focus:bg-[#EB8369] focus:text-white">Admin</button>
+                        <div className="flex flex-row items-center gap-2">
+                            <img src={imgUser} alt="User" className="w-[25px] h-[25px] " />
+                            <span className="text-[#393939] text-[15px] md:text-[16px] font-semibold">Hola, {user?.nombre}</span>
+                            <Link to="/admin"><button className="text-[#EB8369] text-[11px] md:text-[15px] font-semibold border-[1px] border-[#EB8369] rounded-[10px] w-[80px] md:w-[150px] h-[25px] cursor-pointer focus:bg-[#EB8369] focus:text-white"> Ir a Admin</button></Link>
+                        </div>
                     ) : (
                         <button className="text-[#EB8369] text-[11px] md:text-[16px] font-semibold border-[1px] border-[#EB8369] rounded-[10px] w-[80px] md:w-[150px] h-[28px] cursor-pointer focus:bg-[#EB8369] focus:text-white" onClick={ ()  => openLoginModal()}>Iniciar Sesión</button>
                     )}

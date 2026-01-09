@@ -11,8 +11,10 @@ import imgDeliver from "../assets/delivery.png"
 import imgRound from "../assets/round.png"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 import { Link } from "react-router-dom"
+import type { Publicacion } from "../types/entities"
 
-export const CardPublications = () => {
+export const CardPublications = ({ publication }: { publication: Publicacion }) => {
+
     return (
         <div className="w-full md:w-[95%] h-[400px] md:h-[240px] rounded-[10px] overflow-hidden p-3 md:p-5 bg-[#FFFEF8] shadow-[10px_10px_10px_rgba(0,0,0,0.2)] flex flex-col md:flex-row">
             <div className="w-full md:w-[40%]">
@@ -29,10 +31,10 @@ export const CardPublications = () => {
                 </Carousel>
             </div>
             <div className="w-full md:w-[60%] mt-3 md:mt-0 md:ml-5">
-                <h2 className="text-[#393939] text-[16px] md:text-[20px] font-bold">Departamento</h2>
+                <h2 className="text-[#393939] text-[16px] md:text-[20px] font-bold">{publication.inmueble?.nombre}</h2>
                 <div className="flex flex-row justify-between mb-3 md:mb-5 flex-nowrap">
-                    <p className="text-[#A6A6A6] text-xs md:text-sm font-bold">Descripcion</p>
-                    <span className="text-[#393939] text-sm md:text-lg font-bold">$2.600.000</span>
+                    <p className="text-[#A6A6A6] text-xs md:text-sm font-bold">{publication?.descripcion}</p>
+                    <span className="text-[#393939] text-sm md:text-lg font-bold">{publication.inmueble?.precio}</span>
                 </div>
                 <div className="flex flex-row flex-nowrap justify-between gap-2">
                     <div className="flex flex-col items-start gap-2">
@@ -46,11 +48,11 @@ export const CardPublications = () => {
                         </div>
                         <div className="flex flex-row items-center">
                             <img src={imgMeda} alt="meda" className="w-4 h-4" />
-                            <span className="text-[#393939] text-xs md:text-sm font-bold">4.2</span>
+                            <span className="text-[#393939] text-xs md:text-sm font-bold">{publication.calificaciones?.length}</span>
                         </div>
                         <div className="flex flex-row items-center">
                             <img src={imgMap} alt="map" className="w-4 h-4" />
-                            <span className="text-[#393939] text-xs md:text-sm font-bold">El Prado, Santa Marta</span>
+                            <span className="text-[#393939] text-xs md:text-sm font-bold">{publication.inmueble?.ubicacion?.nombre}</span>
                         </div>
                     </div>
 
@@ -58,19 +60,19 @@ export const CardPublications = () => {
                     <div className="hidden md:flex flex-col items-start gap-2">
                         <div className="flex flex-row items-center">
                             <img src={imgRuler} alt="ruler" className="w-4 h-4" />
-                            <span className="text-[#393939] text-xs md:text-sm font-bold">100 m2</span>
+                            <span className="text-[#393939] text-xs md:text-sm font-bold">{publication.inmueble?.areaTotal} m2</span>
                         </div>
                         <div className="flex flex-row items-center">
                             <img src={imgRound} alt="round" className="w-4 h-4" />
-                            <span className="text-[#393939] text-xs md:text-sm font-bold">Estrato 4</span>
+                            <span className="text-[#393939] text-xs md:text-sm font-bold">{publication.inmueble?.estrato} Estrato</span>
                         </div>
                         <div className="flex flex-row items-center">
                             <img src={imgDeliver} alt="deliver" className="w-4 h-4" />
-                            <span className="text-[#393939] text-xs md:text-sm font-bold">Amoblado</span>
+                            <span className="text-[#393939] text-xs md:text-sm font-bold">{publication.inmueble?.estadoInmueble}</span>
                         </div>
                         <div className="flex flex-row items-center">
                             <img src={imgUsers} alt="users" className="w-4 h-4" />
-                            <span className="text-[#393939] text-xs md:text-sm font-bold">C.5 personas</span>
+                            <span className="text-[#393939] text-xs md:text-sm font-bold">C.{publication.inmueble?.capacidad} personas</span>
                         </div>
                     </div>
 

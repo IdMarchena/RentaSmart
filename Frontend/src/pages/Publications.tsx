@@ -41,7 +41,7 @@ export const Publications = () => {
 
     useEffect(() => {
         getFilteredPublications(filters);
-    }, [filters, getFilteredPublications]);
+    }, [filters]);
 
     const handleSearch = () => {
         getFilteredPublications(filters);
@@ -180,7 +180,7 @@ export const Publications = () => {
                         ) : (
                             <div className="flex flex-col md:flex-row md:flex-wrap items-center md:items-start justify-center md:justify-start gap-3 md:gap-5 overflow-y-scroll custom-scrollbar w-full h-auto md:h-[99vh] pb-5">
                                 {filtersPublications.map((publication) => (
-                                    <CardPublications key={publication.id} />
+                                    <CardPublications key={publication.id} publication={publication} />
                                 ))}
                             </div>
                         )}

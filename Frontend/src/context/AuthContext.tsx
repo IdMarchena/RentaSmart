@@ -1,16 +1,16 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import Cookies from 'js-cookie';
-import type { UsuarioRegistrado } from '../types/entities';
+import type { Usuario } from '../types/entities';
 
 interface AuthContextType {
-    user: UsuarioRegistrado | null;
+    user: Usuario | null;
     token: string | null;
     isAuthenticated: boolean;
     isLoading: boolean;
-    login: (user: UsuarioRegistrado, token: string) => void;
+    login: (user: Usuario, token: string) => void;
     logout: () => void;
-    updateUser: (user: Partial<UsuarioRegistrado>) => void;
+    updateUser: (user: Partial<Usuario>) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -28,7 +28,7 @@ const COOKIE_OPTIONS = {
 };
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-    const [user, setUser] = useState<UsuarioRegistrado | null>(null);
+    const [user, setUser] = useState<Usuario | null>(null);
     const [token, setToken] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -53,7 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, []);
 
     // Función para login
-    const login = (userData: UsuarioRegistrado, authToken: string) => {
+    const login = (userData: Usuario, authToken: string) => {
         try {
             setUser(userData);
             setToken(authToken);
@@ -73,7 +73,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         Cookies.remove(COOKIES.TOKEN, { path: '/' });
     };
 
-    const updateUser = (updatedData: Partial<UsuarioRegistrado>) => {
+    const updateUser = (updatedData: Partial<Usuario>) => {
         if (!user) return;
 
         const updatedUser = { ...user, ...updatedData };
