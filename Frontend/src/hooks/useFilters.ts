@@ -38,8 +38,6 @@ export const useFilters = () => {
 
       // Filtrar por ubicación (ciudad)
       if (filters.ubicacion) {
-        // Nota: Necesitamos filtrar por el inmueble relacionado
-        // En Supabase esto es un poco diferente
         const { data: inmuebles } = await supabase
           .from('inmuebles')
           .select('id')
@@ -81,11 +79,15 @@ export const useFilters = () => {
       // Filtrar por precio en el cliente (más fácil que en la query)
       let filteredData = data || []
 
-      if (filters.precioMinimo !== undefined || filters.precioMaximo !== undefined) {
+      // Solo aplicar filtro de precio si hay valores válidos (mayor a 0)
+      const hasPrecioMin = filters.precioMinimo && filters.precioMinimo > 0
+      const hasPrecioMax = filters.precioMaximo && filters.precioMaximo > 0
+
+      if (hasPrecioMin || hasPrecioMax) {
         filteredData = filteredData.filter((pub: any) => {
           const precio = pub.inmueble?.precio_mensual || 0
-          const cumpleMin = filters.precioMinimo === undefined || precio >= filters.precioMinimo
-          const cumpleMax = filters.precioMaximo === undefined || precio <= filters.precioMaximo
+          const cumpleMin = !hasPrecioMin || precio >= filters.precioMinimo!
+          const cumpleMax = !hasPrecioMax || precio <= filters.precioMaximo!
           return cumpleMin && cumpleMax
         })
       }

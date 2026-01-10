@@ -178,7 +178,7 @@ export const Publications = () => {
                                 No se encontraron publicaciones con los filtros seleccionados
                             </div>
                         ) : (
-                            <div className="flex flex-col md:flex-row md:flex-wrap items-center md:items-start justify-center md:justify-start gap-3 md:gap-5 overflow-y-scroll custom-scrollbar w-full h-auto md:h-[99vh] pb-5">
+                            <div className="flex flex-col md:flex-col items-center md:items-start justify-center md:justify-start gap-3 md:gap-5 overflow-y-scroll custom-scrollbar w-full h-auto md:h-[99vh] pb-5">
                                 {filtersPublications.map((publication) => (
                                     <CardPublications key={publication.id} publication={publication} />
                                 ))}

@@ -60,10 +60,10 @@ export const PublicationDash = () => {
                                 ))
                             )}
                         </div>
-                        <CardChart2 />
+                        <CardChart2 publications={publications} />
                     </div>
                     <div className="w-full h-[400px] flex flex-row items-center justify-start gap-5 mt-5">
-                        <CardChart3 />
+                        <CardChart3 publications={publications} />
                     </div>
                 </div>
             </div>

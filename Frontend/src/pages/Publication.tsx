@@ -1,8 +1,9 @@
-import { Header } from "../components/Header";
-import { Footer } from "../components/Footer";
-import imgB1 from "../assets/b1.jpg"
-import imgB2 from "../assets/b2.jpg"
-import imgB3 from "../assets/b3.jpg"
+import { Header } from "../components/Header"
+import { Footer } from "../components/Footer"
+import { useParams } from "react-router-dom"
+import { useEffect, useState } from "react"
+import { usePublications } from "../hooks/usePublications"
+import { GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api'
 import imgBed from "../assets/bed.png"
 import imgBath from "../assets/bath.png"
 import imgMeda from "../assets/medal.png"
@@ -13,124 +14,240 @@ import imgDeliver from "../assets/delivery.png"
 import imgRound from "../assets/round.png"
 import imgUserss from "../assets/userss.png"
 import imgWhatsApp from "../assets/whatsapp.png"
-import imgMaps from "../assets/maps.jpg"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 import { CardReview } from "../components/CardReview"
+
+const mapContainerStyle = {
+    width: '100%',
+    height: '520px',
+    borderRadius: '10px'
+}
+
 export const Publication = () => {
+    const { id } = useParams<{ id: string }>()
+    const { getPublicationById, loading } = usePublications()
+    const [publication, setPublication] = useState<any>(null)
+
+    const { isLoaded } = useJsApiLoader({
+        googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ''
+    })
+
+    useEffect(() => {
+        const loadPublication = async () => {
+            if (id) {
+                const result = await getPublicationById(parseInt(id))
+                if (result.success && result.data) {
+                    setPublication(result.data)
+                }
+            }
+        }
+        loadPublication()
+    }, [id])
+
+    if (loading) {
+        return (
+            <>
+                <Header />
+                <div className="w-full h-screen flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-[#EB8369]"></div>
+                </div>
+                <Footer />
+            </>
+        )
+    }
+
+    if (!publication) {
+        return (
+            <>
+                <Header />
+                <div className="w-full h-screen flex flex-col items-center justify-center">
+                    <h1 className="text-2xl font-bold text-gray-600">Publicación no encontrada</h1>
+                    <p className="text-gray-500 mt-2">La publicación que buscas no existe o ha sido eliminada</p>
+                </div>
+                <Footer />
+            </>
+        )
+    }
+
+    const imagenes = publication.multimedia?.sort((a: any, b: any) => a.orden - b.orden) || []
+    const precioFormateado = publication.inmueble?.precio_mensual?.toLocaleString('es-CO', {
+        style: 'currency',
+        currency: 'COP',
+        minimumFractionDigits: 0
+    }) || 'N/A'
+
+    const telefono = publication.usuario?.telefono || '3001234567'
+    const whatsappLink = `https://wa.me/57${telefono}?text=Hola, estoy interesado en ${publication.titulo}`
+
+    const mapCenter = publication.inmueble?.latitud && publication.inmueble?.longitud
+        ? { lat: publication.inmueble.latitud, lng: publication.inmueble.longitud }
+        : null
+
     return (
         <>
             <Header />
-            <div className="w-full h-auto p-5 mt-15 flex flex-row items-start gap-10">
-                <div className="w-[60%] shadow-[10px_10px_10px_rgba(0,0,0,0.2)] rounded-[10px] ">
-                    <Carousel className="w-full">
-                        <CarouselContent>
-                            {[imgB1, imgB2, imgB3].map((img, index) => (
-                                <CarouselItem key={index}>
-                                    <img src={img} alt={`apartment-${index}`} className="w-full h-[400px] object-cover rounded-[10px]" />
-                                </CarouselItem>
-                            ))}
-                        </CarouselContent>
-                        <CarouselPrevious className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white shadow-md rounded-full" />
-                        <CarouselNext className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white shadow-md rounded-full" />
-                    </Carousel>
+            <div className="w-full h-auto p-5 mt-15 flex flex-col lg:flex-row items-start gap-10">
+                <div className="w-full lg:w-[60%] shadow-[10px_10px_10px_rgba(0,0,0,0.2)] rounded-[10px]">
+                    {imagenes.length > 0 ? (
+                        <Carousel className="w-full">
+                            <CarouselContent>
+                                {imagenes.map((img: any) => (
+                                    <CarouselItem key={img.id}>
+                                        <img
+                                            src={img.url}
+                                            alt={publication.titulo}
+                                            className="w-full h-[400px] object-cover rounded-[10px]"
+                                        />
+                                    </CarouselItem>
+                                ))}
+                            </CarouselContent>
+                            <CarouselPrevious className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white shadow-md rounded-full" />
+                            <CarouselNext className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white shadow-md rounded-full" />
+                        </Carousel>
+                    ) : (
+                        <div className="w-full h-[400px] bg-gray-200 rounded-[10px] flex items-center justify-center">
+                            <span className="text-gray-500">Sin imágenes disponibles</span>
+                        </div>
+                    )}
                 </div>
-                <div className="w-[40%] flex flex-col items-start">
-                    <h2 className="text-[#393939] text-[20px] md:text-[40px] font-bold">Departamento</h2>
+                <div className="w-full lg:w-[40%] flex flex-col items-start">
+                    <h2 className="text-[#393939] text-[20px] md:text-[40px] font-bold">{publication.titulo}</h2>
                     <br />
-                    <p className="text-[#A6A6A6] text-sm md:text-sm font-bold">Moderno apartamento de 2 habitaciones ubicado en una zona tranquila y de fácil acceso.
-                        Cuenta con excelente iluminación natural, cocina equipada, balcón con vista panorámica y parqueadero privado.
-                        Ideal para familias o profesionales. Cercano a supermercados, transporte público y zonas comerciales.
-                        ¡Disponible para arriendo inmediato!
+                    <p className="text-[#A6A6A6] text-sm md:text-sm font-normal">
+                        {publication.descripcion}
                     </p>
-                    <div className=" w-[90%] flex flex-row flex-nowrap justify-between mt-10 mb-10">
+                    <div className="w-[90%] flex flex-row flex-wrap justify-between mt-10 mb-10 gap-4">
                         <div className="flex flex-col items-start gap-2">
-                            <div className="flex flex-row items-center">
+                            <div className="flex flex-row items-center gap-1">
                                 <img src={imgBed} alt="bed" className="w-4 h-4" />
-                                <span className="text-[#393939] text-sm md:text-sm font-bold">2 Hab</span>
+                                <span className="text-[#393939] text-sm md:text-sm font-bold">
+                                    {publication.inmueble?.num_habitaciones || 0} Hab
+                                </span>
                             </div>
-                            <div className="flex flex-row items-center">
+                            <div className="flex flex-row items-center gap-1">
                                 <img src={imgBath} alt="bath" className="w-4 h-4" />
-                                <span className="text-[#393939] text-sm md:text-sm font-bold">2 Baños</span>
+                                <span className="text-[#393939] text-sm md:text-sm font-bold">
+                                    {publication.inmueble?.num_banos || 0} Baños
+                                </span>
                             </div>
-                            <div className="flex flex-row items-center">
-                                <img src={imgMeda} alt="meda" className="w-4 h-4" />
-                                <span className="text-[#393939] text-sm md:text-sm font-bold">4.2</span>
+                            <div className="flex flex-row items-center gap-1">
+                                <img src={imgMeda} alt="rating" className="w-4 h-4" />
+                                <span className="text-[#393939] text-sm md:text-sm font-bold">4.5</span>
                             </div>
-                            <div className="flex flex-row items-center">
+                            <div className="flex flex-row items-center gap-1">
                                 <img src={imgMap} alt="map" className="w-4 h-4" />
-                                <span className="text-[#393939] text-sm md:text-sm font-bold">El Prado, Santa Marta</span>
+                                <span className="text-[#393939] text-sm md:text-sm font-bold">
+                                    {publication.inmueble?.ciudad}, {publication.inmueble?.departamento}
+                                </span>
                             </div>
                         </div>
                         <div className="flex flex-col items-start gap-2">
-                            <div className="flex flex-row items-center">
+                            <div className="flex flex-row items-center gap-1">
                                 <img src={imgRuler} alt="ruler" className="w-4 h-4" />
-                                <span className="text-[#393939] text-sm md:text-sm font-bold">100 m2</span>
+                                <span className="text-[#393939] text-sm md:text-sm font-bold">
+                                    {publication.inmueble?.area_total || 0} m²
+                                </span>
                             </div>
-                            <div className="flex flex-row items-center">
-                                <img src={imgRound} alt="round" className="w-4 h-4" />
-                                <span className="text-[#393939] text-sm md:text-sm font-bold">Estrato 4</span>
+                            <div className="flex flex-row items-center gap-1">
+                                <img src={imgRound} alt="type" className="w-4 h-4" />
+                                <span className="text-[#393939] text-sm md:text-sm font-bold">
+                                    {publication.inmueble?.tipo ?
+                                        (publication.inmueble.tipo.charAt(0).toUpperCase() + publication.inmueble.tipo.slice(1))
+                                        : 'N/A'}
+                                </span>
                             </div>
-                            <div className="flex flex-row items-center">
-                                <img src={imgDeliver} alt="deliver" className="w-4 h-4" />
-                                <span className="text-[#393939] text-sm md:text-sm font-bold">Amoblado</span>
+                            <div className="flex flex-row items-center gap-1">
+                                <img src={imgDeliver} alt="furnished" className="w-4 h-4" />
+                                <span className="text-[#393939] text-sm md:text-sm font-bold">
+                                    {publication.inmueble?.amoblado ? 'Amoblado' : 'Sin amoblar'}
+                                </span>
                             </div>
-                            <div className="flex flex-row items-center">
-                                <img src={imgUsers} alt="users" className="w-4 h-4" />
-                                <span className="text-[#393939] text-sm md:text-sm font-bold">C.5 personas</span>
+                            <div className="flex flex-row items-center gap-1">
+                                <img src={imgUsers} alt="capacity" className="w-4 h-4" />
+                                <span className="text-[#393939] text-sm md:text-sm font-bold">
+                                    C.{publication.inmueble?.capacidad_personas || 0} personas
+                                </span>
                             </div>
                         </div>
                     </div>
-                    <span className="text-[#EB8369] text-sm md:text-xl font-bold">$2.600.000</span>    
+                    <span className="text-[#EB8369] text-sm md:text-xl font-bold">{precioFormateado}</span>
                 </div>
             </div>
             <div className="w-full h-auto flex flex-col items-start p-5 mt-10">
                 <h1 className="text-[#393939] text-[20px] md:text-[20px] font-bold">Medios de Contacto</h1>
-                <div className="w-full flex flex-row items-center justify-between mt-10">
-                    <div className="w-[40%] flex flex-col items-start gap-3">
-                        <div className="w-full h-[250px]  rounded-[10px] border-[1px] border-[#C7C7C7] p-10 flex flex-col items-start gap-2 bg-[#FEFEFE]">
+                <div className="w-full flex flex-col lg:flex-row items-start justify-between mt-10 gap-5">
+                    <div className="w-full lg:w-[40%] flex flex-col items-start gap-3">
+                        <div className="w-full h-[250px] rounded-[10px] border-[1px] border-[#C7C7C7] p-10 flex flex-col items-start gap-2 bg-[#FEFEFE]">
                             <div className="flex flex-row items-start gap-2">
-                                <img src={imgWhatsApp} alt="calendar" className="w-15 h-15 bg-[#DCFCE7] rounded-full p-2" />
+                                <img src={imgWhatsApp} alt="whatsapp" className="w-15 h-15 bg-[#DCFCE7] rounded-full p-2" />
                                 <div className="flex flex-col items-start">
                                     <h2 className="text-[#393939] text-sm md:text-lg font-bold">WhatsApp</h2>
                                     <span className="text-[#16A34A] text-[12px] md:text-[12px] font-bold">Respuesta inmediata</span>
-                                    
                                 </div>
                             </div>
-                            <span className="text-[#393939] text-[12px] md:text-[13px] font-normal">Chatea directamente con el arrendador a través de WhatsApp. Obtén respuestas rápidas sobre disponibilidad, precios y visitas.</span>
-                            <button className="w-full h-[40px] bg-[#5CA978] rounded-[10px] text-white text-[12px] md:text-[12px] font-bold mt-5">Agenda tu cita</button>
+                            <span className="text-[#393939] text-[12px] md:text-[13px] font-normal">
+                                Chatea directamente con el arrendador a través de WhatsApp. Obtén respuestas rápidas sobre disponibilidad, precios y visitas.
+                            </span>
+                            <a
+                                href={whatsappLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="w-full h-[40px] bg-[#5CA978] rounded-[10px] text-white text-[12px] md:text-[12px] font-bold mt-5 flex items-center justify-center hover:bg-[#4a8a60] transition"
+                            >
+                                Contactar por WhatsApp
+                            </a>
                         </div>
                         <div className="w-full h-[250px] rounded-[10px] border-[1px] border-[#C7C7C7] p-10 flex flex-col items-start gap-2 bg-[#FEFEFE]">
                             <div className="flex flex-row items-start gap-2">
-                                <img src={imgUserss} alt="users" className="w-15 h-15 bg-[#DBEAFE] rounded-full p-2" />
+                                <img src={imgUserss} alt="chat" className="w-15 h-15 bg-[#DBEAFE] rounded-full p-2" />
                                 <div className="flex flex-col items-start">
                                     <h2 className="text-[#393939] text-sm md:text-lg font-bold">Chat en Vivo</h2>
                                     <span className="text-[#2684FC] text-[12px] md:text-[12px] font-bold">Uso del canal de la plataforma</span>
-                                    
                                 </div>
                             </div>
-                            <span className="text-[#393939] text-[12px] md:text-[13px] font-normal">Chatea directamente con el arrendador a través de la plataforma en tiempo real. Obtén respuestas rápidas sobre disponibilidad, precios y visitas.</span>
-                            <button className="w-full h-[40px] bg-[#68A9FD] rounded-[10px] text-white text-[12px] md:text-[12px] font-bold mt-5">Agenda tu cita</button>
+                            <span className="text-[#393939] text-[12px] md:text-[13px] font-normal">
+                                Chatea directamente con el arrendador a través de la plataforma en tiempo real. Obtén respuestas rápidas sobre disponibilidad, precios y visitas.
+                            </span>
+                            <button className="w-full h-[40px] bg-[#68A9FD] rounded-[10px] text-white text-[12px] md:text-[12px] font-bold mt-5 hover:bg-[#5090e0] transition">
+                                Abrir Chat
+                            </button>
                         </div>
-                        
                     </div>
-                    <div className="w-[50%]">
-                        <img src={imgMaps} alt="maps" className="w-full h-[500px] object-cover rounded-[10px]" />
+                    <div className="w-full lg:w-[55%]">
+                        {isLoaded && mapCenter ? (
+                            <GoogleMap
+                                mapContainerStyle={mapContainerStyle}
+                                center={mapCenter}
+                                zoom={15}
+                            >
+                                <Marker position={mapCenter} />
+                            </GoogleMap>
+                        ) : (
+                            <div className="w-full h-[520px] bg-gray-200 rounded-[10px] flex items-center justify-center">
+                                <span className="text-gray-500">
+                                    {!mapCenter ? 'Ubicación no disponible' : 'Cargando mapa...'}
+                                </span>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
             <div className="w-full h-auto flex flex-col items-start p-5 mt-10">
                 <div className="w-full flex flex-row items-start gap-2 justify-between">
                     <h2 className="text-[#393939] text-sm md:text-lg font-bold">Calificaciones y Reseñas</h2>
-                    <button className="text-white text-[12px] md:text-[12px] font-bold bg-[#EB8369] rounded-[10px] w-[100px] h-[30px]">Escribir</button>
+                    <button className="text-white text-[12px] md:text-[12px] font-bold bg-[#EB8369] rounded-[10px] w-[100px] h-[30px] hover:bg-[#dd7059] transition">
+                        Escribir
+                    </button>
                 </div>
-                <span className="text-[#393939] text-[12px] md:text-[13px] font-semibold mt-2 mb-2">Conoce la experiencia de nuestros inquilinos</span>
+                <span className="text-[#393939] text-[12px] md:text-[13px] font-semibold mt-2 mb-2">
+                    Conoce la experiencia de nuestros inquilinos
+                </span>
                 <div className="w-full h-[250px] rounded-[10px] border-[1px] border-[#C7C7C7] p-10 flex flex-col items-start gap-2 bg-[#F3F4F6] overflow-y-scroll custom-scrollbar">
                     <CardReview />
                     <CardReview />
                     <CardReview />
                     <CardReview />
                 </div>
-
             </div>
             <Footer />
         </>
