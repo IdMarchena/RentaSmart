@@ -80,8 +80,8 @@ export const usePublications = () => {
           titulo: publicationData.publicacion.titulo,
           descripcion: publicationData.publicacion.descripcion,
           estado: publicationData.publicacion.estado || 'borrador',
-          fecha_publicacion: publicationData.publicacion.estado === 'publicada' 
-            ? new Date().toISOString() 
+          fecha_publicacion: publicationData.publicacion.estado === 'publicada'
+            ? new Date().toISOString()
             : null,
           vistas: 0,
           clicks: 0,
@@ -250,6 +250,110 @@ export const usePublications = () => {
     }
   }
 
+
+  const getCalificaciones = async (publicacionId: number) => {
+    try {
+      const { data: calificaciones, error: fetchError } = await supabase
+        .from('calificaciones')
+        .select('*')
+        .eq('publicacion_id', publicacionId)
+        .order('created_at', { ascending: false })
+
+      if (fetchError) {
+        console.error('Error al obtener calificaciones:', fetchError)
+        throw fetchError
+      }
+
+      if (!calificaciones || calificaciones.length === 0) {
+        return { success: true, data: [] }
+      }
+
+      const usuarioIds = [...new Set(calificaciones.map((cal: any) => cal.usuario_id).filter(Boolean))]
+
+      if (usuarioIds.length === 0) {
+        return { success: true, data: calificaciones }
+      }
+
+      const { data: usuarios, error: usuariosError } = await supabase
+        .from('usuarios')
+        .select('id, nombre')
+        .in('id', usuarioIds)
+
+      if (usuariosError) {
+        console.error('Error al obtener usuarios:', usuariosError)
+        return { success: true, data: calificaciones }
+      }
+
+      const calificacionesConUsuario = calificaciones.map((cal: any) => ({
+        ...cal,
+        usuario: usuarios?.find((u: any) => u.id === cal.usuario_id) || null
+      }))
+
+      return { success: true, data: calificacionesConUsuario }
+    } catch (err: any) {
+      console.error('Error en getCalificaciones:', err)
+      return { success: false, error: err.message }
+    }
+  }
+
+  const createCalificacion = async (
+    publicacionId: number,
+    usuarioId: string,
+    puntaje: number,
+    comentario: string
+  ) => {
+    try {
+      const { data: existing } = await supabase
+        .from('calificaciones')
+        .select('id')
+        .eq('publicacion_id', publicacionId)
+        .eq('usuario_id', usuarioId)
+        .single()
+
+      if (existing) {
+        return { success: false, error: 'Ya has calificado esta publicación' }
+      }
+
+      const { data, error: insertError } = await supabase
+        .from('calificaciones')
+        .insert({
+          publicacion_id: publicacionId,
+          usuario_id: usuarioId,
+          puntaje,
+          comentario,
+        })
+        .select()
+        .single()
+
+      if (insertError) throw insertError
+
+      return { success: true, data }
+    } catch (err: any) {
+      return { success: false, error: err.message }
+    }
+  }
+
+  const getPromedioCalificacion = async (publicacionId: number) => {
+    try {
+      const { data, error: fetchError } = await supabase
+        .from('calificaciones')
+        .select('puntaje')
+        .eq('publicacion_id', publicacionId)
+
+      if (fetchError) throw fetchError
+
+      if (!data || data.length === 0) {
+        return { success: true, promedio: 0, total: 0 }
+      }
+
+      const promedio = data.reduce((acc, cal) => acc + cal.puntaje, 0) / data.length
+
+      return { success: true, promedio: Math.round(promedio * 10) / 10, total: data.length }
+    } catch (err: any) {
+      return { success: false, error: err.message, promedio: 0, total: 0 }
+    }
+  }
+
   return {
     publications,
     loading,
@@ -260,5 +364,8 @@ export const usePublications = () => {
     deletePublication,
     getPublicationById,
     getPublicationsByUser,
+    getCalificaciones,
+    createCalificacion,
+    getPromedioCalificacion,
   }
 }
