@@ -1,109 +1,161 @@
-import axios from "axios";
-import { useState } from "react";
-import type { Publicacion, Servicio } from "../types/entities";
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:6000/api/v1';
+import { useState } from 'react'
+import { supabase } from '../lib/supabase'
+import type { Publicacion, Servicio } from '../types/entities'
 
 export interface PublicationFilters {
-    ubicacion?: string;
-    tipoInmueble?: string;
-    precioMinimo?: number;
-    precioMaximo?: number;
+  ubicacion?: string
+  tipoInmueble?: string
+  precioMinimo?: number
+  precioMaximo?: number
 }
 
 export interface ServiceFilters {
-    nombre?: string;
-    precioMinimo?: number;
-    precioMaximo?: number;
+  nombre?: string
+  precioMinimo?: number
+  precioMaximo?: number
 }
 
 export const useFilters = () => {
-    const [filtersPublications, setFiltersPublications] = useState<Publicacion[]>([]);
-    const [filtersServices, setFiltersServices] = useState<Servicio[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+  const [filtersPublications, setFiltersPublications] = useState<Publicacion[]>([])
+  const [filtersServices, setFiltersServices] = useState<Servicio[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-    const getFilteredPublications = async (filters: PublicationFilters) => {
-        setLoading(true);
-        setError(null);
 
-        try {
-            let url = `${API_URL}/publicaciones`;
+  const getFilteredPublications = async (filters: PublicationFilters) => {
+    setLoading(true)
+    setError(null)
 
-            const { ubicacion, tipoInmueble, precioMinimo, precioMaximo } = filters;
-            const hasFilters = ubicacion || tipoInmueble || precioMinimo !== undefined || precioMaximo !== undefined;
+    try {
+      let query = supabase
+        .from('publicaciones')
+        .select(`
+          *,
+          inmueble:inmuebles(*),
+          multimedia:multimedia_publicaciones(*)
+        `)
+        .eq('estado', 'publicada')
 
-            if (!hasFilters) {
-                url += '/listar';
-            } else if (ubicacion && tipoInmueble && precioMinimo !== undefined && precioMaximo !== undefined) {
-                url += `/listarPublicacionesPorUbicacionYTipoInmueble?ubicacion=${ubicacion}&tipoInmueble=${tipoInmueble}&precioMenor=${precioMinimo}&precioMayor=${precioMaximo}`;
-            } else if (precioMinimo !== undefined && precioMaximo !== undefined) {
-                url += `/listarPublicacionesPorPrecioEntreMenorYMayor?precioMenor=${precioMinimo}&precioMayor=${precioMaximo}`;
-            } else if (ubicacion) {
-                url += `/listarPublicacionesPorUbicacion?ubicacion=${ubicacion}`;
-            } else if (tipoInmueble) {
-                url += `/listarPublicacionesPorTipoInmueble?tipoInmueble=${tipoInmueble}`;
-            } else {
-                url += '/listar';
-            }
+      // Filtrar por ubicación (ciudad)
+      if (filters.ubicacion) {
+        // Nota: Necesitamos filtrar por el inmueble relacionado
+        // En Supabase esto es un poco diferente
+        const { data: inmuebles } = await supabase
+          .from('inmuebles')
+          .select('id')
+          .ilike('ciudad', `%${filters.ubicacion}%`)
 
-            const response = await axios.get<Publicacion[]>(url);
-            setFiltersPublications(response.data);
-            return { success: true, data: response.data };
-        } catch (err: any) {
-            const errorMsg = err.response?.data?.message || 'Error al filtrar publicaciones';
-            setError(errorMsg);
-            return { success: false, error: errorMsg };
-        } finally {
-            setLoading(false);
+        if (inmuebles && inmuebles.length > 0) {
+          const inmuebleIds = inmuebles.map((i) => i.id)
+          query = query.in('inmueble_id', inmuebleIds)
+        } else {
+          setFiltersPublications([])
+          setLoading(false)
+          return { success: true, data: [] }
         }
-    };
+      }
 
-    const getFilteredServices = async (filters: ServiceFilters) => {
-        setLoading(true);
-        setError(null);
+      // Filtrar por tipo de inmueble
+      if (filters.tipoInmueble) {
+        const { data: inmuebles } = await supabase
+          .from('inmuebles')
+          .select('id')
+          .eq('tipo', filters.tipoInmueble.toLowerCase())
 
-        try {
-            let url = `${API_URL}/servicios`;
-
-            const { nombre, precioMinimo, precioMaximo } = filters;
-            const hasFilters = nombre || precioMinimo !== undefined || precioMaximo !== undefined;
-
-            if (!hasFilters) {
-                url += '/listar';
-            } else if (nombre && precioMinimo !== undefined && precioMaximo !== undefined) {
-                url += `/listarServiciosPorNombreYPrecioEntreMenorYMayor?nombre=${nombre}&precioMenor=${precioMinimo}&precioMayor=${precioMaximo}`;
-            } else if (nombre) {
-                url += `/listarServiciosPorNombre?nombre=${nombre}`;
-            } else {
-                url += '/listar';
-            }
-
-            const response = await axios.get<Servicio[]>(url);
-            setFiltersServices(response.data);
-            return { success: true, data: response.data };
-        } catch (err: any) {
-            const errorMsg = err.response?.data?.message || 'Error al filtrar servicios';
-            setError(errorMsg);
-            return { success: false, error: errorMsg };
-        } finally {
-            setLoading(false);
+        if (inmuebles && inmuebles.length > 0) {
+          const inmuebleIds = inmuebles.map((i) => i.id)
+          query = query.in('inmueble_id', inmuebleIds)
+        } else {
+          setFiltersPublications([])
+          setLoading(false)
+          return { success: true, data: [] }
         }
-    };
+      }
 
-    const clearFilters = () => {
-        setFiltersPublications([]);
-        setFiltersServices([]);
-        setError(null);
-    };
+      const { data, error: fetchError } = await query.order('created_at', {
+        ascending: false,
+      })
 
-    return {
-        filtersPublications,
-        filtersServices,
-        loading,
-        error,
-        getFilteredPublications,
-        getFilteredServices,
-        clearFilters
-    };
+      if (fetchError) throw fetchError
+
+      // Filtrar por precio en el cliente (más fácil que en la query)
+      let filteredData = data || []
+
+      if (filters.precioMinimo !== undefined || filters.precioMaximo !== undefined) {
+        filteredData = filteredData.filter((pub: any) => {
+          const precio = pub.inmueble?.precio_mensual || 0
+          const cumpleMin = filters.precioMinimo === undefined || precio >= filters.precioMinimo
+          const cumpleMax = filters.precioMaximo === undefined || precio <= filters.precioMaximo
+          return cumpleMin && cumpleMax
+        })
+      }
+
+      setFiltersPublications(filteredData)
+      return { success: true, data: filteredData }
+    } catch (err: any) {
+      const errorMsg = err.message || 'Error al filtrar publicaciones'
+      setError(errorMsg)
+      return { success: false, error: errorMsg }
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const getFilteredServices = async (filters: ServiceFilters) => {
+    setLoading(true)
+    setError(null)
+
+    try {
+      let query = supabase
+        .from('servicios')
+        .select(`
+          *,
+          prestador:usuarios(nombre, telefono)
+        `)
+        .eq('estado', 'activo')
+
+      if (filters.nombre) {
+        query = query.ilike('nombre', `%${filters.nombre}%`)
+      }
+
+      if (filters.precioMinimo !== undefined) {
+        query = query.gte('precio', filters.precioMinimo)
+      }
+
+      if (filters.precioMaximo !== undefined) {
+        query = query.lte('precio', filters.precioMaximo)
+      }
+
+      const { data, error: fetchError } = await query.order('created_at', {
+        ascending: false,
+      })
+
+      if (fetchError) throw fetchError
+
+      setFiltersServices(data || [])
+      return { success: true, data }
+    } catch (err: any) {
+      const errorMsg = err.message || 'Error al filtrar servicios'
+      setError(errorMsg)
+      return { success: false, error: errorMsg }
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const clearFilters = () => {
+    setFiltersPublications([])
+    setFiltersServices([])
+    setError(null)
+  }
+
+  return {
+    filtersPublications,
+    filtersServices,
+    loading,
+    error,
+    getFilteredPublications,
+    getFilteredServices,
+    clearFilters,
+  }
 }
