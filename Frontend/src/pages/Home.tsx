@@ -12,6 +12,8 @@ import { Cards } from "../components/Cards";
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useResponsiveCards } from "../hooks/useResponsiveCards";
+import { usePublications } from "../hooks/usePublications";
+
 
 export const Home = () => {
     const [openLocation, setOpenLocation] = useState(false);
@@ -29,10 +31,8 @@ export const Home = () => {
     }, []);
 
     const cardsToShow = useResponsiveCards();
-
-
-
-
+    const { publicationsHome } = usePublications();
+   
     return (
         <>
             <div className="w-full h-screen">
@@ -127,14 +127,15 @@ export const Home = () => {
                 <div className='relative w-full px-4 sm:px-8 md:px-12 mt-10'>
                     <Carousel>
                         <CarouselContent>
-                            {Array.from({ length: Math.ceil(6 / cardsToShow) }).map((_, groupIndex) => (
+                            {Array.from({ length: Math.ceil(publicationsHome?.length / cardsToShow) }).map((_, groupIndex) => (
                                 <CarouselItem key={groupIndex} className="w-full flex flex-row items-start justify-center gap-5">
                                     {Array.from({ length: cardsToShow }).map((_, cardIndex) => {
                                         const totalIndex = groupIndex * cardsToShow + cardIndex;
-                                        return totalIndex < 6 ? <Cards key={totalIndex} /> : null;
+                                        return totalIndex < publicationsHome?.length ? <Cards key={totalIndex} publication={publicationsHome?.[totalIndex]} /> : null;
                                     })}
                                 </CarouselItem>
                             ))}
+                            
                         </CarouselContent>
                         <CarouselPrevious className='max-[500px]:absolute max-[500px]:left-0 max-[500px]:size-10' />
                         <CarouselNext className='max-[500px]:absolute max-[500px]:right-0 max-[500px]:size-10' />

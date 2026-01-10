@@ -8,59 +8,34 @@ import imgDeliver from "../assets/delivery.png"
 import imgRound from "../assets/round.png"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 import { Link } from "react-router-dom"
-
-interface Multimedia {
-    id: number
-    url: string
-    tipo: string
-    es_portada: boolean
-    orden: number
-}
-
-interface Inmueble {
-    id: number
-    tipo: string
-    titulo: string
-    descripcion: string
-    ciudad: string
-    departamento: string
-    direccion: string
-    latitud: number
-    longitud: number
-    area_total: number
-    num_habitaciones: number
-    num_banos: number
-    num_pisos: number
-    capacidad_personas: number
-    amoblado: boolean
-    precio_mensual: number
-}
-
-interface PublicacionCompleta {
-    id: number
-    titulo: string
-    descripcion: string
-    estado: string
-    created_at: string
-    inmueble?: Inmueble
-    multimedia?: Multimedia[]
-}
+import type { PublicacionCompleta } from "../hooks/usePublications"
+import { usePublications } from "../hooks/usePublications"
+import { useState, useEffect } from "react"
 
 export const CardPublications = ({ publication }: { publication: PublicacionCompleta }) => {
-    // Obtener imágenes ordenadas
+    const [promedio, setPromedio] = useState<number>(0)
+    const { getPromedioCalificacion } = usePublications()
+
+    useEffect(() => {
+        const cargarPromedio = async () => {
+            const resultado = await getPromedioCalificacion(publication.id)
+            if (resultado.success) {
+                setPromedio(resultado.promedio)
+            }
+        }
+        cargarPromedio()
+    }, [publication.id])
+
     const imagenes = publication.multimedia?.sort((a, b) => a.orden - b.orden) || []
 
-    // Formatear precio
     const precioFormateado = publication.inmueble?.precio_mensual?.toLocaleString('es-CO', {
         style: 'currency',
         currency: 'COP',
         minimumFractionDigits: 0
     }) || 'N/A'
 
-    // Ubicación
     const ubicacion = publication.inmueble?.ciudad || 'Ubicación no disponible'
 
-    // Descripción truncada
     const descripcionCorta = publication.descripcion?.length > 120
         ? `${publication.descripcion.substring(0, 120)}...`
         : publication.descripcion
@@ -112,7 +87,9 @@ export const CardPublications = ({ publication }: { publication: PublicacionComp
                         </div>
                         <div className="flex flex-row items-center gap-1">
                             <img src={imgMeda} alt="rating" className="w-4 h-4" />
-                            <span className="text-[#393939] text-xs md:text-sm font-bold">4.5</span>
+                            <span className="text-[#393939] text-xs md:text-sm font-bold">
+                                {promedio > 0 ? promedio.toFixed(1) : 'Sin calificaciones'}
+                            </span>
                         </div>
                         <div className="flex flex-row items-center gap-1">
                             <img src={imgMap} alt="map" className="w-4 h-4" />

@@ -29,7 +29,7 @@ export const Aside = () => {
         <div className="w-auto h-full flex flex-col items-start justify-start border-r border-[#C7C6BA] gap-2 p-5 max-[1082px]:p-2">
             <div className="w-full h-[50px] bg-[#FEFCEC] md:flex flex-row items-center justify-center mb-2 p-2 max-[1082px]:justify-start">
                 <img src={imgLogo} alt="Logo" className="w-[37.33px] h-[50px] object-cover"/>
-                <h1 className="text-[#393939] xl:text-[20px] font-semibold max-[1082px]:hidden">Renta<span className="text-[#EB8369] xl:text-[20px] font-semibold max-[1082px]:hidden">Smart</span></h1>
+                <Link to="/"><h1 className="text-[#393939] xl:text-[20px] font-semibold max-[1082px]:hidden">Renta<span className="text-[#EB8369] xl:text-[20px] font-semibold max-[1082px]:hidden">Smart</span></h1></Link>
             </div>
             <div className="w-full h-full flex flex-col items-start justify-center gap-5 p-2">
                 <div className="md:flex flex-row items-center justify-between w-full max-[1082px]:justify-start max-[1082px]:gap-2">

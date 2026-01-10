@@ -2,18 +2,20 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import type { Publicacion, Inmueble } from '../types/entities'
 
-interface PublicacionCompleta extends Publicacion {
+export interface PublicacionCompleta extends Publicacion {
   inmueble?: Inmueble
   multimedia?: Array<{
     id: number
     url: string
     tipo: string
     es_portada: boolean
+    orden: number
   }>
 }
 
 export const usePublications = () => {
   const [publications, setPublications] = useState<PublicacionCompleta[]>([])
+  const [publicationsHome, setPublicationsHome] = useState<PublicacionCompleta[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -42,8 +44,35 @@ export const usePublications = () => {
     }
   }
 
+  const getPublicationsHome = async () => {
+    setLoading(true)
+    setError(null)
+
+    try {
+      const { data, error: fetchError } = await supabase
+        .from('publicaciones')
+        .select(`
+          *,
+          inmueble:inmuebles(*),
+          multimedia:multimedia_publicaciones(*)
+        `)
+        .eq('estado', 'publicada')
+        .order('created_at', { ascending: false })
+        .limit(6)
+
+      if (fetchError) throw fetchError
+
+      setPublicationsHome(data || [])
+    } catch (err: any) {
+      setError(err.message || 'Error al cargar publicaciones')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   useEffect(() => {
     getPublications()
+    getPublicationsHome()
   }, [])
 
   const createPublication = async (publicationData: {
@@ -354,8 +383,11 @@ export const usePublications = () => {
     }
   }
 
+
+
   return {
     publications,
+    publicationsHome,
     loading,
     error,
     getPublications,
