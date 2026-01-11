@@ -32,7 +32,7 @@ export const Home = () => {
 
     const cardsToShow = useResponsiveCards();
     const { publicationsHome } = usePublications();
-   
+
     return (
         <>
             <div className="w-full h-screen">
@@ -48,16 +48,35 @@ export const Home = () => {
                                 <img src={imgMaps} alt="maps" className="w-[20px] h-[20px] cursor-pointer" onClick={() => setOpenLocation(true)} />
                             </div>
                             {openLocation &&
-                                <div className="absolute top-15 left-0 w-[100%] bg-[#FEFEFE] rounded-[0px_0px_20px_20px] shadow-xl p-4 animate-slideDown">
-                                    <select
+                                <div className="absolute top-15 left-0 w-[100%] bg-[#FEFEFE] rounded-[0px_0px_20px_20px] shadow-xl p-4 animate-slideDown z-50">
+                                    <input
+                                        type="text"
+                                        placeholder="Escribe para buscar ciudad..."
                                         value={filters.city}
                                         onChange={e => setFilters({ ...filters, city: e.target.value })}
-                                        className="w-full h-[20px] rounded-[10px] text-[#393939] text-[12px] font-bold"
-                                    >
-                                        <option value="">Ciudades</option>
-                                        {cityList.map(ci => <option key={ci} value={ci}>{ci}</option>)}
-                                    </select>
-                                    <button onClick={() => setOpenLocation(false)} className="w-full h-[20px] bg-[#EB8369] rounded-[10px] text-white text-[12px] font-bold">Aplicar</button>
+                                        className="w-full h-[30px] rounded-[10px] text-[#393939] text-[12px] font-medium px-3 border border-[#BCBBB0] focus:outline-none focus:border-[#EB8369] mb-2"
+                                        autoFocus
+                                    />
+                                    <div className="max-h-[150px] overflow-y-auto custom-scrollbar mb-2">
+                                        {cityList
+                                            .filter((city: string) =>
+                                                city.toLowerCase().includes(filters.city.toLowerCase())
+                                            )
+                                            .slice(0, 8)
+                                            .map((city: string) => (
+                                                <div
+                                                    key={city}
+                                                    onClick={() => {
+                                                        setFilters({ ...filters, city })
+                                                        setOpenLocation(false)
+                                                    }}
+                                                    className="px-3 py-2 hover:bg-[#FFF5F2] cursor-pointer rounded-md text-[#393939] text-[12px] font-medium transition"
+                                                >
+                                                    {city}
+                                                </div>
+                                            ))}
+                                    </div>
+                                    <button onClick={() => setOpenLocation(false)} className="w-full h-[30px] bg-[#EB8369] rounded-[10px] text-white text-[12px] font-bold hover:bg-[#dd7059] transition">Aplicar</button>
                                 </div>}
                         </div>
                         <div className="w-full md:w-[30%] h-full flex flex-col items-start justify-center md:border-short-r px-4 md:px-0">
@@ -106,12 +125,12 @@ export const Home = () => {
                                     <button onClick={() => setOpenPrice(false)} className="w-full h-[20px] bg-[#EB8369] rounded-[10px] text-white text-[12px] font-bold">Aplicar</button>
                                 </div>}
                         </div>
-                            <button className="w-[55%] md:w-[15%] h-[30px] md:h-full flex flex-col items-center justify-center bg-[#EB8369] md:bg-transparent rounded-[10px] md:rounded-none">
-                                <Link
-                                    to="/publications"
-                                    state={{ filters }}
-                                >   <img src={imgSearch} alt="maps" className="w-[20px] h-[20px] md:w-[30px] md:h-[30px] cursor-pointer" /> </Link>
-                            </button>
+                        <button className="w-[55%] md:w-[15%] h-[30px] md:h-full flex flex-col items-center justify-center bg-[#EB8369] md:bg-transparent rounded-[10px] md:rounded-none">
+                            <Link
+                                to="/publications"
+                                state={{ filters }}
+                            >   <img src={imgSearch} alt="maps" className="w-[20px] h-[20px] md:w-[30px] md:h-[30px] cursor-pointer" /> </Link>
+                        </button>
                     </div>
 
                 </div>
@@ -135,7 +154,7 @@ export const Home = () => {
                                     })}
                                 </CarouselItem>
                             ))}
-                            
+
                         </CarouselContent>
                         <CarouselPrevious className='max-[500px]:absolute max-[500px]:left-0 max-[500px]:size-10' />
                         <CarouselNext className='max-[500px]:absolute max-[500px]:right-0 max-[500px]:size-10' />

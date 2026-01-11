@@ -78,19 +78,43 @@ export const Publications = () => {
 
                                     {openLocation && (
                                         <div className="absolute top-full left-0 w-full bg-[#FEFEFE] rounded-[0px_0px_10px_10px] shadow-xl p-4 z-50 mt-1 animate-slideDown">
-                                            <select
+                                            <input
+                                                type="text"
+                                                placeholder="Escribe para buscar ciudad..."
                                                 value={filters.ubicacion}
                                                 onChange={e => setFilters({ ...filters, ubicacion: e.target.value })}
-                                                className="w-full h-[30px] rounded-[10px] text-[#393939] text-[12px] font-bold mb-2 px-2 border border-[#BCBBB0]"
-                                            >
-                                                <option value="">Selecciona una ciudad</option>
-                                                {cityList.map(city => (
-                                                    <option key={city} value={city}>{city}</option>
-                                                ))}
-                                            </select>
+                                                className="w-full h-[40px] rounded-[10px] text-[#393939] text-[12px] font-medium px-3 border border-[#BCBBB0] focus:outline-none focus:border-[#EB8369] mb-2"
+                                                autoFocus
+                                            />
+                                            <div className="max-h-[200px] overflow-y-auto custom-scrollbar mb-2">
+                                                {cityList
+                                                    .filter((city: string) =>
+                                                        city.toLowerCase().includes((filters.ubicacion || '').toLowerCase())
+                                                    )
+                                                    .slice(0, 10)
+                                                    .map((city: string) => (
+                                                        <div
+                                                            key={city}
+                                                            onClick={() => {
+                                                                setFilters({ ...filters, ubicacion: city })
+                                                                setOpenLocation(false)
+                                                            }}
+                                                            className="px-3 py-2 hover:bg-[#FFF5F2] cursor-pointer rounded-md text-[#393939] text-[12px] font-medium transition border-b last:border-b-0"
+                                                        >
+                                                            {city}
+                                                        </div>
+                                                    ))}
+                                                {cityList.filter((city: string) =>
+                                                    city.toLowerCase().includes((filters.ubicacion || '').toLowerCase())
+                                                ).length === 0 && (
+                                                        <div className="px-3 py-2 text-gray-500 text-[12px] text-center">
+                                                            No se encontraron ciudades
+                                                        </div>
+                                                    )}
+                                            </div>
                                             <button
                                                 onClick={() => setOpenLocation(false)}
-                                                className="w-full h-[30px] bg-[#EB8369] rounded-[10px] text-white text-[12px] font-bold hover:bg-[#dd7059] transition"
+                                                className="w-full h-[35px] bg-[#EB8369] rounded-[10px] text-white text-[12px] font-bold hover:bg-[#dd7059] transition"
                                             >
                                                 Aplicar
                                             </button>
