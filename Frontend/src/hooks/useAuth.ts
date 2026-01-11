@@ -15,7 +15,7 @@ interface SignupData {
 
 export const useAuth = () => {
   const navigate = useNavigate()
-  const { login: contextLogin, logout: contextLogout } = useAuthContext()
+  const { login: contextLogin, logout: contextLogout, user, token } = useAuthContext()
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -125,11 +125,48 @@ export const useAuth = () => {
     navigate('/login')
   }
 
+  const updateProfile = async (profileData: any) => {
+    setLoading(true)
+    setError(null)
+
+    try {
+      const { data: profile, error: profileError } = await supabase
+        .from('usuarios')
+        .update(profileData)
+        .eq('id', user?.id)
+        .select()
+        .single()
+
+      if (profileError) {
+        console.error('Error al actualizar:', profileError)
+        throw profileError
+      }
+
+      if (!profile) {
+        console.error('No se recibió perfil actualizado')
+        throw new Error('Perfil no encontrado')
+      }
+
+      console.log('Perfil actualizado:', profile)
+      contextLogin(profile as Usuario, token as string)
+
+      return { success: true }
+    } catch (err: any) {
+      const errorMessage = err.message || 'Error al actualizar el perfil'
+      console.error('Error en updateProfile:', errorMessage, err)
+      setError(errorMessage)
+      return { success: false, error: errorMessage }
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return {
     loading,
     error,
     login,
     signup,
     logout,
+    updateProfile
   }
 }

@@ -14,6 +14,7 @@ import imgServicioOn from "../../assets/servicios-on.png"
 import imgServicioOff from "../../assets/servicios-off.png"
 import { useLocation } from "react-router-dom"
 import { Link } from "react-router-dom"
+import { useAuthContext } from "../../context/AuthContext"
 
 export const Aside = () => {
     const location = useLocation();
@@ -23,7 +24,10 @@ export const Aside = () => {
     const isMessages = location.pathname === '/admin/messages';
     const isServices = location.pathname === '/admin/services';
     const isUser = location.pathname === '/admin/user';
-
+    const { logout } = useAuthContext()
+    const handleLogout = () => {
+        logout()
+    }
 
     return (
         <div className="w-auto h-full flex flex-col items-start justify-start border-r border-[#C7C6BA] gap-2 p-5 max-[1082px]:p-2">
@@ -67,7 +71,7 @@ export const Aside = () => {
                 </div>
                 <div className="md:flex flex-row items-center justify-between w-full max-[1082px]:justify-start max-[1082px]:gap-2">
                     <img src={imgExitOff} alt="Logo" className="w-[30px] h-[30px] object-cover"/>
-                    <span className="text-[#A9ADB6] xl:text-[14px] text-[12px] font-semibold max-[1082px]:hidden">Salir</span>
+                    <span className="text-[#A9ADB6] xl:text-[14px] text-[12px] font-semibold max-[1082px]:hidden cursor-pointer" onClick={handleLogout}>Cerrar Sesión</span>
                     <div className=""></div>
                 </div>
             </div>
