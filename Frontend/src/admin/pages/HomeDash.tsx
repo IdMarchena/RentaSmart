@@ -7,9 +7,14 @@ import { CardsData3 } from "../components/CardsData-3"
 import { CardsData4 } from "../components/CardsData-4"
 import { CardChart1 } from "../components/CardChart-1"
 import { CardActivity } from "../components/CardActivity"
+import { useActivity } from "../hooks/useActivity"
+import { useAuthContext } from "../../context/AuthContext"
 
 
 export const HomeDash = () => {
+    const { user } = useAuthContext()
+    const { activities, loading } = useActivity(user?.id)
+
     return (
         <div className="w-full h-screen flex flex-row">
             <Aside />
@@ -42,10 +47,21 @@ export const HomeDash = () => {
                             <img src={imgActivity} alt="Activity" className="w-[30px] h-[30px] object-cover mr-2" />
                         </div>
                         <div className="w-full h-[350px] flex flex-col items-center justify-start overflow-y-scroll custom-scrollbar-1 overflow-x-hidden p-2 gap-4">
-                            <CardActivity />
-                            <CardActivity />
-                            <CardActivity />
-                            <CardActivity />
+                            {loading ? (
+                                <div className="w-full h-full flex items-center justify-center">
+                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#EB8369]"></div>
+                                </div>
+                            ) : activities.length === 0 ? (
+                                <div className="w-full h-full flex items-center justify-center">
+                                    <p className="text-gray-500 text-[12px] text-center">
+                                        No hay actividad reciente
+                                    </p>
+                                </div>
+                            ) : (
+                                activities.map(activity => (
+                                    <CardActivity key={activity.id} activity={activity} />
+                                ))
+                            )}
                         </div>
 
                     </div>

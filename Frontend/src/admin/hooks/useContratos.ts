@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import type { Contrato } from '../../types/entities'
 
@@ -48,6 +48,8 @@ export const useContratos = () => {
 
             if (fetchError) throw fetchError
 
+            console.log("Contratos", data)
+
             setContratos(data || [])
         } catch (err: any) {
             setError(err.message || 'Error al cargar contratos')
@@ -55,6 +57,10 @@ export const useContratos = () => {
             setLoading(false)
         }
     }
+
+    useEffect(() => {
+        getContratos()
+    }, [])
 
     // Obtener contratos por usuario (como arrendador o arrendatario)
     const getContratosByUser = async (userId: string) => {
