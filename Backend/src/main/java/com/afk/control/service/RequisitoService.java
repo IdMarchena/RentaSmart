@@ -8,6 +8,6 @@ public interface RequisitoService {
     RequisitoDto createRequisito(RequisitoDto requisito);
     RequisitoDto findRequisitoById(Long id);
     List<RequisitoDto> findAllRequisitos();
-    void deleteRequisitoById(Long id);
-    void updateRequisito(RequisitoDto requisito);
+    boolean deleteRequisitoById(Long id);
+    RequisitoDto updateRequisito(RequisitoDto requisito,Long id);
 }

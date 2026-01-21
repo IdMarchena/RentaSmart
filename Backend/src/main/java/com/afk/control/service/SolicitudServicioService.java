@@ -11,7 +11,7 @@ public interface SolicitudServicioService {
 
     SolicitudDeServicioDto findById(Long id);
 
-    void actualizarSolicitudServicio(Long id,SolicitudDeServicioDto solicitudServicio);
+    SolicitudDeServicioDto actualizarSolicitudServicio(Long id,SolicitudDeServicioDto solicitudServicio);
 
     List<SolicitudDeServicioDto> findAll();
 
@@ -25,5 +25,5 @@ public interface SolicitudServicioService {
 
     List<SolicitudDeServicioDto> findByFechaBetween(LocalDateTime startDate, LocalDateTime endDate);
 
-    void deleteById(Long id);
+    boolean deleteById(Long id);
 }

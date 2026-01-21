@@ -6,6 +6,7 @@ import com.afk.control.mapper.PagoMapper;
 import com.afk.control.service.FacturaService;
 import com.afk.model.entity.*;
 import com.afk.model.entity.enums.EstadoPago;
+import com.afk.model.entity.enums.TipoFactura;
 import com.afk.model.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,7 +25,6 @@ public class FacturaServiceImpl implements FacturaService {
     private final UsuarioRepository usuarioRepository;
     private final ContratoRepository contratoRepository;
     private final FacturaMapper facturaMapper;
-    private final TipoPagoRepository tipoPagoRepository;
     private final PagoMapper pagoMapper;
 
     @Override
@@ -75,10 +75,9 @@ public class FacturaServiceImpl implements FacturaService {
 
     @Override
     public List<FacturaDto> getFacturasByContrato(Long idContrato) {
-        List<Factura> facturas = facturaRepository.findByContratoId(idContrato);
-        return facturas.stream()
-                .map(facturaMapper::toDto)
-                .collect(Collectors.toList());
+        List<Factura> facturas = facturaRepository.findByOrigen(idContrato, TipoFactura.CONTRATO);
+
+        return facturaMapper.toDtoList(facturas);
     }
 
     @Override
@@ -88,10 +87,13 @@ public class FacturaServiceImpl implements FacturaService {
 
         Factura newFactura = Factura.builder()
                 .fechaEmision(LocalDateTime.now())
-                .detalle("Factura generada automáticamente para contrato " + contrato.getId())
+                .detalle("Factura generada automáticamente para contrato #" + contrato.getId())
                 .usuario(contrato.getUsuarioArrendatario())
-                .contrato(contrato)
-                .servicio(contrato.getInmueble().getServicio())
+                .idOrigen(idContrato)
+                .tipoFactura(TipoFactura.CONTRATO)
+
+                .estado(EstadoPago.PENDIENTE)
+                .pago(null)
                 .build();
 
         Factura savedFactura = facturaRepository.save(newFactura);
@@ -107,30 +109,22 @@ public class FacturaServiceImpl implements FacturaService {
 
     @Override
     @Transactional
-    public FacturaDto generarFacturaDesdePago(PagoDto pago) {
-        TipoPago tipoPago = tipoPagoRepository.findById(pago.idTipo())
-                .orElseThrow(() -> new RuntimeException("Tipo de pago no encontrado"));
+    public FacturaDto generarFacturaDesdePago(String tipoFactura, PagoDto pagoDto) {
+        TipoFactura tipoFactur = TipoFactura.valueOf(tipoFactura.toUpperCase());
 
-        Usuario usuario = usuarioRepository.findById(pago.idUsuario())
+        Usuario usuario = usuarioRepository.findById(pagoDto.idUsuario())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        String detalleEspecifico = "Pago por concepto de " + tipoPago.getDescripcion();
-        Contrato contratoRef = null;
+        String detalleEspecifico = "Pago por concepto de " + tipoFactur + " #" + pagoDto.origenId();
 
-        if ("CONTRATO".equalsIgnoreCase(tipoPago.getDescripcion())) {
-            contratoRef = contratoRepository.findById(pago.origenId()).orElse(null);
-            if (contratoRef != null) {
-                detalleEspecifico += " #" + contratoRef.getId() + " - Inmueble: " + contratoRef.getInmueble().getNombre();
-            }
-        }
         Factura factura = Factura.builder()
                 .fechaEmision(LocalDateTime.now())
                 .detalle(detalleEspecifico)
                 .usuario(usuario)
-                .pago(pagoMapper.toEntity(pago))
-                .contrato(contratoRef)
-                .estado(pago.estado())
-                .servicio(null)
+                .pago(pagoMapper.toEntity(pagoDto))
+                .tipoFactura(tipoFactur)
+                .idOrigen(pagoDto.origenId())
+                .estado(pagoDto.estado())
                 .build();
 
         return facturaMapper.toDto(facturaRepository.save(factura));

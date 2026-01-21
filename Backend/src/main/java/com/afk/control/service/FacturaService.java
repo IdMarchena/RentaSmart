@@ -15,5 +15,5 @@ public interface FacturaService {
     List<FacturaDto> getFacturasByContrato(Long idContrato);
     FacturaDto generateFacturaForContrato(Long idContrato);
     String getFacturaPagoStatus(Long id);
-    FacturaDto generarFacturaDesdePago(PagoDto pago);
+    FacturaDto generarFacturaDesdePago(String tipoFactura,PagoDto pago);
 }

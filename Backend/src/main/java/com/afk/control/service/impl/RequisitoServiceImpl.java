@@ -5,7 +5,6 @@ import com.afk.control.mapper.RequisitoMapper;
 import com.afk.control.service.RequisitoService;
 import com.afk.model.entity.Requisito;
 import com.afk.model.repository.RequisitoRepository;
-import com.afk.model.repository.TipoRequisitoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -54,27 +53,32 @@ public class RequisitoServiceImpl implements RequisitoService {
     }
     @Override
     @Transactional(readOnly = true)
-    public void deleteRequisitoById(Long id){
+    public boolean deleteRequisitoById(Long id){
         if(id == null || id <= 0){
             throw new NoSuchElementException("Requisito no encontrado");
         }
-        requisitoRepository.deleteById(id);
+        try{
+            requisitoRepository.deleteById(id);
+            return true;
+        }catch(Exception e){
+            return false;
+        }
     }
 
     @Override
     @Transactional(readOnly = true)
-    public void updateRequisito(RequisitoDto requisito) {
+    public RequisitoDto updateRequisito(RequisitoDto requisito,Long id) {
         if(requisito == null){
             throw new IllegalArgumentException("El requisito no puede ser nulo");
         }
 
         Requisito requisitoEntity = mapper.toEntity(requisito);
 
-        Requisito rExistente = requisitoRepository.findById(requisitoEntity.getId())
+        Requisito rExistente = requisitoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("requisito no encontrado"));
 
         rExistente.setDescripcion(requisitoEntity.getDescripcion());
-        rExistente.setTipo(requisitoEntity.getTipo());
-        requisitoRepository.save(rExistente);
+        return mapper.toDto(requisitoRepository.save(rExistente));
+
     }
 }

@@ -1,15 +1,17 @@
 package com.afk.control.service.impl;
-import com.afk.control.dto.HabitacionDto;
 import com.afk.control.dto.InmuebleDto;
-import com.afk.control.mapper.HabitacionMapper;
 import com.afk.control.mapper.InmuebleMapper;
-import com.afk.control.service.HabitacionService;
 import com.afk.control.service.InmuebleService;
-import com.afk.model.entity.Habitacion;
 import com.afk.model.entity.Inmueble;
+import com.afk.model.entity.Ubicacion;
+import com.afk.model.entity.Usuario;
 import com.afk.model.entity.enums.EstadoInmueble;
+import com.afk.model.entity.enums.TipoInmueble;
 import com.afk.model.repository.InmuebleRepository;
+import com.afk.model.repository.UbicacionRepository;
+import com.afk.model.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,26 +19,59 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
-@RequiredArgsConstructor
+@Slf4j
 @Service
+@RequiredArgsConstructor // Genera el constructor para todos los campos "private final"
 public class InmuebleServiceImpl implements InmuebleService {
 
-    @Autowired
-    private InmuebleRepository inmuebleRepository;
-
-    @Autowired
-    private InmuebleMapper inmuebleMapper;
-
-    private final HabitacionService habitacionService;
-    private final HabitacionMapper habitacionMapper;
+    // 1. TODOS deben ser "private final" para que Lombok los inyecte correctamente
+    private final InmuebleRepository inmuebleRepository;
+    private final InmuebleMapper inmuebleMapper;
+    private final UbicacionRepository ubicacionRepository;
+    private final UsuarioRepository usuarioRepository;
 
     @Override
+    @Transactional // 2. IMPORTANTE: Necesitas una transacción para manejar relaciones
     public InmuebleDto createInmueble(InmuebleDto inmuebleDto) {
-        if(inmuebleDto==null) throw new IllegalArgumentException("inmuebleDto cannot be null");
-        Inmueble i= inmuebleRepository.findByNombre(inmuebleDto.nombre()).getFirst();
-        if(i!=null) throw new IllegalArgumentException("inmueble already exist");
+        if (inmuebleDto == null) throw new IllegalArgumentException("inmuebleDto cannot be null");
+
+        // 3. Validar duplicados (ahora verificamos antes de guardar)
+        List<Inmueble> existentes = inmuebleRepository.findByNombre(inmuebleDto.nombre());
+        if (!existentes.isEmpty()) {
+            throw new IllegalArgumentException("El inmueble con nombre '" + inmuebleDto.nombre() + "' ya existe");
+        }
+
+        log.info("🏠 Intentando crear inmueble con nombre: {}", inmuebleDto.nombre());
+
+        // 4. Convertir DTO a Entidad
         Inmueble inmueble = inmuebleMapper.toEntity(inmuebleDto);
+
+        // 5. Vincular Ubicación
+        if (inmuebleDto.idUbicacion() != null) {
+            log.info("📍 Buscando ubicación ID: {}", inmuebleDto.idUbicacion());
+            Ubicacion ubicacion = ubicacionRepository.findById(inmuebleDto.idUbicacion())
+                    .orElseThrow(() -> new NoSuchElementException("La ubicación con ID " + inmuebleDto.idUbicacion() + " no existe"));
+            inmueble.setUbicacion(ubicacion);
+        } else {
+            throw new IllegalArgumentException("El ID de ubicación es obligatorio");
+        }
+
+        // 6. Vincular Arrendatario (Usuario)
+        if (inmuebleDto.idArrendatario() != null) {
+            log.info("👤 Buscando usuario ID: {}", inmuebleDto.idArrendatario());
+            Usuario arrendatario = usuarioRepository.findById(inmuebleDto.idArrendatario())
+                    .orElseThrow(() -> new NoSuchElementException("El usuario con ID " + inmuebleDto.idArrendatario() + " no existe"));
+            inmueble.setUsuario(arrendatario);
+        }
+        // Ajustar número de pisos si es nulo o cero
+        if (inmueble.getNumeroPisos() == null || inmueble.getNumeroPisos() == 0) {
+            inmueble.setNumeroPisos(1);
+        }
+
+        // 7. Guardar
         Inmueble savedInmueble = inmuebleRepository.save(inmueble);
+        log.info("✅ Inmueble guardado exitosamente con ID: {}", savedInmueble.getId());
+
         return inmuebleMapper.toDto(savedInmueble);
     }
 
@@ -112,10 +147,16 @@ public class InmuebleServiceImpl implements InmuebleService {
     @Override
     @Transactional(readOnly = true)
     public List<InmuebleDto> findInmueblesByUbicacionAndEstado(Long ubicacionId, String estado) {
+        EstadoInmueble e;
+        try{
+            e=EstadoInmueble.valueOf(estado.toUpperCase());
+        } catch (IllegalArgumentException ex) {
+            throw new RuntimeException("Estado inmueble con estado " + estado + " no encontrado");
+        }
         List<Inmueble> inmuebles = inmuebleRepository.findAll();
         if(inmuebles.isEmpty()) throw new IllegalArgumentException("inmuebles cannot be empty");
         List<Inmueble> listaFiltada = inmuebles.stream()
-                .filter(inmueble -> inmueble.getEstadoInmueble().equals(estado) && inmueble.getUbicacion().getId().equals(ubicacionId))
+                .filter(inmueble -> inmueble.getEstadoInmueble().equals(e) && inmueble.getUbicacion().getId().equals(ubicacionId))
                 .collect(Collectors.toList());
         return inmuebleMapper.toDtoList(listaFiltada);
     }
@@ -145,81 +186,83 @@ public class InmuebleServiceImpl implements InmuebleService {
         }
         Inmueble i = inmuebleRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Inmueble con ID " + id + " no encontrado"));
+        EstadoInmueble es;
         if (estado != null) {
-            switch (estado) {
-                case "LIBRE_AMOBLADO":
-                    i.setEstadoInmueble(EstadoInmueble.LIBRE_AMOBLADO);
-                    break;
-                case "LIBRE_NO_AMOBLADO":
-                    i.setEstadoInmueble(EstadoInmueble.LIBRE_NO_AMOBLADO);
-                    break;
-                case "OCUPADO":
-                    i.setEstadoInmueble(EstadoInmueble.OCUPADO);
-                    break;
-                case "EN_RESERVA":
-                    i.setEstadoInmueble(EstadoInmueble.EN_RESERVA);
-                    break;
-                default:
-                    throw new IllegalArgumentException("estado invalido");
+            try{
+                es = EstadoInmueble.valueOf(estado.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                throw new RuntimeException("Estado inmueble con estado " + estado + " no encontrado");
             }
+            i.setEstadoInmueble(es);
         }
-    }
-    @Override
-    @Transactional(readOnly = true)
-    public List<HabitacionDto> findHabitacionesByInmuebleId(Long id){
-        Inmueble a = inmuebleRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Apartamento no encontrado"));
-        List<Habitacion> habitaciones = a.getHabitaciones();
-        if(habitaciones.isEmpty()){
-            throw new RuntimeException("Habitacion no encontrado");
-        }
-        return habitacionMapper.toDtoList(habitaciones);
     }
 
     @Override
-    public void eliminarHabitacionDeUnInmueblePorHabitacionId(Long idInmueble, Long idHabitacion) {
-        Inmueble inmueble = inmuebleRepository.findById(idInmueble)
-                .orElseThrow(() -> new RuntimeException("Apartamento no encontrado"));
-        List<Habitacion> habitaciones = inmueble.getHabitaciones();
-        Habitacion habitacionAEliminar = habitaciones.stream()
-                .filter(h -> h.getId().equals(idHabitacion))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Habitación no encontrada"));
-        habitaciones.remove(habitacionAEliminar);
-        habitacionService.deleteHabitacion(idHabitacion);
-        inmueble.setHabitaciones(habitaciones);
-        inmuebleRepository.save(inmueble);
-    }
-
-
-    @Override
-    @Transactional(readOnly = true)
-    public void actualizarHabitacionDeUnInmueblePorHabitacionId(HabitacionDto habitacion, Long idHabitacion,Long idInmueble, String estado){
-        if(habitacion == null){
-            throw new IllegalArgumentException("el apartamento a actualizar no puede ser nulo");
-        }
-        Habitacion h = habitacionMapper.toEntity(habitacion);
-
+    public void eliminarHabitacionDeUnInmueblePorHabitacionId(Long idInmueble, Integer cantidadHabitaciones) {
         Inmueble i = inmuebleRepository.findById(idInmueble)
-                .orElseThrow(() -> new RuntimeException("Apartamento no encontrado"));
-
-        List<Habitacion> habitaciones = i.getHabitaciones();
-
-        Habitacion hModificar = habitaciones.stream()
-                .filter(ha -> ha.getId().equals(idHabitacion))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Habitacion no encontrada"));
-        habitacionService.actualizarEstadoHabitacion(hModificar.getId(), estado);
+                .orElseThrow(() -> new NoSuchElementException("no se encontro"));
+        Integer numeroHabitaciones = i.getNumeroHabitaciones();
+        if(numeroHabitaciones<cantidadHabitaciones) throw new IllegalArgumentException("numeroHabitaciones invalido");
+        i.setNumeroHabitaciones(numeroHabitaciones-cantidadHabitaciones);
+        inmuebleRepository.save(i);
     }
+
+
 
     @Override
     @Transactional(readOnly = true)
     public Integer contarHabitacionesPorInmuebleId(Long id){
         Inmueble a = inmuebleRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Apartamento no encontrado"));
-        if(a.getHabitaciones().isEmpty()){
+        if(a.getNumeroHabitaciones()==null){
             throw new RuntimeException("apartamento con 0 habitaciones");
         }
-        return a.getHabitaciones().size();
+        return a.getNumeroHabitaciones();
+    }
+    @Override
+    @Transactional(readOnly = true)
+    public List<InmuebleDto> findInmuebleByTipo(String tipo){
+        TipoInmueble t;
+        try{
+            t = TipoInmueble.valueOf(tipo.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("el tipo de inmueble no es valido");
+        }
+        List<Inmueble> lista = inmuebleRepository.findAll();
+        if(lista.isEmpty()) throw new IllegalArgumentException("inmuebles cannot be empty");
+        List<Inmueble> listFiltrada=lista.stream()
+                .filter(i -> i.getTipo().equals(t))
+                .collect(Collectors.toList());
+        return inmuebleMapper.toDtoList(listFiltrada);
+    }
+    @Override
+    @Transactional(readOnly = true)
+    public List<InmuebleDto> findInmuebleByNumeroPisos(Integer numeroPisos){
+        List<Inmueble> lista = inmuebleRepository.findAll();
+        if(lista.isEmpty()) throw new IllegalArgumentException("inmuebles cannot be empty");
+        List<Inmueble> listFiltrada=lista.stream()
+                .filter(i -> i.getNumeroPisos().equals(numeroPisos))
+                .collect(Collectors.toList());
+        return inmuebleMapper.toDtoList(listFiltrada);
+    }
+    @Override
+    @Transactional(readOnly = true)
+    public List<InmuebleDto> findInmuebleByNumeroBanos(Integer numeroBanos){
+        List<Inmueble> lista = inmuebleRepository.findAll();
+        if(lista.isEmpty()) throw new IllegalArgumentException("inmuebles cannot be empty");
+        List<Inmueble> listFiltrada=lista.stream()
+                .filter(i -> i.getNumeroPisos().equals(numeroBanos))
+                .collect(Collectors.toList());
+        return inmuebleMapper.toDtoList(listFiltrada);
+    }
+    @Override
+    @Transactional(readOnly = true)
+    public List<InmuebleDto> findInmuebleByCapacidadPersonas(Integer capacidadPersonas){
+        List<Inmueble> lista = inmuebleRepository.findAll();
+        if(lista.isEmpty()) throw new IllegalArgumentException("inmuebles cannot be empty");
+        List<Inmueble> listFiltrada=lista.stream()
+                .filter(i -> i.getNumeroPisos().equals(capacidadPersonas))
+                .collect(Collectors.toList());
+        return inmuebleMapper.toDtoList(listFiltrada);
     }
 }
