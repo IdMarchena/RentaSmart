@@ -5,10 +5,9 @@ import com.afk.control.mapper.PagoMapper;
 import com.afk.control.mapper.UsuarioMapper;
 import com.afk.control.service.FacturaService;
 import com.afk.model.entity.Pago;
-import com.afk.model.entity.TipoPago;
 import com.afk.model.entity.enums.EstadoPago;
+import com.afk.model.entity.enums.TipoPago;
 import com.afk.model.repository.PagoRepository;
-import com.afk.model.repository.TipoPagoRepository;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
 import com.stripe.model.PaymentIntent;
@@ -31,7 +30,7 @@ public class StripeService {
     private String secretKey;
 
     private final PagoRepository pagoRepository;
-    private final TipoPagoRepository tipoPagoRepository;
+
 
     private final FacturaService facturaService;
 
@@ -56,7 +55,7 @@ public class StripeService {
 
         PaymentIntent intent = PaymentIntent.create(params);
 
-        TipoPago tipo = tipoPagoRepository.findByDescripcion(nombreTipo);
+        TipoPago tipo = TipoPago.valueOf(nombreTipo.toUpperCase());
 
         Pago nuevoPago = Pago.builder()
                 .fecha(LocalDateTime.now())
@@ -74,18 +73,16 @@ public class StripeService {
         return intent;
     }
     @Transactional
-    public void confirmarPagoExitoso(String stripeIntentId) {
+    public void confirmarPagoExitoso(String tipo,String stripeIntentId) {
         Pago pago = pagoRepository.findByStripePaymentIntentId(stripeIntentId);
 
         if (pago != null) {
             pago.setEstado(EstadoPago.COMPLETADO);
             pagoRepository.save(pago);
 
-            // Solo generamos factura si el pago existe
-            facturaService.generarFacturaDesdePago(pagoMapper.toDto(pago));
+            facturaService.generarFacturaDesdePago(tipo,pagoMapper.toDto(pago));
             log.info("Pago {} procesado y factura generada.", stripeIntentId);
         } else {
-            // Esto es lo que verás ahora con el 'trigger'
             log.warn("Se recibió confirmación de Stripe para un pago que no existe en nuestra DB: {}", stripeIntentId);
         }
     }
