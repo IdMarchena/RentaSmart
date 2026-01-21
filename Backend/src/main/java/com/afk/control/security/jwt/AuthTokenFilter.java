@@ -23,7 +23,6 @@ import java.io.IOException;
 public class AuthTokenFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
-    private final JwtProtocolConfig protocolConfig;
     private final UserDetailsService userDetailsService;
 
     @Override
@@ -34,105 +33,68 @@ public class AuthTokenFilter extends OncePerRequestFilter {
         String requestPath = request.getRequestURI();
         String method = request.getMethod();
 
-        log.debug("Procesando request: {} {}", method, requestPath);
-
         try {
-            // 1. Permitir peticiones OPTIONS sin autenticación (CORS preflight)
             if ("OPTIONS".equals(method)) {
-                log.debug("Permitiendo petición OPTIONS: {}", requestPath);
                 filterChain.doFilter(request, response);
                 return;
             }
 
-            // 2. Verificar si es endpoint público
-            if (protocolConfig.isPublicEndpoint(requestPath)) {
-                log.debug("Acceso a endpoint público: {}", requestPath);
-                filterChain.doFilter(request, response);
-                return;
-            }
-
-            // 3. Procesar autenticación JWT para endpoints protegidos
+            // IMPORTANTE: Siempre procesamos la autenticación.
+            // No hacemos 'return' aunque sea público para que el SecurityContext tenga al usuario si el token existe.
             processJwtAuthentication(request);
 
         } catch (Exception e) {
             log.error("Error en JWT filter para {}: {}", requestPath, e.getMessage());
-            // No bloqueamos el request, dejamos que Spring Security maneje la falta de auth
         }
 
         filterChain.doFilter(request, response);
     }
 
-    /**
-     * Procesa la autenticación JWT siguiendo el protocolo estricto
-     */
     private void processJwtAuthentication(HttpServletRequest request) {
         String requestUri = request.getRequestURI();
-        if (requestUri.startsWith("/oauth2/") ||
-                requestUri.startsWith("/login/oauth2/") ||
-                requestUri.equals("/api/v1/auth/login") ||
-                requestUri.equals("/api/v1/auth/signup")) {
-            log.debug("Skipping JWT processing for OAuth2 or auth endpoint: {}", requestUri);
+
+        // Excluir rutas de login/oauth para evitar bucles de validación en el apretón de manos
+        if (requestUri.startsWith("/oauth2/") || requestUri.startsWith("/login/oauth2/")) {
             return;
         }
-        // Extraer token usando protocolo estricto
+
         String authHeader = request.getHeader(JwtProtocolConfig.HEADER_AUTHORIZATION);
         String cookieToken = extractTokenFromCookie(request);
+
+        // El util debe ser capaz de decidir cuál tomar
         String token = jwtUtil.extractTokenFromRequest(authHeader, cookieToken);
 
-        if (token == null) {
-            log.debug("No se encontró token JWT en el request");
-            return;
-        }
+        if (token != null) {
+            JwtValidationResult validationResult = jwtUtil.validateAndParseToken(token);
 
-        // Validar token usando protocolo optimizado
-        JwtValidationResult validationResult = jwtUtil.validateAndParseToken(token);
-
-        if (!validationResult.isValid()) {
-            log.debug("Token JWT inválido: {}", validationResult.getErrorMessage());
-            return;
-        }
-
-        String username = validationResult.getUsername();
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            authenticateUser(request, username);
+            if (validationResult.isValid()) {
+                String username = validationResult.getUsername();
+                if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                    authenticateUser(request, username);
+                }
+            } else {
+                log.debug("Token detectado pero inválido: {}", validationResult.getErrorMessage());
+            }
         }
     }
 
-    /**
-     * Autentica al usuario en el contexto de seguridad
-     */
     private void authenticateUser(HttpServletRequest request, String username) {
         try {
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-
-            UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(
-                            userDetails,
-                            null,
-                            userDetails.getAuthorities()
-                    );
-
+            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                    userDetails, null, userDetails.getAuthorities());
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authentication);
-
-            log.debug("Usuario autenticado exitosamente: {}", username);
-
+            log.debug("Usuario autenticado vía JWT: {}", username);
         } catch (Exception e) {
-            log.error("Error al autenticar usuario {}: {}", username, e.getMessage());
+            log.error("Fallo al cargar UserDetails para: {}", username);
         }
     }
 
-    /**
-     * Extrae token JWT de las cookies
-     */
     private String extractTokenFromCookie(HttpServletRequest request) {
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
-                if (JwtProtocolConfig.COOKIE_TOKEN_NAME.equals(cookie.getName())) {
-                    return cookie.getValue();
-                }
-                // Soporte para cookie legacy "token"
-                if ("token".equals(cookie.getName())) {
+                if (JwtProtocolConfig.COOKIE_TOKEN_NAME.equals(cookie.getName()) || "token".equals(cookie.getName())) {
                     return cookie.getValue();
                 }
             }
@@ -140,4 +102,3 @@ public class AuthTokenFilter extends OncePerRequestFilter {
         return null;
     }
 }
-

@@ -1,7 +1,8 @@
 package com.afk.control.security.service;
 
-import com.afk.model.entity.Rol;
+
 import com.afk.model.entity.UsuarioRegistrado;
+import com.afk.model.entity.enums.Roles;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -26,9 +27,9 @@ public class UserDetailsImpl implements UserDetails, OAuth2User {
     private final Collection<? extends GrantedAuthority> authorities;
     private final Map<String, Object> attributes;
     public static UserDetailsImpl build(UsuarioRegistrado user,
-                                        List<Rol> roles) {
+                                        List<Roles> roles) {
         List<SimpleGrantedAuthority> authorities = roles.stream()
-                .map(role -> new SimpleGrantedAuthority(role.getRole().name()))
+                .map(role -> new SimpleGrantedAuthority(role.name().toUpperCase()))
                 .collect(Collectors.toList());
 
         return new UserDetailsImpl(
