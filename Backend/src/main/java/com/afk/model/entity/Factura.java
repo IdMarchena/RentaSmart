@@ -1,6 +1,7 @@
 package com.afk.model.entity;
 
 import com.afk.model.entity.enums.EstadoPago;
+import com.afk.model.entity.enums.TipoFactura;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -33,15 +34,15 @@ public class Factura {
     @JoinColumn(name = "id_pago", nullable = false)
     private Pago pago;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_contrato", nullable = false)
-    private Contrato contrato;
+    @Enumerated(EnumType.STRING)
+    @Column(name="tipo_factura",nullable = false)
+    private TipoFactura tipoFactura;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="id_servicio",nullable = false)
-    private Servicio servicio;
+    @Column(name="origen_factura",nullable = false)
+    private Long idOrigen;
 
     @Enumerated(EnumType.STRING)
+    @Column(name="estado_factura",nullable = false)
     private EstadoPago estado;
 
 }

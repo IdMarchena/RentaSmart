@@ -1,6 +1,7 @@
 package com.afk.model.entity;
 
 import com.afk.model.entity.enums.EstadoServicio;
+import com.afk.model.entity.enums.TipoServicio;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.ArrayList;
@@ -30,8 +31,8 @@ public class Servicio {
     @JoinColumn(name = "id_usuario", nullable = false)
     private Usuario usuario;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_tipo_servicio", nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipo_servicio", nullable = false)
     private TipoServicio tipo;
 
     @Column(name = "precio", nullable = false)
@@ -40,6 +41,10 @@ public class Servicio {
     @Enumerated(EnumType.STRING)
     @Column(name = "estado_servicio", nullable = false)
     private EstadoServicio estado;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_ubicacion", nullable = false)
+    private Ubicacion ubicacion;
 
     @Builder.Default
     @OneToMany(mappedBy = "servicio", cascade = CascadeType.ALL, orphanRemoval = true)

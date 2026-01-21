@@ -6,7 +6,9 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @AllArgsConstructor
@@ -27,7 +29,7 @@ public class Publicacion {
     private String descripcion;
 
     @OneToOne(fetch =  FetchType.LAZY)
-    @JoinColumn(name="id_vacante",nullable = false)
+    @JoinColumn(name="id_inmueble",nullable = false)
     private Inmueble inmueble;
 
     @Column(name="fecha_publicacion", nullable = false)
@@ -37,10 +39,10 @@ public class Publicacion {
     private EstadoPublicacion estadoPublicacion;
 
     @Builder.Default
-    @OneToMany(mappedBy = "publicacion", fetch = FetchType.LAZY,cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Calificacion> calificaciones = new ArrayList<>();
+    @OneToMany(mappedBy = "publicacion", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Calificacion> calificaciones = new LinkedHashSet<>();
 
-    @OneToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="id_usuario",nullable = false)
     private Usuario usuario;
 
@@ -48,6 +50,6 @@ public class Publicacion {
     private Double precio;
 
     @Builder.Default
-    @OneToMany(mappedBy = "publicacion",fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Multimedia> multimedia = new ArrayList<>();
+    @OneToMany(mappedBy = "publicacion", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Multimedia> multimedia = new LinkedHashSet<>();
 }

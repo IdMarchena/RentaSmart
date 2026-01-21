@@ -37,13 +37,13 @@ public class Contrato {
     private Inmueble inmueble;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_financiacion", nullable = true)
+    @JoinColumn(name = "id_financiacion")
     private Financiacion financiacion;
 
     @Column(name = "fecha_inicio",nullable = false)
     private LocalDateTime fechaInicio;
 
-    @Column(name = "fecha_finalizacion",nullable = true)
+    @Column(name = "fecha_finalizacion")
     private LocalDateTime fechaFinalizacion;
 
     @Column(name = "precio", nullable = false)
