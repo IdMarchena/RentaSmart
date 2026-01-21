@@ -1,5 +1,5 @@
 package com.afk.model.entity.enums;
 
-public enum EstadoMultimedia {
+public enum TipoMultimedia {
     VIDEO,FOTO,DOCUMENTO
 }
