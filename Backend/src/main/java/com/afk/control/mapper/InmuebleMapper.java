@@ -8,9 +8,7 @@ import java.util.stream.StreamSupport;
 @Mapper(componentModel = "spring",
 uses = {
         UbicacionMapper.class,
-        ServicioMapper.class,
-        UsuarioMapper.class,
-        HabitacionMapper.class
+        UsuarioMapper.class
 })
 public interface InmuebleMapper {
 
@@ -23,15 +21,11 @@ public interface InmuebleMapper {
     }
 
     @Mapping(target = "ubicacion", source = "idUbicacion", qualifiedByName = "ubicacionFromId")
-    @Mapping(target = "servicio", source = "idServicio", qualifiedByName = "servicioFromId")
     @Mapping(target = "usuario", source = "idArrendatario", qualifiedByName = "usuarioFromId")
-    @Mapping(target = "habitaciones", source = "idsHabitaciones",qualifiedByName = "habitacionesFromIds")
     Inmueble toEntity(InmuebleDto inmuebleDto);
 
     @Mapping(target = "idUbicacion", source = "ubicacion.id")
-    @Mapping(target = "idServicio", source = "servicio.id")
     @Mapping(target = "idArrendatario", source = "usuario.id")
-    @Mapping(target = "idsHabitaciones", source = "habitaciones", qualifiedByName = "habitacionesToIds")
     InmuebleDto toDto(Inmueble inmueble);
 
     @Named("inmuebleToDtoList")
@@ -49,9 +43,7 @@ public interface InmuebleMapper {
     }
 
     @Mapping(target = "ubicacion", source = "idUbicacion", qualifiedByName = "ubicacionFromId")
-    @Mapping(target = "servicio", source = "idServicio", qualifiedByName = "servicioFromId")
     @Mapping(target = "usuario", source = "idArrendatario", qualifiedByName = "usuarioFromId")
-    @Mapping(target = "habitaciones", source = "idsHabitaciones",qualifiedByName = "habitacionesFromIds")
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateEntityFromDto(InmuebleDto dto, @MappingTarget Inmueble entity);
 }

@@ -8,7 +8,7 @@ import java.util.stream.StreamSupport;
 
 @Mapper(componentModel = "spring",
 uses = {UsuarioMapper.class,
-        TipoServicioMapper.class})
+        UbicacionMapper.class,})
 public interface ServicioMapper {
 
     @Named("servicioFromId")
@@ -18,6 +18,8 @@ public interface ServicioMapper {
         servicio.setId(id);
         return servicio;
     }
+
+
     @Named("calificacionesFromIds")
     default List<Calificacion> calificacionesFromIds(List<Long> ids) {
         if (ids == null) return null;
@@ -38,12 +40,12 @@ public interface ServicioMapper {
 
 
     @Mapping(target = "usuario", source = "idUsuario", qualifiedByName = "usuarioFromId")
-    @Mapping(target = "tipo", source = "idTipo", qualifiedByName = "tipoServicioFromId")
+    @Mapping(target="ubicacion",source="idUbicacion",qualifiedByName = "ubicacionFromId")
     @Mapping(target = "calificaciones", source = "calificacionesIds", qualifiedByName = "calificacionesFromIds")
     Servicio toEntity(ServicioDto dto);
 
     @Mapping(target = "idUsuario", source = "usuario.id")
-    @Mapping(target = "idTipo", source = "tipo.id")
+    @Mapping(target = "idUbicacion", source = "ubicacion.id")
     @Mapping(target = "calificacionesIds", source = "calificaciones", qualifiedByName = "calificacionesToIds")
     ServicioDto toDto(Servicio sancion);
 
@@ -62,7 +64,7 @@ public interface ServicioMapper {
     }
 
     @Mapping(target = "usuario", source = "idUsuario", qualifiedByName = "usuarioFromId")
-    @Mapping(target = "tipo", source = "idTipo", qualifiedByName = "tipoServicioFromId")
+    @Mapping(target="ubicacion",source="idUbicacion",qualifiedByName = "ubicacionFromId")
     @Mapping(target = "calificaciones", source = "calificacionesIds", qualifiedByName = "calificacionesFromIds")
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateEntityFromDto(ServicioDto dto, @MappingTarget Servicio entity);

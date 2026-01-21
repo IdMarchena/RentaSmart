@@ -10,6 +10,7 @@ public record SolicitudDeServicioDto(
         Long idUsuario,
         Long idInmueble,
         LocalDateTime fecha,
-        EstadoCita estado
+        EstadoCita estado,
+        String descripcionProblema
 ) {
 }

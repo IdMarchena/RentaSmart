@@ -1,16 +1,19 @@
 package com.afk.control.mapper;
+
 import com.afk.control.dto.PublicacionDto;
 import com.afk.model.entity.Calificacion;
 import com.afk.model.entity.Inmueble;
 import com.afk.model.entity.Publicacion;
 import org.mapstruct.*;
+
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 @Mapper(componentModel = "spring",
-        uses = {UsuarioMapper.class,
-                MultimediaMapper.class})
+        uses = {UsuarioMapper.class, MultimediaMapper.class})
 public interface PublicacionMapper {
 
     @Named("publicacionFromId")
@@ -20,6 +23,7 @@ public interface PublicacionMapper {
         publicacion.setId(id);
         return publicacion;
     }
+
     @Named("mapInmueble")
     default Inmueble mapInmueble(Long id) {
         if (id == null) return null;
@@ -27,18 +31,21 @@ public interface PublicacionMapper {
         i.setId(id);
         return i;
     }
+
+    // CAMBIO: Ahora devuelve Set<Calificacion> para coincidir con la Entidad
     @Named("calificacionesFromIds")
-    default List<Calificacion> calificacionesFromIds(List<Long> ids) {
+    default Set<Calificacion> calificacionesFromIds(List<Long> ids) {
         if (ids == null) return null;
         return ids.stream().map(id -> {
             Calificacion c = new Calificacion();
             c.setId(id);
             return c;
-        }).collect(Collectors.toList());
+        }).collect(Collectors.toSet());
     }
 
+    // CAMBIO: Ahora recibe Collection (o Set) para coincidir con la Entidad
     @Named("calificacionesToIds")
-    default List<Long> calificacionesToIds(List<Calificacion> calificaciones) {
+    default List<Long> calificacionesToIds(Collection<Calificacion> calificaciones) {
         if (calificaciones == null) return List.of();
         return calificaciones.stream()
                 .map(Calificacion::getId)
@@ -48,26 +55,20 @@ public interface PublicacionMapper {
     @Mapping(target = "inmueble", source = "idInmueble", qualifiedByName = "mapInmueble")
     @Mapping(target = "calificaciones", source = "calificacionesIds", qualifiedByName = "calificacionesFromIds")
     @Mapping(target = "usuario", source = "idUsuario", qualifiedByName = "usuarioFromId")
-    @Mapping(target = "multimedia", source = "multimediaIds", qualifiedByName = "multimediasFromIds")
+    @Mapping(target = "multimedia", source = "multimedia") // MapStruct usará MultimediaMapper para Set<->List
     Publicacion toEntity(PublicacionDto dto);
 
     @Mapping(target = "idInmueble", source = "inmueble.id")
     @Mapping(target = "calificacionesIds", source = "calificaciones", qualifiedByName = "calificacionesToIds")
     @Mapping(target = "idUsuario", source = "usuario.id")
-    @Mapping(target = "multimediaIds", source = "multimedia", qualifiedByName = "multimediasToIds")
+    @Mapping(target = "multimedia", source = "multimedia") // MapStruct usará MultimediaMapper para Set<->List
     PublicacionDto toDto(Publicacion publicacion);
 
     @Named("publicacionToDtoList")
     default List<PublicacionDto> toDtoList(Iterable<Publicacion> publicaciones) {
+        if (publicaciones == null) return List.of();
         return StreamSupport.stream(publicaciones.spliterator(), false)
                 .map(this::toDto)
-                .collect(Collectors.toList());
-    }
-
-    @Named("publicacionToEntityList")
-    default List<Publicacion> toEntityList(Iterable<PublicacionDto> publicacionesDto) {
-        return StreamSupport.stream(publicacionesDto.spliterator(), false)
-                .map(this::toEntity)
                 .collect(Collectors.toList());
     }
 

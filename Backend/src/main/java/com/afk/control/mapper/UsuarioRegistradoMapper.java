@@ -8,20 +8,18 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 @Mapper(componentModel = "spring",
-        uses = {RolMapper.class,
-                UbicacionMapper.class
+        uses = {UbicacionMapper.class
                 }
 )
 public interface UsuarioRegistradoMapper {
 
-    @Mapping(target = "rol", source = "idRol", qualifiedByName = "RolFromId")
     @Mapping(target = "ubicacion", source = "idUbicacion", qualifiedByName = "ubicacionFromId")
     @Mapping(target = "nombre", ignore = true)
     @Mapping(target = "correo", ignore = true)
     @Mapping(target = "clave", ignore = true)
     UsuarioRegistrado toEntity(UsuarioRegistradoDto dto);
 
-    @Mapping(target = "idRol", source = "rol.id")
+
     @Mapping(target = "idUbicacion", source = "ubicacion.id")
     UsuarioRegistradoDto toDto(UsuarioRegistrado usuario);
 

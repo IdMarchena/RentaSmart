@@ -1,5 +1,4 @@
 package com.afk.control.mapper;
-import com.afk.client.external.dto.ChatRequest;
 import com.afk.control.dto.ChattDto;
 import com.afk.model.entity.Chat;
 import com.afk.model.entity.Usuario;

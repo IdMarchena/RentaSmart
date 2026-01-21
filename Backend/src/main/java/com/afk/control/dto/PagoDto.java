@@ -1,12 +1,13 @@
 package com.afk.control.dto;
 import com.afk.model.entity.enums.EstadoPago;
+import com.afk.model.entity.enums.TipoPago;
 
 import java.time.LocalDateTime;
 
 public record PagoDto(Long id,
                       LocalDateTime fecha,
                       Integer monto,
-                      Long idTipo,
+                      TipoPago tipo,
                       EstadoPago estado,
                       String moneda,
                       String stripePaymentIntentId,

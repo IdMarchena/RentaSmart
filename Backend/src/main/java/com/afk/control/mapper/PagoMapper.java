@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-@Mapper(componentModel = "spring",uses = {TipoPagoMapper.class,UsuarioMapper.class})
+@Mapper(componentModel = "spring",uses = {UsuarioMapper.class})
 public interface PagoMapper {
 
     @Named("pagoFromId")
@@ -17,11 +17,9 @@ public interface PagoMapper {
         return pago;
     }
 
-    @Mapping(target = "tipo", source = "idTipo", qualifiedByName = "tipoPagoFromId")
     @Mapping(target = "usuario", source = "idUsuario", qualifiedByName = "usuarioFromId")
     Pago toEntity(PagoDto pagoDto);
 
-    @Mapping(source = "tipo.id", target = "idTipo")
     @Mapping(target = "idUsuario", source = "usuario.id")
     PagoDto toDto(Pago pago);
 
@@ -40,7 +38,6 @@ public interface PagoMapper {
                 .collect(Collectors.toList());
     }
 
-    @Mapping(target = "tipo", source = "idTipo", qualifiedByName = "tipoPagoFromId")
     @Mapping(target = "usuario", source = "idUsuario", qualifiedByName = "usuarioFromId")
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateEntityFromDto(PagoDto dto, @MappingTarget Pago entity);
