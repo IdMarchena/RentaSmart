@@ -14,33 +14,33 @@ public class ChatController {
 
     private final ChatService chatService;
 
-    @PostMapping("/crear")
+    @PostMapping
     public ResponseEntity<ChattDto> crearChat(@RequestBody ChattDto chattDto) {
         return new ResponseEntity<>(chatService.crearChat(chattDto), HttpStatus.CREATED);
     }
 
-    @GetMapping("/obtenerPorId/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<ChattDto> obtenerChatPorId(@PathVariable Long id) {
         return ResponseEntity.ok(chatService.buscarChatPorId(id));
     }
 
-    @GetMapping("/obtenerPorNombre/{nombre}")
+    @GetMapping("/{nombre}")
     public ResponseEntity<ChattDto> obtenerChatPorNombre(@PathVariable String nombre) {
         return ResponseEntity.ok(chatService.buscarChatPorNombre(nombre));
     }
 
-    @GetMapping("/listar")
+    @GetMapping
     public ResponseEntity<List<ChattDto>> listarTodosLosChats() {
         return ResponseEntity.ok(chatService.listarChats());
     }
 
-    @PatchMapping("/cambiarEstadoChat/{id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<Void> cambiarEstado(@PathVariable Long id, @RequestParam String estado) {
         chatService.cambiarEstadoChat(id, estado);
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/eliminarPorId/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminarChat(@PathVariable Long id) {
         chatService.deleteChat(id);
         return ResponseEntity.noContent().build();

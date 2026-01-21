@@ -24,7 +24,6 @@ import java.util.Optional;
 public class OAuth2SuccessController {
 
     private final UsuarioRegistradoRepository usuarioRegistradoRepository;
-    private final RolRepository rolRepository;
     private final UbicacionRepository ubicacionRepository;
 
     @GetMapping("/loginSuccess")
@@ -66,9 +65,7 @@ public class OAuth2SuccessController {
             usuario = existente.get();
         } else {
 
-            Rol rol = rolRepository.findByRole(Roles.USER)
-                    .orElseThrow(() -> new RuntimeException("Rol USER no encontrado"));
-
+            Roles rol = Roles.valueOf(request.getParameter("rol").toUpperCase());
             Ubicacion ubicacion = ubicacionRepository.findById(1L)
                     .orElseThrow(() -> new RuntimeException("Ubicación por defecto no encontrada"));
 
@@ -92,7 +89,7 @@ public class OAuth2SuccessController {
                         jwt,
                         "Bearer",
                         usuario.getCorreo(),
-                        Collections.singletonList(usuario.getRol().getRole().name())
+                        Collections.singletonList(usuario.getRol().name().toUpperCase())
                 )
         );
     }

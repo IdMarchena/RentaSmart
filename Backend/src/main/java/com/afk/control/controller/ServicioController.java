@@ -17,180 +17,154 @@ public class ServicioController {
 
     private final ServicioService service;
 
-    @PostMapping("/crear")
+    // ===================== CREAR =====================
+    @PostMapping
     public ResponseEntity<JsonResponse<ServicioDto>> crearServicio(@RequestBody ServicioDto servicio) {
-        ServicioDto servicioDto = service.crearServicio(servicio);
-        if (servicioDto==null) {
-            return ResponseEntity.status(404).body(
-                    new JsonResponse<>(false, "servicio no se pudo crear", null, 404)
+        ServicioDto creado = service.crearServicio(servicio);
+        if (creado == null) {
+            return ResponseEntity.status(400).body(
+                    new JsonResponse<>(false, "El servicio no se pudo crear", null, 400)
             );
         }
-        return ResponseEntity.ok(
-                new JsonResponse<>(
-                        true,
-                        "Servicio creado exitosamente",
-                        servicioDto,
-                        201
-                )
+        return ResponseEntity.status(201).body(
+                new JsonResponse<>(true, "Servicio creado exitosamente", creado, 201)
         );
     }
 
-    @GetMapping("/obtenerPorId/{id}")
+    // ===================== OBTENER POR ID =====================
+    @GetMapping("/{id}")
     public ResponseEntity<JsonResponse<ServicioDto>> getServicioById(@PathVariable Long id) {
-        ServicioDto servicioDto = service.getServicioById(id);
-        if (servicioDto != null) {
-            return ResponseEntity.ok(
-                    new JsonResponse<>(
-                            true,
-                            "Servicio encontrado",
-                            servicioDto,
-                            200
-                    )
-            );
-        } else {
+        ServicioDto dto = service.getServicioById(id);
+        if (dto == null) {
             return ResponseEntity.status(404).body(
-                    new JsonResponse<>(
-                            false,
-                            "Servicio no encontrado",
-                            null,
-                            404
-                    )
-            );
-        }
-    }
-
-    @GetMapping("/todos")
-    public ResponseEntity<JsonResponse<List<ServicioDto>>> getAllServicios() {
-        List<ServicioDto> servicios = service.getAllServicios();
-        if (servicios.isEmpty()) {
-            return ResponseEntity.status(404).body(
-                    new JsonResponse<>(false, "servicios no se pudieron obtener", null, 404)
+                    new JsonResponse<>(false, "Servicio no encontrado", null, 404)
             );
         }
         return ResponseEntity.ok(
-                new JsonResponse<>(
-                        true,
-                        "Servicios obtenidos correctamente",
-                        servicios,
-                        200
-                )
+                new JsonResponse<>(true, "Servicio encontrado", dto, 200)
         );
     }
 
-    @DeleteMapping("/eliminarPorId/{id}")
+    // ===================== OBTENER TODOS =====================
+    @GetMapping
+    public ResponseEntity<JsonResponse<List<ServicioDto>>> getAllServicios() {
+        List<ServicioDto> lista = service.getAllServicios();
+        if (lista.isEmpty()) {
+            return ResponseEntity.status(404).body(
+                    new JsonResponse<>(false, "No se encontraron servicios", null, 404)
+            );
+        }
+        return ResponseEntity.ok(
+                new JsonResponse<>(true, "Servicios obtenidos correctamente", lista, 200)
+        );
+    }
+
+    // ===================== ACTUALIZAR =====================
+    @PutMapping("/{id}")
+    public ResponseEntity<JsonResponse<ServicioDto>> actualizarServicio(@PathVariable Long id,
+                                                                        @RequestBody ServicioDto servicio) {
+        try {
+            ServicioDto actualizado = service.actualizarServicio(id, servicio);
+            if (actualizado == null) {
+                return ResponseEntity.status(404).body(
+                        new JsonResponse<>(false, "Servicio no encontrado para actualizar", null, 404)
+                );
+            }
+            return ResponseEntity.ok(
+                    new JsonResponse<>(true, "Servicio actualizado exitosamente", actualizado, 200)
+            );
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(
+                    new JsonResponse<>(false, "Error al actualizar el servicio", null, 500)
+            );
+        }
+    }
+
+    // ===================== ELIMINAR =====================
+    @DeleteMapping("/{id}")
     public ResponseEntity<JsonResponse<Void>> eliminarServicio(@PathVariable Long id) {
         try {
-            service.eliminarServicio(id);
+            boolean eliminado = service.eliminarServicio(id);
+            if (!eliminado) {
+                return ResponseEntity.status(404).body(
+                        new JsonResponse<>(false, "Servicio no encontrado para eliminar", null, 404)
+                );
+            }
             return ResponseEntity.ok(
-                    new JsonResponse<>(
-                            true,
-                            "Servicio eliminado exitosamente",
-                            null,
-                            200
-                    )
+                    new JsonResponse<>(true, "Servicio eliminado exitosamente", null, 200)
+            );
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(
+                    new JsonResponse<>(false, "Error al eliminar el servicio", null, 500)
+            );
+        }
+    }
+
+    // ===================== FILTROS =====================
+    @GetMapping("/nombre/{nombre}")
+    public ResponseEntity<JsonResponse<List<ServicioDto>>> buscarServicioPorNombre(@PathVariable String nombre) {
+        List<ServicioDto> lista = service.buscarServicioPorNombre(nombre);
+        if (lista.isEmpty()) {
+            return ResponseEntity.status(404).body(
+                    new JsonResponse<>(false, "No se encontraron servicios por nombre", null, 404)
+            );
+        }
+        return ResponseEntity.ok(
+                new JsonResponse<>(true, "Servicios encontrados por nombre", lista, 200)
+        );
+    }
+
+    @GetMapping("/tipo/{tipo}")
+    public ResponseEntity<JsonResponse<List<ServicioDto>>> buscarServiciosPorTipo(@PathVariable String tipo) {
+        List<ServicioDto> lista = service.buscarServiciosPorTipo(tipo);
+        if (lista.isEmpty()) {
+            return ResponseEntity.status(404).body(
+                    new JsonResponse<>(false, "No se encontraron servicios por tipo", null, 404)
+            );
+        }
+        return ResponseEntity.ok(
+                new JsonResponse<>(true, "Servicios encontrados por tipo", lista, 200)
+        );
+    }
+
+    @GetMapping("/estado/{estado}")
+    public ResponseEntity<JsonResponse<List<ServicioDto>>> buscarServiciosPorEstado(@PathVariable String estado) {
+        List<ServicioDto> lista = service.buscarServiciosPorEstado(estado);
+        if (lista.isEmpty()) {
+            return ResponseEntity.status(404).body(
+                    new JsonResponse<>(false, "No se encontraron servicios por estado", null, 404)
+            );
+        }
+        return ResponseEntity.ok(
+                new JsonResponse<>(true, "Servicios encontrados por estado", lista, 200)
+        );
+    }
+
+    @GetMapping("/nombre/precio")
+    public ResponseEntity<JsonResponse<List<ServicioDto>>> buscarServiciosPorNombreYPrecio(@RequestParam String nombre,
+                                                                                           @RequestParam Integer precio) {
+        List<ServicioDto> lista = service.buscarServiciosPorNombreYPrecio(nombre, precio);
+        if (lista.isEmpty()) {
+            return ResponseEntity.status(404).body(
+                    new JsonResponse<>(false, "No se encontraron servicios por nombre y precio", null, 404)
+            );
+        }
+        return ResponseEntity.ok(
+                new JsonResponse<>(true, "Servicios encontrados por nombre y precio", lista, 200)
+        );
+    }
+
+    // ===================== CAMBIAR ESTADO =====================
+    @PutMapping("/{id}/estado")
+    public ResponseEntity<JsonResponse<Void>> cambiarEstadoServicioPorId(@PathVariable Long id, @RequestParam String estado) {
+        try {
+            service.cambiarEstadoServicioPorIdServicio(id, estado);
+            return ResponseEntity.ok(
+                    new JsonResponse<>(true, "Estado de servicio actualizado exitosamente", null, 200)
             );
         } catch (Exception e) {
             return ResponseEntity.status(404).body(
-                    new JsonResponse<>(
-                            false,
-                            "Servicio no encontrado para eliminar",
-                            null,
-                            404
-                    )
-            );
-        }
-    }
-
-    @PutMapping("/actualizarPorId/{id}")
-    public ResponseEntity<JsonResponse<ServicioDto>> actualizarServicio(@PathVariable Long id, @RequestBody ServicioDto servicio) {
-        try{
-            service.actualizarServicio(id, servicio);
-            return ResponseEntity.ok(
-                    new JsonResponse<>(
-                            true,
-                            "Servicio actualizado exitosamente",
-                            null,
-                            200
-                    )
-            );
-        }catch (Exception e) {
-            return ResponseEntity.status(404).body(
-                    new JsonResponse<>(
-                            false,
-                            "Servicio no encontrado para actualizar",
-                            null,
-                            404
-                    )
-            );
-        }
-    }
-    @GetMapping("/buscarServiciosPorNombre/{nombre}")
-    public ResponseEntity<JsonResponse<List<ServicioDto>>> buscarServicioPorNombre(@PathVariable String nombre) {
-        List<ServicioDto> servicios = service.buscarServicioPorNombre(nombre);
-        return ResponseEntity.ok(
-                new JsonResponse<>(
-                        true,
-                        "Servicios encontrados por nombre",
-                        servicios,
-                        200
-                )
-        );
-    }
-    @GetMapping("/buscarServiciosPorTipo/{tipo}")
-    public ResponseEntity<JsonResponse<List<ServicioDto>>> buscarServiciosPorTipo(@PathVariable String tipo) {
-        List<ServicioDto> servicios = service.buscarServiciosPorTipo(tipo);
-        if (servicios.isEmpty()) {
-            return ResponseEntity.status(404).body(
-                    new JsonResponse<>(false, "servicio no se pudieron buscar por tipo", null, 404)
-            );
-        }
-        return ResponseEntity.ok(
-                new JsonResponse<>(
-                        true,
-                        "Servicios encontrados por tipo",
-                        servicios,
-                        200
-                )
-        );
-    }
-    @GetMapping("/buscarServiciosPorNombreYPrecios")
-    public ResponseEntity<JsonResponse<List<ServicioDto>>> buscarServiciosPorNombreYPrecio(@RequestParam String nombre, @RequestParam Integer precio) {
-        List<ServicioDto> servicios = service.buscarServiciosPorNombreYPrecio(nombre, precio);
-        if (servicios.isEmpty()) {
-            return ResponseEntity.status(404).body(
-                    new JsonResponse<>(false, "servicio no se pudieron buscar por nombre y precios", null, 404)
-            );
-        }
-        return ResponseEntity.ok(
-                new JsonResponse<>(
-                        true,
-                        "Servicios encontrados por nombre y precio",
-                        servicios,
-                        200
-                )
-        );
-    }
-
-    @PutMapping("/cambiarEstadoServicioPorId/{id}")
-    public ResponseEntity<JsonResponse<Void>> cambiarEstadoServicioPorIdServicio(@PathVariable Long id, @RequestParam String estado) {
-        try{
-            service.cambiarEstadoServicioPorIdServicio(id, estado);
-            return ResponseEntity.ok(
-                    new JsonResponse<>(
-                            true,
-                            "Estado de servicio actualizado exitosamente",
-                            null,
-                            200
-                    )
-            );
-        }catch (Exception e) {
-            return ResponseEntity.status(404).body(
-                    new JsonResponse<>(
-                            false,
-                            "Servicio no encontrado para cambiar el estado",
-                            null,
-                            404
-                    )
+                    new JsonResponse<>(false, "Servicio no encontrado para cambiar el estado", null, 404)
             );
         }
     }

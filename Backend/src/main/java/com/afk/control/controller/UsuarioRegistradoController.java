@@ -16,7 +16,7 @@ public class UsuarioRegistradoController {
 
     private final UsuarioRegistradoService usuarioRegistradoService;
 
-    @PostMapping("/crear")
+    @PostMapping
     public ResponseEntity<JsonResponse<UsuarioRegistradoDto>> crearUsuarioRegistrado(@RequestBody UsuarioRegistradoDto dto) {
         UsuarioRegistradoDto creado = usuarioRegistradoService.createUsuarioRegistrado(dto);
         if (creado == null) {
@@ -34,7 +34,7 @@ public class UsuarioRegistradoController {
         );
     }
 
-    @GetMapping("/obtenerUsuarioRegistradoPorId/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<JsonResponse<UsuarioRegistradoDto>> obtenerUsuarioRegistradoPorId(@PathVariable Long id) {
         UsuarioRegistradoDto dto = usuarioRegistradoService.findUsuarioRegistradoById(id);
         if (dto == null) {
@@ -52,7 +52,7 @@ public class UsuarioRegistradoController {
         );
     }
 
-    @GetMapping("/listar")
+    @GetMapping
     public ResponseEntity<JsonResponse<List<UsuarioRegistradoDto>>> listarUsuariosRegistrados() {
         List<UsuarioRegistradoDto> lista = usuarioRegistradoService.findAllUsuariosRegistrados();
         if (lista.isEmpty()) {
@@ -69,9 +69,9 @@ public class UsuarioRegistradoController {
                 )
         );
     }
-    @GetMapping("/buscarUsuarioRegistradosPorUbicacion/{name}")
-    public ResponseEntity<JsonResponse<List<UsuarioRegistradoDto>>> buscarUsuarioRegistradosPorUbicacion(@PathVariable String name) {
-        List<UsuarioRegistradoDto> lista = usuarioRegistradoService.buscarTodosLosUsuarioRegistradosPorUbicacion(name);
+    @GetMapping("/buscar")
+    public ResponseEntity<JsonResponse<List<UsuarioRegistradoDto>>> buscarUsuarioRegistradosPorUbicacion(@RequestParam  String ubicacion) {
+        List<UsuarioRegistradoDto> lista = usuarioRegistradoService.buscarTodosLosUsuarioRegistradosPorUbicacion(ubicacion);
         if (lista.isEmpty()) {
             return ResponseEntity.status(404).body(
                     new JsonResponse<>(false, "Usuarios no encontrado", null, 404)
@@ -83,7 +83,7 @@ public class UsuarioRegistradoController {
         }
     }
 
-    @DeleteMapping("/eliminarUsuarioRegistradoPorId/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<JsonResponse<Void>> eliminarUsuarioRegistrado(@PathVariable Long id) {
         try {
             usuarioRegistradoService.deleteUsuarioRegistradoById(id);

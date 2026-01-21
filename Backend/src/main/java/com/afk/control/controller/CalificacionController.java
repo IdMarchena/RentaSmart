@@ -15,7 +15,7 @@ public class CalificacionController {
 
     private final CalificacionService calificacionService;
 
-    @PostMapping("/crear")
+    @PostMapping
     public ResponseEntity<JsonResponse<CalificacionDto>> crearCalificacion(@RequestBody CalificacionDto calificacionDto) {
         CalificacionDto creada = calificacionService.createCalificacion(calificacionDto);
         if(creada==null) {
@@ -29,7 +29,7 @@ public class CalificacionController {
         }
     }
 
-    @GetMapping("/obtenerPorId/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<JsonResponse<CalificacionDto>> obtenerPorId(@PathVariable Long id) {
         CalificacionDto calificacion = calificacionService.findCalificacionById(id);
         if(calificacion==null) {
@@ -43,7 +43,7 @@ public class CalificacionController {
         }
     }
 
-    @GetMapping("/listar")
+    @GetMapping
     public ResponseEntity<JsonResponse<List<CalificacionDto>>> listarTodas() {
         List<CalificacionDto> calificaciones = calificacionService.findAllCalificaciones();
         if(calificaciones.isEmpty()){
@@ -57,7 +57,7 @@ public class CalificacionController {
         }
     }
 
-    @PutMapping("/actualizarPorId/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<JsonResponse<CalificacionDto>> actualizarCalificacion(@PathVariable Long id, @RequestBody CalificacionDto dto) {
         CalificacionDto actualizada = calificacionService.updateCalificacion(id, dto);
         if(actualizada==null) {
@@ -71,7 +71,7 @@ public class CalificacionController {
         }
     }
 
-    @DeleteMapping("/eliminarPorId/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<JsonResponse<Void>> eliminarCalificacion(@PathVariable Long id) {
         try{
             calificacionService.deleteCalificacionById(id);
@@ -85,7 +85,7 @@ public class CalificacionController {
         }
     }
 
-    @GetMapping("/encontrarCalificacionesPorServicioId/{idServicio}")
+    @GetMapping("/por-servicio/{idServicio}")
     public ResponseEntity<JsonResponse<List<CalificacionDto>>> encontrarCalificacionesPorServicioId(@PathVariable Long idServicio) {
         List<CalificacionDto> calificaciones = calificacionService.encontrarCalificacionesPorServicioId(idServicio);
         if(calificaciones.isEmpty()){
@@ -98,12 +98,12 @@ public class CalificacionController {
             );
         }
     }
-    @GetMapping("/encontrarCalificacionesPorPublicacionId/{idPublicacion}")
+    @GetMapping("/por-publicacion/{idPublicacion}")
     public ResponseEntity<JsonResponse<List<CalificacionDto>>> encontrarCalificacionesPorPublicacionId(@PathVariable Long idPublicacion) {
         List<CalificacionDto> calificaciones = calificacionService.encontrarCalificacionesPorPublicacionId(idPublicacion);
         if(calificaciones.isEmpty()){
-            return ResponseEntity.status(404).body(
-                    new JsonResponse<>(false,"error al intentar encontrar las calificaciones",null,404)
+            return ResponseEntity.status(200).body(
+                    new JsonResponse<>(false,"error al intentar encontrar las calificaciones",null,200)
             );
         }else{
             return ResponseEntity.ok(

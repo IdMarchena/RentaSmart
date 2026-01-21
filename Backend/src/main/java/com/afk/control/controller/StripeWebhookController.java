@@ -24,7 +24,8 @@ public class StripeWebhookController {
     private String endpointSecret;
 
     @PostMapping("/stripe")
-    public ResponseEntity<String> handleWebhook(@RequestBody String payload, @RequestHeader("Stripe-Signature") String sigHeader) {
+    public ResponseEntity<String> handleWebhook(@RequestBody String payload, @RequestHeader("Stripe-Signature") String sigHeader,
+                                                @RequestParam String tipo) {
         Event event;
 
         try {
@@ -44,7 +45,7 @@ public class StripeWebhookController {
             }
             if (intent != null) {
                 log.info("¡Pago confirmado! Intent ID: {}", intent.getId());
-                stripeService.confirmarPagoExitoso(intent.getId());
+                stripeService.confirmarPagoExitoso(tipo,intent.getId());
             }
         }
         return ResponseEntity.ok("Evento procesado correctamente");

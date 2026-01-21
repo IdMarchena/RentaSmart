@@ -18,7 +18,7 @@ public class CitaController {
     private final CitaService service;
 
 
-    @PostMapping("/crear")
+    @PostMapping
     public ResponseEntity<JsonResponse<CitaDto>> createCita(CitaDto cita){
         try{
             CitaDto citaDto = service.createCita(cita);
@@ -34,7 +34,7 @@ public class CitaController {
     }
 
 
-    @GetMapping("/obtenerPorId/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<JsonResponse<CitaDto>> findCitaById(@PathVariable Long id) {
         try {
             CitaDto citaDto = service.findCitaById(id);
@@ -48,7 +48,7 @@ public class CitaController {
         }
     }
 
-    @GetMapping("/todas")
+    @GetMapping
     public ResponseEntity<JsonResponse<List<CitaDto>>> findAllCitas() {
         try {
             List<CitaDto> citas = service.findAllCitas();
@@ -62,7 +62,7 @@ public class CitaController {
         }
     }
 
-    @PutMapping("/actualizarPorId/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<JsonResponse<CitaDto>> updateCita(@PathVariable Long id, @RequestBody CitaDto cita) {
         try {
             CitaDto citaDto = service.updateCita(id, cita);
@@ -76,7 +76,7 @@ public class CitaController {
         }
     }
 
-    @DeleteMapping("/eliminarPorId/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<JsonResponse<Void>> deleteCitaById(@PathVariable Long id) {
         try {
             service.deleteCitaById(id);
@@ -90,7 +90,7 @@ public class CitaController {
         }
     }
 
-    @GetMapping("/listarCitasIdUsuario/{idUsuario}")
+    @GetMapping("/por-usuario/{idUsuario}")
     public ResponseEntity<JsonResponse<List<CitaDto>>> findCitasByUsuario(@PathVariable Long idUsuario) {
         try {
             List<CitaDto> citas = service.findCitasByUsuario(idUsuario);
@@ -105,7 +105,7 @@ public class CitaController {
     }
 
 
-    @GetMapping("/listarPorIdServicio/{idServicio}")
+    @GetMapping("/por-servicio/{idServicio}")
     public ResponseEntity<JsonResponse<List<CitaDto>>> listarCitasPorIDServicio(@PathVariable Long idServicio) {
         try {
             List<CitaDto> citas = service.listarCitasPorIDServicio(idServicio);
@@ -119,7 +119,7 @@ public class CitaController {
         }
     }
 
-    @GetMapping("/listarPorIdPublicacion/{idPublicacion}")
+    @GetMapping("/por-publicacion/{idPublicacion}")
     public ResponseEntity<JsonResponse<List<CitaDto>>> listarCitasPorIDPublicacion(@PathVariable Long idPublicacion) {
         try {
             List<CitaDto> citas = service.listarCitasPorIDPublicacion(idPublicacion);
@@ -133,8 +133,8 @@ public class CitaController {
         }
     }
 
-    @GetMapping("/listarPorEstado/{estado}")
-    public ResponseEntity<JsonResponse<List<CitaDto>>> listarCitasPorEstado(@PathVariable String estado) {
+    @GetMapping("/por-estado")
+    public ResponseEntity<JsonResponse<List<CitaDto>>> listarCitasPorEstado(@RequestParam String estado) {
         try {
             List<CitaDto> citas = service.listarCitasPorEstado(estado);
             return ResponseEntity.ok(
@@ -147,8 +147,8 @@ public class CitaController {
         }
     }
 
-    @GetMapping("/listarPorFecha/{fecha}")
-    public ResponseEntity<JsonResponse<List<CitaDto>>> listarCitasPorFecha(@PathVariable String fecha) {
+    @GetMapping("/por-fecha")
+    public ResponseEntity<JsonResponse<List<CitaDto>>> listarCitasPorFecha(@RequestParam String fecha) {
         try {
             LocalDateTime fechaParsed = LocalDateTime.parse(fecha);  // Parseamos la fecha
             List<CitaDto> citas = service.listarCitasPorFecha(fechaParsed);
