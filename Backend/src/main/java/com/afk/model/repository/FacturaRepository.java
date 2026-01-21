@@ -14,6 +14,6 @@ public interface FacturaRepository extends JpaRepository<Factura, Long> {
     @Query("SELECT c FROM Factura c WHERE c.usuario.id = :userId OR c.usuario.id = :userId")
     List<Factura> findByUsuarioId(@Param("userId") Long userId);
 
-    @Query("SELECT c FROM Factura c WHERE c.contrato.id = :idContrato OR c.contrato.id = :idContrato")
-    List<Factura> findByContratoId(@Param("idContrato") Long idContrato);
+    @Query("SELECT f FROM Factura f WHERE f.idOrigen = :idOrigen AND f.tipoFactura = :tipo")
+    List<Factura> findByOrigen(@Param("idOrigen") Long idOrigen, @Param("tipo") com.afk.model.entity.enums.TipoFactura tipo);
 }
