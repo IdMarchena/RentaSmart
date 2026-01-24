@@ -2,6 +2,7 @@ import { Route, Routes } from "react-router-dom";
 import { Home } from "../pages/Home";
 import { Publications } from "../pages/Publications";
 import { Publication } from "../pages/Publication";
+import { Servicio } from "../pages/Servicio";
 import { HomeDash } from "../admin/pages/HomeDash";
 import { PublicationDash } from "../admin/pages/PublicationDash";
 import { ContratoDash } from "../admin/pages/ContratoDash";
@@ -18,6 +19,7 @@ export const AppsRouter = () => {
       <Route path="/publications" element={<Publications />} />
       <Route path="/publication/:id" element={<Publication />} />
       <Route path="/publications/:id" element={<Publication />} />
+      <Route path="/servicio/:id" element={<Servicio />} />
 
       <Route
         path="/admin"

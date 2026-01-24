@@ -1,5 +1,4 @@
 import type { Publicacion, Inmueble, Multimedia } from '@/types/entitys';
-import type { UsuarioResumen } from '@/types/entities';
 
 import type { PublicacionRepository } from '@/repositories/publicaciones/PublicacionRepository';
 import type { InmuebleRepository } from '@/repositories/inmuebles/InmuebleRepository';
@@ -125,25 +124,10 @@ if (!publicacion.calificaciones || publicacion.calificaciones.length === 0) {
     return publicacion;
   }
 
-  // =========================
-  // MAPPERS
-  // =========================
-  private mapTipoInmueble(tipo: string): Inmueble['tipo'] {
-    return (tipo?.toUpperCase() as Inmueble['tipo']) || 'APARTAMENTO';
-  }
 
-  private mapEstadoInmueble(estado: string): Inmueble['estadoInmueble'] {
-    return (estado?.toUpperCase() as Inmueble['estadoInmueble']) || 'DISPONIBLE';
-  }
 
-  private mapEstadoPublicacion(
-    estado: string
-  ): Publicacion['estadoPublicacion'] {
-    return (
-      (estado?.toUpperCase() as Publicacion['estadoPublicacion']) ||
-      'PUBLICADA'
-    );
-  }
+
+
 
   private mapTipoMultimedia(tipo: string): Multimedia['tipo'] {
     if (tipo === 'FOTO' || tipo === 'IMAGEN') return 'IMAGEN';
@@ -153,16 +137,4 @@ if (!publicacion.calificaciones || publicacion.calificaciones.length === 0) {
     return 'VIDEO';
   }
 
-  private mapRolUsuario(rol: string): UsuarioResumen['rol'] {
-    return (rol?.toLowerCase() as UsuarioResumen['rol']) || 'user';
-  }
-  private isValidUrl(url: string): boolean {
-  if (!url) return false;
-  // Si es un blob y da error, podrías poner una imagen por defecto
-  if (url.startsWith('blob:')) {
-    console.warn("Detectada URL blob persistida (inválida):", url);
-    return false; 
-  }
-  return true;
-}
 }

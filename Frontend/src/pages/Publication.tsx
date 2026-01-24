@@ -338,18 +338,27 @@ export const Publication = () => {
             <Footer />
 
             {/* Modal para escribir reseña */}
+            {/* Dentro de Servicio.tsx, al final antes del Footer */}
+
             {showModalReview && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center">
-                    <div className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm" onClick={() => setShowModalReview(false)}></div>
+                <div className="fixed inset-0 z-[200] flex items-center justify-center bg-white/60 backdrop-blur-md p-4 overflow-y-auto">
+                    <div
+                        className="absolute inset-0"
+                        onClick={() => setShowModalReview(false)}
+                    />
                     <div className="relative z-10">
                         <ModalReview
-                            onClose={() => setShowModalReview(false)}
+                            onClose={() => {
+                                setShowModalReview(false)
+                                setErrorMessage('')
+                            }}
                             onSubmit={handleSubmitReview}
                             publicacionTitulo={publication.titulo}
                         />
                     </div>
                 </div>
             )}
+
         </>
     )
 }

@@ -155,7 +155,114 @@ export const generateContractPDF = (contractContent: string, _fileName: string =
     };
 };
 
-// Función alternativa para descargar como archivo de texto
+// Función para generar URL del contrato para vista previa en iframe
+export const generateContractPreview = (contractContent: string): string => {
+    // Estilos CSS para el contrato
+    const styles = `
+        <style>
+            @page {
+                margin: 2cm;
+                size: A4;
+            }
+            
+            body {
+                font-family: 'Times New Roman', serif;
+                font-size: 12pt;
+                line-height: 1.5;
+                color: #000;
+                margin: 0;
+                padding: 20px;
+                background: white;
+            }
+            
+            .contract-header {
+                text-align: center;
+                font-size: 16pt;
+                font-weight: bold;
+                margin-bottom: 30px;
+                text-transform: uppercase;
+            }
+            
+            .section-title {
+                font-size: 14pt;
+                font-weight: bold;
+                margin: 20px 0 10px 0;
+                text-transform: uppercase;
+            }
+            
+            .section-content {
+                margin-bottom: 15px;
+                text-align: justify;
+            }
+            
+            .signature-line {
+                margin-top: 50px;
+                border-bottom: 1px solid #000;
+                width: 300px;
+                text-align: center;
+            }
+            
+            .signature-container {
+                display: flex;
+                justify-content: space-between;
+                margin-top: 30px;
+            }
+            
+            .signature-box {
+                width: 45%;
+            }
+            
+            .witness-section {
+                margin-top: 40px;
+            }
+        </style>
+    `;
+
+    // Formatear el contenido del contrato con HTML
+    const formattedContent = contractContent
+        .split('\n')
+        .map(line => {
+            // Títulos de secciones (números romanos)
+            if (line.match(/^[IVX]+\. .+/)) {
+                return `<div class="section-title">${line}</div>`;
+            }
+            // Líneas de firmas
+            else if (line.includes('_________________________')) {
+                return `<div class="signature-line">${line}</div>`;
+            }
+            // Líneas en blanco
+            else if (line.trim() === '') {
+                return '<br>';
+            }
+            // Contenido normal
+            else {
+                return `<div class="section-content">${line}</div>`;
+            }
+        })
+        .join('');
+
+    // HTML completo
+    const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Contrato de Arrendamiento</title>
+            ${styles}
+        </head>
+        <body>
+            <div class="contract-header">
+                CONTRATO DE ARRENDAMIENTO DE INMUEBLE URBANO
+            </div>
+            ${formattedContent}
+        </body>
+        </html>
+    `;
+
+    // Crear un blob y generar URL
+    const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+    return URL.createObjectURL(blob);
+};
 export const downloadContractAsText = (contractContent: string, fileName: string = 'contrato-arrendamiento.txt'): void => {
     const blob = new Blob([contractContent], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
