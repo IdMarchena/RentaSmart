@@ -5,11 +5,13 @@ import com.afk.control.service.UsuarioService;
 import com.afk.model.entity.Usuario;
 import com.afk.model.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UsuarioServiceImpl implements UsuarioService {
@@ -34,8 +36,10 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     @Transactional(readOnly = true)
     public UsuarioDto findUsuarioById(Long id) {
+        log.info("este es el id a buscar de el usuario madnadod esde el backedn:"+id);
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        log.info("este es el nombre a buscar de el usuario madnadod esde el backedn:"+usuario.getNombre());
         return mapToDto(usuario);
     }
 

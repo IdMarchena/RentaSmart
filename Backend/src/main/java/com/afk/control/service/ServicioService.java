@@ -15,4 +15,5 @@ public interface ServicioService {
     List<ServicioDto> buscarServiciosPorNombreYPrecio(String nombre,Integer precio);
     void cambiarEstadoServicioPorIdServicio(Long id, String estado);
     List<ServicioDto> buscarServiciosPorEstado(String estado);
+    List<ServicioDto> getServicesByUserId(Long id);
 }

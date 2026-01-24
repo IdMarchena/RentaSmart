@@ -68,6 +68,7 @@ public class PublicacionServiceImpl implements PublicacionService {
 
         // 4. PERSISTENCIA
         // CascadeType.ALL hará que se disparen los inserts de Multimedia
+        p.setEstadoPublicacion(EstadoPublicacion.ACTIVA);
         Publicacion guardada = repository.save(p);
 
         return mapper.toDto(guardada);

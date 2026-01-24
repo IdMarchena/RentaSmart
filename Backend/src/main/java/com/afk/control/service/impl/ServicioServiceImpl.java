@@ -9,12 +9,13 @@ import com.afk.model.entity.enums.TipoServicio;
 import com.afk.model.repository.CalificacionRepository;
 import com.afk.model.repository.ServicioRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ServicioServiceImpl implements ServicioService {
@@ -29,6 +30,7 @@ public class ServicioServiceImpl implements ServicioService {
     public ServicioDto crearServicio(ServicioDto servicio) {
         if(servicio==null) throw new IllegalArgumentException("El servicio no puede ser nulo");
         Servicio s = mapper.toEntity(servicio);
+        s.setEstado(EstadoServicio.ACTIVO);
         return mapper.toDto(repository.save(s));
     }
 
@@ -84,12 +86,33 @@ public class ServicioServiceImpl implements ServicioService {
     @Override
     @Transactional(readOnly = true)
     public List<ServicioDto> buscarServicioPorNombre(String nombre) {
-        List<Servicio> lista = repository.findAll();
-        if (lista.isEmpty()) throw new NoSuchElementException("El servicio no existe");
-        List<Servicio> listaFiltrada = lista.stream()
-                .filter(s -> s.getNombre().equals(nombre))
+
+        if (nombre == null || nombre.trim().isEmpty()) {
+            throw new IllegalArgumentException("El nombre de búsqueda no puede ser vacío");
+        }
+
+        String criterio = nombre.trim().toLowerCase();
+        log.info("🔍 Buscando servicios que contengan: [{}]", criterio);
+
+        List<Servicio> servicios = repository.findAll();
+
+        log.info("📦 Total servicios en BD: {}", servicios.size());
+
+        List<Servicio> filtrados = servicios.stream()
+                .filter(s -> {
+                    String nombreServicio = s.getNombre() != null
+                            ? s.getNombre().toLowerCase().trim()
+                            : "";
+                    boolean match = nombreServicio.contains(criterio);
+
+                    log.debug("➡️ Comparando '{}' con '{}' => {}", nombreServicio, criterio, match);
+                    return match;
+                })
                 .collect(Collectors.toList());
-        return mapper.toDtoList(listaFiltrada);
+
+        log.info("✅ Servicios encontrados: {}", filtrados.size());
+
+        return mapper.toDtoList(filtrados);
     }
 
     @Override
@@ -151,5 +174,16 @@ public class ServicioServiceImpl implements ServicioService {
         }
         s.setEstado(es);
         repository.save(s);
+    }
+    @Override
+    @Transactional(readOnly = true)
+    public List<ServicioDto> getServicesByUserId(Long id){
+        List<Servicio> services= repository.findAll();
+        if(services.isEmpty()) throw new NoSuchElementException("No se encontraron servicios");
+
+        List<Servicio> listaFiltrada = services.stream()
+                .filter(s -> s.getUsuario().getId().equals(id))
+                .collect(Collectors.toList());
+        return mapper.toDtoList(listaFiltrada);
     }
 }

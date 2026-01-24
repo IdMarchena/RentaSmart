@@ -6,13 +6,14 @@ import com.afk.model.entity.Contrato;
 import com.afk.model.entity.enums.EstadoContrato;
 import com.afk.model.repository.ContratoRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.*;
 import java.util.stream.Collectors;
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ContratoServiceImpl implements ContratoService {
@@ -22,7 +23,9 @@ public class ContratoServiceImpl implements ContratoService {
 
     @Override
     public ContratoDto createContrato(ContratoDto dto) {
+        log.info("Criando contrato, este es el dia d epago pa ese contrato"+dto.diaDePago());
         Contrato contrato = mapper.toEntity(dto);
+        contrato.setFechaInicio(LocalDateTime.now());
         Contrato savedContrato = repository.save(contrato);
         return mapper.toDto(savedContrato);
     }
@@ -66,7 +69,14 @@ public class ContratoServiceImpl implements ContratoService {
 
     @Override
     public List<ContratoDto> findContratosComoArrendador(Long idUsuario) {
-        return List.of();
+        log.info("regresando todos los contratos del usuario con id:"+idUsuario);
+        List<Contrato> contratos = repository.findAll();
+        if(contratos.isEmpty()) throw new NoSuchElementException("Usuario no encontrado");
+        List<Contrato> listaFiltrada = contratos.stream()
+                .filter(c -> c.getUsuarioArrendador().getId().equals(idUsuario))
+                .collect(Collectors.toList());
+        log.info("esta es la cantidad de contratos del vale:"+listaFiltrada.size());
+        return mapper.toDtoList(listaFiltrada);
     }
 
     @Override
