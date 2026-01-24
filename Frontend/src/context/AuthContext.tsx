@@ -2,13 +2,14 @@ import { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import Cookies from 'js-cookie';
 import type { Usuario } from '../types/entities';
+import { DATA_SOURCE } from '@/api';
 
 interface AuthContextType {
     user: Usuario | null;
     token: string | null;
     isAuthenticated: boolean;
     isLoading: boolean;
-    login: (user: Usuario, token: string) => void;
+    login: (user: Usuario, token?: string | null) => void;
     logout: () => void;
     updateUser: (user: Partial<Usuario>) => void;
 }
@@ -38,9 +39,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const savedUser = Cookies.get(COOKIES.USER);
             const savedToken = Cookies.get(COOKIES.TOKEN);
 
-            if (savedUser && savedToken) {
+            if (savedUser && (DATA_SOURCE === 'backend' || savedToken)) {
                 setUser(JSON.parse(savedUser));
-                setToken(savedToken);
+                setToken(savedToken ?? null);
             }
         } catch (error) {
             console.error('Error al cargar datos de autenticación:', error);
@@ -53,13 +54,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, []);
 
     // Función para login
-    const login = (userData: Usuario, authToken: string) => {
+    const login = (userData: Usuario, authToken?: string | null) => {
         try {
             setUser(userData);
-            setToken(authToken);
+            setToken(authToken ?? null);
 
             Cookies.set(COOKIES.USER, JSON.stringify(userData), COOKIE_OPTIONS);
-            Cookies.set(COOKIES.TOKEN, authToken, COOKIE_OPTIONS);
+            if (authToken) {
+                Cookies.set(COOKIES.TOKEN, authToken, COOKIE_OPTIONS);
+            } else {
+                Cookies.remove(COOKIES.TOKEN, { path: '/' });
+            }
         } catch (error) {
             console.error('Error al guardar datos de autenticación:', error);
         }
@@ -86,7 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const value: AuthContextType = {
         user,
         token,
-        isAuthenticated: !!user && !!token,
+        isAuthenticated: DATA_SOURCE === 'backend' ? !!user : !!user && !!token,
         isLoading,
         login,
         logout,
