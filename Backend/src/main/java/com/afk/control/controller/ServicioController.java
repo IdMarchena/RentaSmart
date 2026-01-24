@@ -58,6 +58,18 @@ public class ServicioController {
                 new JsonResponse<>(true, "Servicios obtenidos correctamente", lista, 200)
         );
     }
+    @GetMapping("/user/{id}")
+    public ResponseEntity<JsonResponse<List<ServicioDto>>> getAllServiciosByIdUser(@PathVariable Long id) {
+        List<ServicioDto> lista = service.getServicesByUserId(id);
+        if (lista.isEmpty()) {
+            return ResponseEntity.status(404).body(
+                    new JsonResponse<>(false, "No se encontraron servicios", null, 404)
+            );
+        }
+        return ResponseEntity.ok(
+                new JsonResponse<>(true, "Servicios obtenidos correctamente", lista, 200)
+        );
+    }
 
     // ===================== ACTUALIZAR =====================
     @PutMapping("/{id}")
