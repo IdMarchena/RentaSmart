@@ -15,6 +15,33 @@ export interface Usuario {
     updated_at: string;
 }
 
+export interface UsuarioResumen {
+    id: number;
+    nombre: string;
+    correo: string;
+    cedula?: string;
+    telefono?: string;
+    rol: string;
+}
+
+export interface UsuarioRegistrado {
+    id: number;
+    nombre: string;
+    correo: string;
+    telefono: string;
+    ubicacion: string;
+    fechaRegistro: string;
+    estado: 'activo' | 'inactivo' | 'bloqueado';
+}
+
+export interface UsuarioRegistradoSearchResult {
+    id: number;
+    nombre: string;
+    correo: string;
+    telefono: string;
+    ubicacion: string;
+}
+
 export interface Inmueble {
     id: number;
     tipo: 'apartamento' | 'casa' | 'habitacion';
@@ -48,32 +75,45 @@ export interface Inmueble {
 
 export interface Publicacion {
     id: number;
-    inmueble_id: number;
-    usuario_id: string;
-
     titulo: string;
     descripcion: string;
-
-    estado: 'borrador' | 'publicada' | 'pausada' | 'eliminada';
-
-    vistas: number;
-    clicks: number;
-
-    fecha_publicacion: string;
-    fecha_vencimiento?: string;
-
-    created_at: string;
-    updated_at: string;
+    idInmueble: number;
+    fechaPublicacion: string;
+    estadoPublicacion: 'ACTIVA'|'EDITADA'|'BORRADOR' | 'PUBLICADA' | 'REPORTADA' | 'ELIMINADA';
+    calificacionesIds: number[];
+    idUsuario: number;
+    precio: number;
+    multimediaIds: number[];
+    // Datos expandidos opcionales
+    inmueble?: Inmueble;
+    usuario?: any;
+    multimedias?: Multimedia[];
 }
 
-export interface MultimediaPublicacion {
+export interface Inmueble {
     id: number;
-    publicacion_id: number;
+    tipo: 'apartamento' | 'casa' | 'habitacion';
+    descripcion: string;
+    idUbicacion: number;
+    areaTotal: number;
+    numeroBanos: number;
+    numeroPisos: number;
+    capacidadPersonas: number;
+    estrato: number;
+    estadoInmueble: 'disponible' | 'ocupado' | 'mantenimiento' | 'inactivo';
+    nombre: string;
+    idArrendatario?: number;
+    numeroHabitaciones: number;
+}
+
+export interface Multimedia {
+    id: number;
     url: string;
-    tipo: 'imagen' | 'video' | 'tour_360';
+    tipo: 'FOTO' | 'VIDEO' | 'DOCUMENTO';
+    idPublicacion: number;
     orden: number;
-    es_portada: boolean;
-    created_at: string;
+    // Datos expandidos opcionales
+    publicacion?: Publicacion;
 }
 
 export interface Contrato {

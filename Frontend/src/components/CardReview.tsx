@@ -7,7 +7,8 @@ interface CardReviewProps {
         id: number
         puntaje: number
         comentario: string
-        created_at: string
+        created_at?: string // Opcional por si viene una o la otra
+        fecha?: string      // Opcional por si viene una o la otra
         usuario?: {
             nombre: string
         } | null
@@ -15,13 +16,25 @@ interface CardReviewProps {
 }
 
 export const CardReview = ({ calificacion }: CardReviewProps) => {
-    const fechaFormateada = new Date(calificacion.created_at).toLocaleDateString('es-ES', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-    })
+    // 1. Priorizamos 'fecha' o 'created_at' y limpiamos el formato
+    const fechaOriginal = calificacion.fecha || calificacion.created_at || "";
+    
+    // 2. Convertimos "2026-01-22 01:02..." en "2026-01-22T01:02..." 
+    // reemplazando el espacio por una 'T' para que JS lo entienda siempre.
+    const fechaLimpia = fechaOriginal.replace(" ", "T");
 
-    const nombreCompleto = calificacion.usuario?.nombre || 'Usuario'
+    const fechaFormateada = fechaOriginal 
+        ? new Date(fechaLimpia).toLocaleDateString('es-ES', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        })
+        : 'Fecha no disponible';
+
+    const nombreCompleto = 
+        calificacion.usuario?.nombre || 
+        (calificacion as any).nombreUsuario || 
+        'Anónimo';
 
     return (
         <div className="w-full min-h-[150px] rounded-[10px] border-[1px] border-[#C7C7C7] p-5 flex flex-col items-start gap-2 bg-[#FEFEFE]">
