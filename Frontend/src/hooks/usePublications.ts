@@ -108,8 +108,8 @@ export const usePublications = () => {
           usuario_id: user.id,
           titulo: publicationData.publicacion.titulo,
           descripcion: publicationData.publicacion.descripcion,
-          estado: publicationData.publicacion.estado || 'borrador',
-          fecha_publicacion: publicationData.publicacion.estado === 'publicada'
+          estado: publicationData.publicacion.estadoPublicacion || 'borrador',
+          fecha_publicacion: publicationData.publicacion.estadoPublicacion === 'publicada'
             ? new Date().toISOString()
             : null,
           vistas: 0,
