@@ -10,6 +10,7 @@ export interface ServicioRepository {
   getByType(tipo: string): Promise<Servicio[]>
   getByStatus(estado: string): Promise<Servicio[]>
   getByNameAndPrice(nombre: string, precio: number): Promise<Servicio[]>
+  getByUserId(id: number): Promise<Servicio[]>
   changeServiceState(id: number, estado: string): Promise<void>
 }
   

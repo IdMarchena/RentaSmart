@@ -111,6 +111,16 @@ export class BackendServicioRepository implements ServicioRepository {
     return this.mapToEntity(response.data)
   }
 
+  async getByUserId(id: number): Promise<Servicio[]> {
+    const response = await http<JsonResponse<ServicioDto[]>>(`/api/servicios/user/${id}`)
+
+    if (!response.success || !response.data) {
+      throw new Error(response.message || 'Error al buscar servicios por usuario')
+    }
+
+    return this.mapToEntity(response.data)
+  }
+
   // Cambiar el estado de un servicio
   async changeServiceState(id: number, estado: string): Promise<void> {
     await http<JsonResponse<void>>(`/api/servicios/${id}/estado?estado=${estado}`, {
@@ -125,7 +135,7 @@ export class BackendServicioRepository implements ServicioRepository {
       nombre: dto.nombre,
       descripcion: dto.descripcion,
       usuario: { id: dto.idUsuario } as any, // Referencia al usuario
-      tipoServicio: dto.tipoServicio,
+      tipo: dto.tipo,
       precio: dto.precio,
       estadoServicio: dto.estadoServicio,
       ubicacion: { id: dto.idUbicacion } as any, // Referencia a la ubicación
@@ -134,22 +144,17 @@ export class BackendServicioRepository implements ServicioRepository {
   }
 
   // Mapeo de Entity a DTO
-  private mapToDto(entity: Partial<Servicio>): ServicioDto {
+  private mapToDto(entity: any): any {
     return {
-      id: entity.id || 0,
       nombre: entity.nombre || '',
       descripcion: entity.descripcion || '',
-      idUsuario: typeof entity.usuario === 'number' 
-        ? entity.usuario 
-        : (entity.usuario as any)?.id || 0,
-      tipoServicio: entity.tipoServicio || 'OTRO',
+      idUsuario: entity.usuario?.id || entity.idUsuario,
+      tipo: entity.tipo || 'OTRO',
       precio: entity.precio || 0,
       estadoServicio: entity.estadoServicio || 'PENDIENTE',
-      idUbicacion: typeof entity.ubicacion === 'number' 
-        ? entity.ubicacion 
-        : (entity.ubicacion as any)?.id || 0,
+      idUbicacion: entity.ubicacion?.id || entity.idUbicacion,
       calificacionesIds: Array.isArray(entity.calificaciones) 
-        ? entity.calificaciones.map(c => c.id)
+        ? entity.calificaciones.map((c: any) => c.id)
         : [],
     }
   }

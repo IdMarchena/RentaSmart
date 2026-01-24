@@ -1,14 +1,15 @@
 import imgDocument from "../../assets/document.png"
 import type { Contrato } from "@/types/entitys"
 import { generateLegalContractTemplate } from "@/utils/contractGenerator"
-import { generateContractPDF, downloadContractAsText } from "@/utils/pdfGenerator"
+import { generateContractPDF, downloadContractAsText, generateContractPreview } from "@/utils/pdfGenerator"
 
 interface CardViewContratoProps {
     contrato: Contrato // Usamos el tipo real
     onClose?: () => void
+    onContractGenerated?: (contractUrl: string) => void // Nuevo prop para notificar cuando se genera el contrato
 }
 
-const CardViewContrato = ({ contrato, onClose }: CardViewContratoProps) => {
+const CardViewContrato = ({ contrato, onClose, onContractGenerated }: CardViewContratoProps) => {
     // 1. Corregimos nombres de fechas
     const fechaInicio = contrato.fechaInicio ? new Date(contrato.fechaInicio).toLocaleDateString('es-ES') : 'No definida'
     const fechaFin = contrato.fechaFinalizacion ? new Date(contrato.fechaFinalizacion).toLocaleDateString('es-ES') : 'No definida'
@@ -22,6 +23,27 @@ const CardViewContrato = ({ contrato, onClose }: CardViewContratoProps) => {
         } catch (error) {
             console.error('Error generando PDF:', error);
             alert('Error al generar el PDF. Por favor, intenta nuevamente.');
+        }
+    };
+
+    // Función para generar vista previa y notificar al padre
+    const handleGeneratePreview = () => {
+        try {
+            const contractContent = generateLegalContractTemplate(contrato);
+            const contractUrl = generateContractPreview(contractContent);
+            
+            // Notificar al componente padre que se generó el contrato
+            if (onContractGenerated) {
+                onContractGenerated(contractUrl);
+            }
+            
+            // Cerrar el modal actual
+            if (onClose) {
+                onClose();
+            }
+        } catch (error) {
+            console.error('Error generando vista previa:', error);
+            alert('Error al generar la vista previa. Por favor, intenta nuevamente.');
         }
     };
 
@@ -172,15 +194,23 @@ const CardViewContrato = ({ contrato, onClose }: CardViewContratoProps) => {
                     <label className="text-xs font-bold text-blue-800 uppercase">Generar Contrato Legal</label>
                     <div className="w-full flex flex-row gap-2 justify-center">
                         <button
-                            onClick={handleGeneratePDF}
+                            onClick={handleGeneratePreview}
                             className="flex-1 h-[40px] bg-[#EB8369] text-white rounded-[10px] shadow cursor-pointer hover:bg-[#d67359] transition-colors duration-200 flex items-center justify-center gap-2"
                         >
                             <img src={imgDocument} alt="pdf" className="w-4 h-4" />
-                            <span className="font-semibold text-xs">Generar PDF</span>
+                            <span className="font-semibold text-xs">Generar Vista Previa</span>
                         </button>
                         <button
-                            onClick={handleDownloadText}
+                            onClick={handleGeneratePDF}
                             className="flex-1 h-[40px] bg-[#393939] text-white rounded-[10px] shadow cursor-pointer hover:bg-black transition-colors duration-200 flex items-center justify-center gap-2"
+                        >
+                            <span className="font-semibold text-xs">Imprimir PDF</span>
+                        </button>
+                    </div>
+                    <div className="w-full flex flex-row gap-2 justify-center mt-2">
+                        <button
+                            onClick={handleDownloadText}
+                            className="flex-1 h-[35px] bg-gray-600 text-white rounded-[8px] shadow cursor-pointer hover:bg-gray-700 transition-colors duration-200"
                         >
                             <span className="font-semibold text-xs">Descargar TXT</span>
                         </button>

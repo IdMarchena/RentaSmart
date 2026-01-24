@@ -22,6 +22,12 @@ export const CardContratos = ({ contrato, onViewPDF, onDelete }: CardContratosPr
     const [showEditModal, setShowEditModal] = useState(false)
     const [showConfirmationModal, setShowConfirmationModal] = useState(false)
 
+    // Función para manejar cuando se genera un contrato
+    const handleContractGenerated = (contractUrl: string) => {
+        // Notificar al componente padre (ContratoDash) que hay una URL para mostrar
+        onViewPDF(contractUrl);
+    };
+
     // 1. Formatear fecha usando 'fechaInicio' de tu interfaz
     const fechaFormateada = contrato.fechaInicio 
         ? new Date(contrato.fechaInicio).toLocaleDateString('es-ES', {
@@ -119,7 +125,11 @@ export const CardContratos = ({ contrato, onViewPDF, onDelete }: CardContratosPr
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
                     <div className="absolute inset-0 backdrop-blur-sm" onClick={() => setShowViewModal(false)}></div>
                     <div className="relative z-10 w-full max-w-2xl">
-                        <CardViewContrato contrato={contrato} onClose={() => setShowViewModal(false)} />
+                        <CardViewContrato 
+                            contrato={contrato} 
+                            onClose={() => setShowViewModal(false)} 
+                            onContractGenerated={handleContractGenerated}
+                        />
                     </div>
                 </div>
             )}
