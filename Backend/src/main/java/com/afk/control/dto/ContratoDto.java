@@ -1,5 +1,7 @@
 package com.afk.control.dto;
 import com.afk.model.entity.enums.EstadoContrato;
+import jakarta.persistence.Column;
+
 import java.time.LocalDateTime;
 
 public record ContratoDto(
@@ -13,6 +15,8 @@ public record ContratoDto(
         LocalDateTime fechaFinalizacion,
         Integer precio,
         EstadoContrato estadoContrato,
-        Double deposito
+        Double deposito,
+        String clausulasEspeciales,
+        Integer diaDePago
 ) {
 }
