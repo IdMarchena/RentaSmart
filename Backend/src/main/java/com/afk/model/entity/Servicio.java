@@ -47,6 +47,6 @@ public class Servicio {
     private Ubicacion ubicacion;
 
     @Builder.Default
-    @OneToMany(mappedBy = "servicio", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "servicio",fetch = FetchType.LAZY ,cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Calificacion> calificaciones = new ArrayList<>();
 }

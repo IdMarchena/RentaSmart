@@ -19,7 +19,7 @@ public class Calificacion {
     @Column(name = "puntaje_calificacion", nullable = false)
     private Integer puntaje;
 
-    @Column(name="comentario_calificacion",nullable = false,length = 100)
+    @Column(name="comentario_calificacion",nullable = false,length = 500)
     private String comentario;
 
     @ManyToOne(fetch = FetchType.LAZY)

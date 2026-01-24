@@ -55,4 +55,10 @@ public class Contrato {
 
     @Column(name="deposito")
     private Double deposito;
+
+    @Column(name = "clausulas_especiales", nullable = false, length = 1000)
+    private String clausulasEspeciales;
+
+    @Column(name="dia_de_pago")
+    private Integer diaDePago;
 }
