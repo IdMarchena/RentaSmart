@@ -3,26 +3,41 @@ import imgAdd1 from "../../assets/add-1.png"
 import { CardContratos } from "../components/CardContratos"
 import { useState, useEffect } from "react"
 import CardCreateContratos from "../components/CardCreateContratos"
-import { useContratos } from "../hooks/useContratos"
 import { useAuthContext } from "../../context/AuthContext"
+import { useContrato as useContratosHook } from "@/hooks/useContrato"
 
 export const ContratoDash = () => {
     const { user } = useAuthContext()
-    const { contratos, loading, getContratosByUser } = useContratos()
+    const {contratos, loading, getByArrendadorId } = useContratosHook()
     const [OpenPublicModal, setOpenPublicModal] = useState(false)
     const [selectedContratoUrl, setSelectedContratoUrl] = useState<string | null>(null)
 
-    useEffect(() => {
-        if (user) {
-            getContratosByUser(user.id)
-        }
-    }, [user])
-
     const togglePublicModal = () => {
         setOpenPublicModal(!OpenPublicModal)
+    } 
+
+// Cambia esto en tu useEffect y funciones de carga
+useEffect(() => {
+    const load = async () => {
+        if (user?.id) {
+            // Si tu ID es un string (UUID), no uses parseInt. 
+            // Si el repo espera número, úsalo. Si no, quítalo.
+            await getByArrendadorId(Number(user.id)); 
+        }
+    };
+    load();
+}, [user?.id]); // Solo depende del ID del usuario
+
+    const handleCloseModal = () => {
+        setOpenPublicModal(false)
+        if (user?.id) {
+            getByArrendadorId(parseInt(user.id))
+        }
     }
 
+
     const handleViewPDF = (pdfUrl: string | undefined) => {
+            console.log("PDF URL recibida:", pdfUrl)
         if (pdfUrl) {
             setSelectedContratoUrl(pdfUrl)
         }
@@ -56,7 +71,7 @@ export const ContratoDash = () => {
                                         key={contrato.id}
                                         contrato={contrato}
                                         onViewPDF={handleViewPDF}
-                                        onDelete={() => getContratosByUser(user!.id)}
+                                        onDelete={() => getByArrendadorId(parseInt(user!.id))}
                                     />
                                 ))
                             )}
@@ -83,14 +98,11 @@ export const ContratoDash = () => {
             {OpenPublicModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center">
                     <div
-                        className="absolute inset-0 bg-opacity-50 backdrop-blur-sm"
-                        onClick={togglePublicModal}
+                        className="absolute inset-0  bg-opacity-50 backdrop-blur-sm"
+                        onClick={handleCloseModal}
                     ></div>
                     <div className="relative z-10">
-                        <CardCreateContratos onClose={() => {
-                            togglePublicModal()
-                            if (user) getContratosByUser(user.id)
-                        }} />
+                        <CardCreateContratos onClose={handleCloseModal} />
                     </div>
                 </div>
             )}

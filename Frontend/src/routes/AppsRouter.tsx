@@ -17,6 +17,7 @@ export const AppsRouter = () => {
       <Route path="/" element={<Home />} />
       <Route path="/publications" element={<Publications />} />
       <Route path="/publication/:id" element={<Publication />} />
+      <Route path="/publications/:id" element={<Publication />} />
 
       <Route
         path="/admin"

@@ -2,7 +2,7 @@ import { Header } from "../components/Header"
 import { Footer } from "../components/Footer"
 import { useParams } from "react-router-dom"
 import { useEffect, useState } from "react"
-import { usePublications } from "../hooks/usePublications"
+import { usePublicaciones } from "../hooks/usePublicaciones"
 import { useAuthContext } from "../context/AuthContext"
 import { GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api'
 import imgBed from "../assets/bed.png"
@@ -28,7 +28,7 @@ const mapContainerStyle = {
 export const Publication = () => {
     const { id } = useParams<{ id: string }>()
     const { user } = useAuthContext()
-    const { getPublicationById, getCalificaciones, createCalificacion, getPromedioCalificacion, loading } = usePublications()
+    const { getById, getCalificaciones, createCalificacion, getPromedioCalificacion, loading } = usePublicaciones()
     const [publication, setPublication] = useState<any>(null)
     const [calificaciones, setCalificaciones] = useState<any[]>([])
     const [promedio, setPromedio] = useState(0)
@@ -43,22 +43,27 @@ export const Publication = () => {
     useEffect(() => {
         const loadPublication = async () => {
             if (id) {
-                const result = await getPublicationById(parseInt(id))
-                if (result.success && result.data) {
-                    setPublication(result.data)
+                try {
+                    const result = await getById(parseInt(id))
+                    if (result) {
+                        setPublication(result)
 
-                    // Cargar calificaciones
-                    const calResult = await getCalificaciones(parseInt(id))
-                    if (calResult.success && calResult.data) {
-                        setCalificaciones(calResult.data)
-                    }
+                        // Cargar calificaciones
+                        const calResult = await getCalificaciones(parseInt(id))
+                        if (calResult.success && calResult.data) {
+                            setCalificaciones(calResult.data)
+                            console.log("RESEÑAS CARGADAS:", calResult.data);
+                        }
 
-                    // Cargar promedio
-                    const promResult = await getPromedioCalificacion(parseInt(id))
-                    if (promResult.success) {
-                        setPromedio(promResult.promedio || 0)
-                        setTotalCalificaciones(promResult.total || 0)
+                        // Cargar promedio
+                        const promResult = await getPromedioCalificacion(parseInt(id))
+                        if (promResult) {
+                            setPromedio(promResult.promedio || 0)
+                            setTotalCalificaciones(promResult.total || 0)
+                        }
                     }
+                } catch (error) {
+                    console.error('Error al cargar publicación:', error)
                 }
             }
         }
@@ -73,17 +78,18 @@ export const Publication = () => {
 
         if (!id) return
 
-        const result = await createCalificacion(parseInt(id), user.id, puntuacion, comentario)
+        const result = await createCalificacion(parseInt(id), parseInt(user.id), puntuacion, comentario)
 
         if (result.success) {
             // Recargar calificaciones
             const calResult = await getCalificaciones(parseInt(id))
             if (calResult.success && calResult.data) {
                 setCalificaciones(calResult.data)
+                console.log("RESEÑAS RECIBIDAS:", calResult.data);
             }
 
             const promResult = await getPromedioCalificacion(parseInt(id))
-            if (promResult.success) {
+            if (promResult) {
                 setPromedio(promResult.promedio || 0)
                 setTotalCalificaciones(promResult.total || 0)
             }
@@ -120,18 +126,21 @@ export const Publication = () => {
     }
 
     const imagenes = publication.multimedia?.sort((a: any, b: any) => a.orden - b.orden) || []
-    const precioFormateado = publication.inmueble?.precio_mensual?.toLocaleString('es-CO', {
+    const precioFormateado = publication.precio?.toLocaleString('es-CO', {
         style: 'currency',
         currency: 'COP',
         minimumFractionDigits: 0
     }) || 'N/A'
 
-    const telefono = publication.usuario?.telefono || '3001234567'
+    const telefono = publication.usuario?.telefono || '3001234567' || publication.usuario?.telefono?.toString()
     const whatsappLink = `https://wa.me/57${telefono}?text=Hola, estoy interesado en ${publication.titulo}`
 
-    const mapCenter = publication.inmueble?.latitud && publication.inmueble?.longitud
-        ? { lat: publication.inmueble.latitud, lng: publication.inmueble.longitud }
-        : null
+    const mapCenter = publication.inmueble?.ubicacion?.latitud && publication.inmueble?.ubicacion?.longitud
+    ? { 
+        lat: Number(publication.inmueble.ubicacion.latitud), 
+        lng: Number(publication.inmueble.ubicacion.longitud) 
+      }
+    : null
 
     return (
         <>
@@ -171,13 +180,13 @@ export const Publication = () => {
                             <div className="flex flex-row items-center gap-1">
                                 <img src={imgBed} alt="bed" className="w-4 h-4" />
                                 <span className="text-[#393939] text-sm md:text-sm font-bold">
-                                    {publication.inmueble?.num_habitaciones || 0} Hab
+                                    {publication.inmueble?.numeroHabitaciones || 0} Hab
                                 </span>
                             </div>
                             <div className="flex flex-row items-center gap-1">
                                 <img src={imgBath} alt="bath" className="w-4 h-4" />
                                 <span className="text-[#393939] text-sm md:text-sm font-bold">
-                                    {publication.inmueble?.num_banos || 0} Baños
+                                    {publication.inmueble?.numeroBanos || 0} Baños
                                 </span>
                             </div>
                             <div className="flex flex-row items-center gap-1">
@@ -189,7 +198,7 @@ export const Publication = () => {
                             <div className="flex flex-row items-center gap-1">
                                 <img src={imgMap} alt="map" className="w-4 h-4" />
                                 <span className="text-[#393939] text-sm md:text-sm font-bold">
-                                    {publication.inmueble?.ciudad}, {publication.inmueble?.departamento}
+                                    {publication.inmueble?.ubicacion?.nombre || 'Ubicación no disponible'}
                                 </span>
                             </div>
                         </div>
@@ -197,7 +206,7 @@ export const Publication = () => {
                             <div className="flex flex-row items-center gap-1">
                                 <img src={imgRuler} alt="ruler" className="w-4 h-4" />
                                 <span className="text-[#393939] text-sm md:text-sm font-bold">
-                                    {publication.inmueble?.area_total || 0} m²
+                                    {publication.inmueble?.areaTotal || 0} m²
                                 </span>
                             </div>
                             <div className="flex flex-row items-center gap-1">
@@ -211,13 +220,15 @@ export const Publication = () => {
                             <div className="flex flex-row items-center gap-1">
                                 <img src={imgDeliver} alt="furnished" className="w-4 h-4" />
                                 <span className="text-[#393939] text-sm md:text-sm font-bold">
-                                    {publication.inmueble?.amoblado ? 'Amoblado' : 'Sin amoblar'}
+                                    {publication.inmueble?.estadoInmueble === 'LIBRE_AMOBLADO' ? 'Amoblado' : 
+                                     publication.inmueble?.estadoInmueble === 'LIBRE_NO_AMOBLADO' ? 'Sin amoblar' :
+                                     publication.inmueble?.estadoInmueble || 'N/A'}
                                 </span>
                             </div>
                             <div className="flex flex-row items-center gap-1">
                                 <img src={imgUsers} alt="capacity" className="w-4 h-4" />
                                 <span className="text-[#393939] text-sm md:text-sm font-bold">
-                                    C.{publication.inmueble?.capacidad_personas || 0} personas
+                                    C.{publication.inmueble?.capacidadPersonas || 0} personas
                                 </span>
                             </div>
                         </div>

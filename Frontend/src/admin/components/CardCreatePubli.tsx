@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { MapPicker } from '@/components/MapPicker'
-import { usePublications } from '@/hooks/usePublications'
+import { usePublicaciones } from '@/hooks/usePublicaciones'
 import imgUpload from '@/assets/upload.png'
 import { useNavigate } from 'react-router-dom'
 interface CardCreatePubliProps {
@@ -8,7 +8,7 @@ interface CardCreatePubliProps {
 }
 
 export const CardCreatePubli = ({ onClose }: CardCreatePubliProps) => {
-    const { createPublication, loading } = usePublications()
+    const { create, loading } = usePublicaciones()
     const navigate = useNavigate()
     const [formData, setFormData] = useState({
         // Datos del inmueble
@@ -95,40 +95,43 @@ export const CardCreatePubli = ({ onClose }: CardCreatePubliProps) => {
             return
         }
 
-        const result = await createPublication({
+        const result = await create({
             inmueble: {
                 tipo: formData.tipo,
-                titulo: formData.titulo,
                 descripcion: formData.descripcion,
-                ciudad: formData.ciudad,
-                departamento: formData.departamento,
-                direccion: formData.direccion,
-                latitud: formData.latitud,
-                longitud: formData.longitud,
-                area_total: formData.area_total,
-                num_habitaciones: formData.num_habitaciones,
-                num_banos: formData.num_banos,
-                num_pisos: formData.num_pisos,
-                capacidad_personas: formData.capacidad_personas,
-                amoblado: formData.amoblado,
-                precio_mensual: formData.precio_mensual,
+                ubicacion: { 
+                    id: 1,
+                    padre: null as any,
+                    nombre: formData.ciudad,
+                    latitud: formData.latitud,
+                    longitud: formData.longitud,
+                    estado: 'ACTIVA' as any,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                },
+                areaTotal: formData.area_total,
+                numeroBanos: formData.num_banos,
+                numeroPisos: formData.num_pisos,
+                capacidadPersonas: formData.capacidad_personas,
+                estrato: formData.estrato,
+                numeroHabitaciones: formData.num_habitaciones
             },
             publicacion: {
                 titulo: formData.titulo,
                 descripcion: formData.descripcion,
-                estado: 'publicada',
+                precio: formData.precio_mensual
             },
-            imagenes,
+            imagenes: imagenesPreview // Enviamos las URLs de las imágenes
         })
 
-        if (result.success) {
+        if (result) {
             setSuccess(true)
             navigate('/admin/publications')
             setTimeout(() => {
                 onClose?.()
             }, 2000)
         } else {
-            setError(result.error || 'Error al crear la publicación')
+            setError('Error al crear la publicación')
         }
     }
 

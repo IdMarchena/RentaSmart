@@ -5,13 +5,13 @@ import { CardChart3 } from "../components/CardChart-3"
 import { CardsPubli } from "../components/CardsPubli"
 import { CardCreatePubli } from "@/admin/components/CardCreatePubli.tsx"
 import { useState, useEffect } from "react"
-import { usePublications } from "@/hooks/usePublications"
+import { usePublicaciones } from "@/hooks/usePublicaciones"
 import { useAuthContext } from "@/context/AuthContext"
 
 export const PublicationDash = () => {
     const [OpenPublicModal, setOpenPublicModal] = useState(false)
     const { user } = useAuthContext()
-    const { publications, loading, getPublicationsByUser } = usePublications()
+    const { publications, loading, getPublicationsByUser } = usePublicaciones()
 
     const togglePublicModal = () => {
         setOpenPublicModal(!OpenPublicModal)
@@ -20,7 +20,7 @@ export const PublicationDash = () => {
     // Cargar publicaciones del usuario al montar
     useEffect(() => {
         if (user?.id) {
-            getPublicationsByUser(user.id)
+            getPublicationsByUser(parseInt(user.id))
         }
     }, [user])
 
@@ -28,7 +28,7 @@ export const PublicationDash = () => {
     const handleCloseModal = () => {
         setOpenPublicModal(false)
         if (user?.id) {
-            getPublicationsByUser(user.id)
+            getPublicationsByUser(parseInt(user.id))
         }
     }
 
@@ -55,12 +55,12 @@ export const PublicationDash = () => {
                                     <p className="text-[#393939] text-sm">No tienes publicaciones aún. ¡Crea tu primera publicación!</p>
                                 </div>
                             ) : (
-                                publications.map((pub) => (
-                                    <CardsPubli key={pub.id} publicacion={pub} onDelete={() => getPublicationsByUser(user!.id)} />
+                                publications.map((pub: any) => (
+                                    <CardsPubli key={pub.id} publicacion={pub} onDelete={() => getPublicationsByUser(parseInt(user!.id))} />
                                 ))
                             )}
                         </div>
-                        <CardChart2 publications={publications} />
+                        {!loading && <CardChart2 publications={publications} />}
                     </div>
                     <div className="w-full h-[400px] flex flex-row items-center justify-start gap-5 mt-5">
                         <CardChart3 publications={publications} />

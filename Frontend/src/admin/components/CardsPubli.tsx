@@ -7,6 +7,7 @@ import { useState } from "react"
 import { CardConfirmation } from "@/admin/components/CardConfirmation.tsx"
 import { useNavigate } from "react-router-dom"
 import { usePublications } from "@/hooks/usePublications"
+import { useInmuebles } from "@/hooks/useInmuebles"
 import type { Publicacion, Inmueble } from "@/types/entities"
 
 interface PublicacionCompleta extends Publicacion {
@@ -55,7 +56,7 @@ export const CardsPubli = ({ publicacion, onDelete }: CardsPubliProps) => {
         publicacion.multimedia?.[0]?.url ||
         imgVista
 
-    const fecha = new Date(publicacion.created_at).toLocaleDateString('es-ES', {
+    const fecha = new Date(publicacion.fechaPublicacion).toLocaleDateString('es-ES', {
         day: 'numeric',
         month: 'short',
         year: 'numeric'

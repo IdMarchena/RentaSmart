@@ -150,7 +150,7 @@ export const CardEditPubli = ({ onClose, publicacion }: CardEditPublicProps) => 
                 for (let i = 0; i < nuevasImagenes.length; i++) {
                     const file = nuevasImagenes[i]
                     const fileExt = file.name.split('.').pop()
-                    const fileName = `${publicacion.inmueble_id}_${Date.now()}_${i}.${fileExt}`
+                    const fileName = `${publicacion.idInmueble}_${Date.now()}_${i}.${fileExt}`
 
                     // Subir a Storage
                     const { error: uploadError } = await supabase.storage
