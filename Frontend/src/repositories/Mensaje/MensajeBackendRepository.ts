@@ -120,13 +120,10 @@ export class BackendMensajeRepository implements MensajeRepository {
   }
 
   // Mapeo de Entity a DTO
-  private mapToDto(entity: Partial<Mensaje>): MensajeDto {
+  private mapToDto(entity: any): any {
     return {
-      id: entity.id || 0,
-      idChat: typeof entity.chat === 'number' 
-      ? entity.chat : (entity.chat?.id || 0),
-      idEmisor: typeof entity.emisor === 'number' 
-      ? entity.emisor : (entity.emisor as any)?.id || 0,
+      idChat: entity.chat.id || entity.chat.id,
+      idEmisor: entity.emisor.id || entity.emisor.id,
       contenido: entity.contenido || '',
       estado: entity.estado || 'ACTIVO',
       fechaEnvio: entity.fechaEnvio || new Date().toISOString(),

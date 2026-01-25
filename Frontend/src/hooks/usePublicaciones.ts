@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { publicacionRepository, inmuebleRepository, usuariosRepository, calificacionRepository } from '@/repositories'
+import {  usuariosRepository, calificacionRepository } from '@/repositories'
 import { useAuthContext } from '../context/AuthContext'
 import type { Publicacion } from '@/types/entitys'
 import type { Inmueble } from '@/types/entitys'
@@ -10,7 +10,6 @@ import { BackendUbicacionRepository } from '@/repositories/Ubicacion/UbicacionBa
 import { BackendCalificacionRepository } from '@/repositories/Calificacion/CalificacionRepository'
 import { BackendMultimediaRepository } from '@/repositories/multimedia/MultimediaRepository.backend'
 import { CalificacionService } from '@/services/CalificacionService'
-import { usuariosRepositoryBackend } from '@/repositories/usuarios/UsuariosRepository.backend'
 import { BackendServicioRepository } from '@/repositories/Servicio/ServicioBackendRepository'
 export const usePublicaciones = () => {
   const [loading, setLoading] = useState(false)

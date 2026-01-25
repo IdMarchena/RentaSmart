@@ -5,6 +5,7 @@ import type { Mensaje } from '@/types/entitys'
 export const useMensaje = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [mensajes, setMensajes] = useState<Mensaje[]>([]);
 
   const getAll = async (): Promise<Mensaje[]> => {
     setLoading(true)
@@ -12,6 +13,7 @@ export const useMensaje = () => {
     
     try {
       const result = await mensajeRepository.getAll()
+      setMensajes(result); // Guardamos los mensajes obtenidos en el estado
       return result
     } catch (err: any) {
       const errorMessage = err.message || 'Error al obtener mensajes'
@@ -86,12 +88,14 @@ export const useMensaje = () => {
   }
 
   // Métodos especializados
+
   const getByChat = async (chatId: number, pagina: number, tamano: number): Promise<Mensaje[]> => {
     setLoading(true)
     setError(null)
     
     try {
       const result = await mensajeRepository.getByChat(chatId, pagina, tamano)
+      setMensajes(result); // Guardamos los mensajes obtenidos en el estado
       return result
     } catch (err: any) {
       const errorMessage = err.message || 'Error al obtener mensajes del chat'
@@ -139,6 +143,7 @@ export const useMensaje = () => {
     
     try {
       const result = await mensajeRepository.searchInChat(chatId, query)
+      setMensajes(result); // Almacena los mensajes obtenidos de la búsqueda
       return result
     } catch (err: any) {
       const errorMessage = err.message || 'Error al buscar en el chat'
@@ -152,6 +157,7 @@ export const useMensaje = () => {
   return {
     loading,
     error,
+    mensajes, // Retorna los mensajes almacenados
     getAll,
     getById,
     create,
@@ -160,6 +166,6 @@ export const useMensaje = () => {
     getByChat,
     markAsRead,
     countUnreadMessages,
-    searchInChat
+    searchInChat // Incluye el método de búsqueda en el retorno
   }
 }

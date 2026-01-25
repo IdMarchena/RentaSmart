@@ -16,6 +16,15 @@ export class BackendChatRepository implements ChatRepository {
 
     return this.mapToEntity(response.data)
   }
+    async getAllByUserId(id: number): Promise<Chat[]> {
+    const response = await http<JsonResponse<ChattDto[]>>(`/api/v1/chats/user/${id}`)
+
+    if (!response.success || !response.data) {
+      throw new Error(response.message || 'Error al obtener los chats')
+    }
+
+    return this.mapToEntity(response.data)
+  }
 
   // Obtener un chat por su ID
   async getById(id: number): Promise<Chat | null> {
@@ -69,7 +78,7 @@ export class BackendChatRepository implements ChatRepository {
 
   // Obtener un chat por nombre
   async getByName(nombre: string): Promise<Chat | null> {
-    const response = await http<JsonResponse<ChattDto>>(`/api/v1/chats/${nombre}`)
+    const response = await http<JsonResponse<ChattDto>>(`/api/v1/chats/nombre/${nombre}`)
 
     if (!response.success || !response.data) {
       return null
@@ -93,19 +102,14 @@ export class BackendChatRepository implements ChatRepository {
   }
 
   // Mapeo de Entity a DTO
-  private mapToDto(entity: Partial<Chat>): ChattDto {
+  private mapToDto(entity: any): any {
     return {
-      id: entity.id || 0,
       nombre: entity.nombre!,
-      idUsuarioA: typeof entity.usuarioA === 'number' 
-        ? entity.usuarioA 
-        : (entity.usuarioA as any)?.id || 0,
-      idUsuarioB: typeof entity.usuarioB === 'number' 
-        ? entity.usuarioB 
-        : (entity.usuarioB as any)?.id || 0,
-      idsMensaje: entity.mensajes?.map((mensaje) => mensaje.id) || [],
+      idUsuarioA: entity.idUsuarioA || entity.usuarioA.id,
+      idUsuarioB: entity.idUsuarioB || entity.usuarioB.id,
+      idsMensaje: entity.mensajes?.map((mensaje: any) => mensaje.id) || [],
       estado_chat: entity.estado_chat!,
-      fechaCreacion: entity.fechaCreacion!,
+      fechaCreacion: entity.fechaCreacion! || new Date().toISOString(),
     }
   }
 }
