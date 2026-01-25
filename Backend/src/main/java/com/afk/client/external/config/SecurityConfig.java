@@ -83,6 +83,7 @@
                     .authorizeHttpRequests(auth -> auth
                             .requestMatchers(
                                     "/api/v1/auth/**",
+                                    "/api/usuarios/**",
                                     "/oauth2/**",  // Add this line for OAuth2 callback
                                     "/login/oauth2/**",
                                     "/api/ubicaciones/**",
