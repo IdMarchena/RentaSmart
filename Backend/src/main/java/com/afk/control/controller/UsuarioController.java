@@ -120,4 +120,20 @@
                     )
             );
         }
+        @GetMapping("userVerificate/{idUser}/rol")
+        public ResponseEntity<JsonResponse<Boolean>> verificarRol(
+                @PathVariable Long idUser,
+                @RequestParam String rol) {
+
+            boolean tieneRol = usuarioService.verificarRol(idUser, rol);
+            if (tieneRol) {
+                return ResponseEntity.ok(
+                        new JsonResponse<>(true, "El usuario tiene el rol solicitado", true, 200)
+                );
+            } else {
+                return ResponseEntity.status(403).body(
+                        new JsonResponse<>(false, "El usuario no tiene el rol solicitado", false, 403)
+                );
+            }
+        }
     }
