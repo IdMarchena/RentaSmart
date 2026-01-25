@@ -6,6 +6,7 @@ import com.afk.model.entity.Mensaje;
 import com.afk.model.entity.enums.EstadoChat;
 import com.afk.model.repository.MensajeRepository;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -13,7 +14,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+
+@Slf4j
 @Service
 @AllArgsConstructor
 public class MensajeServiceImpl implements MensajeService {
@@ -59,12 +64,12 @@ public class MensajeServiceImpl implements MensajeService {
 
     @Override
     public List<MensajeDto> obtenerMensajesPorChat(Long chatId, int pagina, int tamaño) {
+        log.info("Obteniendo mensajes por chat con paginación reversible");
         Pageable pageable = PageRequest.of(pagina, tamaño, Sort.by("fechaEnvio").descending());
-        return repository.findByChatIdOrderByFechaEnvioDesc(chatId, pageable)
-                .getContent()
-                .stream()
-                .map(mapper::toDto)
-                .toList();
+        List<Mensaje> mensajes = repository.findByChatIdOrderByFechaEnvioDesc(chatId, pageable).getContent();
+        List<Mensaje> listaRevertida = new ArrayList<>(mensajes);
+        Collections.reverse(listaRevertida);
+        return mapper.toDtoList(listaRevertida);
     }
 
     @Override

@@ -10,9 +10,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,16 +27,11 @@ public class ChatServiceImpl implements ChatService {
     @Transactional
     public ChattDto crearChat(ChattDto chattDto) {
         if (chattDto == null) throw new IllegalArgumentException("El DTO no puede ser nulo");
-
-        // 1. Validar si ya existe un chat entre estos dos usuarios (Pareja única)
         Optional<Chat> chatExistente = chatRepository.findByUsuarios(chattDto.idUsuarioA(), chattDto.idUsuarioB());
 
         if (chatExistente.isPresent()) {
-            // En lugar de lanzar error, devolvemos el chat que ya existe (comportamiento estándar de chat)
             return mapper.toDto(chatExistente.get());
         }
-
-        // 2. Si no existe, lo creamos
         Chat nuevoChat = mapper.toEntity(chattDto);
         nuevoChat.setFechaCreacion(LocalDateTime.now());
         nuevoChat.setEstado_chat(EstadoChat.ACTIVO);
@@ -87,5 +84,15 @@ public class ChatServiceImpl implements ChatService {
             throw new RuntimeException("Chat no encontrado");
         }
         chatRepository.deleteById(id);
+    }
+    @Override
+    @Transactional(readOnly = true)
+    public List<ChattDto> findAllChatsByIdUser(Long idUser){
+        List<Chat> chats = chatRepository.findAll();
+        if(chats.isEmpty()) throw new IllegalArgumentException("El atributo 'chats' no existe");
+        List<Chat> chatsFiltrados = chats.stream()
+                .filter(c -> c.getUsuarioa().getId().equals(idUser) || c.getUsuariob().getId().equals(idUser))
+                .collect(Collectors.toList());
+        return mapper.toDtoList(chatsFiltrados);
     }
 }

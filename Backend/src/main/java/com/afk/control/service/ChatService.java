@@ -10,5 +10,6 @@ public interface ChatService {
     ChattDto buscarChatPorId(Long id);
     ChattDto buscarChatPorNombre(String nombre);
     void deleteChat(Long id);
+    List<ChattDto> findAllChatsByIdUser(Long idUser);
 
 }
