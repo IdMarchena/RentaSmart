@@ -14,5 +14,8 @@ export interface UsuariosRepository {
   create(data: Omit<UsuarioResumen, 'id'>): Promise<UsuarioResumen>
   update(id: number, data: Partial<UsuarioResumen>): Promise<UsuarioResumen>
   delete(id: number): Promise<void>
+  
+  // Nuevo método para verificar rol
+  verificarRol(idUser: number, rol: string): Promise<boolean>;
 }
 

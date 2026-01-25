@@ -11,6 +11,7 @@ import { ServiciosDash } from "../admin/pages/ServiciosDash";
 import { UsuarioDash } from "../admin/pages/UsuarioDash";
 import { ServiciosAdminDash } from "../admin/pages/ServiciosAdminDash.tsx";
 import { ProtectedRoute } from "../components/ProtectedRoute";
+import { PublicacionesRoute, ContratosRoute, ServiciosRoute, MensajesRoute, ProfesionalRoute } from "../components/RolProtectedRoute";
 
 export const AppsRouter = () => {
   return (
@@ -33,7 +34,9 @@ export const AppsRouter = () => {
         path="/admin/publications"
         element={
           <ProtectedRoute>
-            <PublicationDash />
+            <PublicacionesRoute>
+              <PublicationDash />
+            </PublicacionesRoute>
           </ProtectedRoute>
         }
       />
@@ -41,7 +44,9 @@ export const AppsRouter = () => {
         path="/admin/contracts"
         element={
           <ProtectedRoute>
-            <ContratoDash />
+            <ContratosRoute>
+              <ContratoDash />
+            </ContratosRoute>
           </ProtectedRoute>
         }
       />
@@ -49,7 +54,9 @@ export const AppsRouter = () => {
         path="/admin/messages"
         element={
           <ProtectedRoute>
-            <MensajesDash />
+            <MensajesRoute>
+              <MensajesDash />
+            </MensajesRoute>
           </ProtectedRoute>
         }
       />
@@ -57,7 +64,9 @@ export const AppsRouter = () => {
         path="/admin/services"
         element={
           <ProtectedRoute>
-            <ServiciosDash />
+            <ServiciosRoute>
+              <ServiciosDash />
+            </ServiciosRoute>
           </ProtectedRoute>
         }
       />

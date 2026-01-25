@@ -6,10 +6,12 @@ import imgSearch from "../../assets/search.png";
 import { CardSearchServicios } from "@/admin/components/CardSearchServicios.tsx";
 import { Link } from "react-router-dom";
 import { useServicio } from "@/hooks/useServicio";
+import { useRol } from "@/hooks/useRol";
 import type { Servicio } from "@/types/entitys";
 
 export const ServiciosDash = () => {
     const { getAll, getByName, loading } = useServicio();
+    const { puedeAccederProfesional } = useRol();
     
     // Estados para los datos reales
     const [todosLosServicios, setTodosLosServicios] = useState<Servicio[]>([]);
@@ -45,13 +47,16 @@ export const ServiciosDash = () => {
             <div className="w-[85%] h-full flex flex-col items-start justify-start p-5 overflow-y-scroll custom-scrollbar-2 max-[1082px]:w-[100%]">
                 <div className="w-full h-[100px] flex flex-row items-center justify-between mt-3 cursor-pointer">
                     <h1 className="text-[#393939] text-[20px] font-bold">  Servicios</h1>
-                    <Link 
-                        to="/admin/servicesAdmin"
-                        className="h-[35px] flex flex-row items-center justify-center gap-1 rounded-[10px] bg-[#EB8369] p-2 shadow-[0px_10px_10px_rgba(0,0,0,0.2)] hover:scale-105 transition-transform"
-                    >
-                        <img src={imgUserAdmin} alt="" className="w-[20px] h-[20px] object-cover" />
-                        <span className="text-[#FFFFFF] text-[12px] font-bold">Profesional</span>
-                    </Link>
+                    {/* Botón Profesional - Solo visible para PRESTADOR_SERVICIO */}
+                    {puedeAccederProfesional() && (
+                        <Link 
+                            to="/admin/servicesAdmin"
+                            className="h-[35px] flex flex-row items-center justify-center gap-1 rounded-[10px] bg-[#EB8369] p-2 shadow-[0px_10px_10px_rgba(0,0,0,0.2)] hover:scale-105 transition-transform"
+                        >
+                            <img src={imgUserAdmin} alt="" className="w-[20px] h-[20px] object-cover" />
+                            <span className="text-[#FFFFFF] text-[12px] font-bold">Profesional</span>
+                        </Link>
+                    )}
                 </div>
 
                 <div className="w-full h-[100vh] flex flex-row items-center justify-start gap-10 mt-5 max-[890px]:flex-col max-[890px]:h-[200vh]">

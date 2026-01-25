@@ -132,10 +132,29 @@ export const usuariosRepositoryBackend: UsuariosRepository = {
   
       return response.data
     },
-  
+
     async delete(id: number): Promise<void> {
-      await http<JsonResponse<void>>(`/api/usuarios/${id}`, {
+      const response = await http<JsonResponse<void>>(`/api/usuarios/${id}`, {
         method: 'DELETE'
       })
-    }
-};
+      
+      if (!response.success) {
+        throw new Error(response.message || 'Error al eliminar usuario')
+      }
+    },
+
+    async verificarRol(idUser: number, rol: string): Promise<boolean> {
+      try {
+        const response = await http<JsonResponse<boolean>>(`/api/usuarios/userVerificate/${idUser}/rol?rol=${rol}`, {
+          method: 'GET',
+        });
+        
+        console.log(`🔍 Verificando rol: usuario ${idUser}, rol ${rol}`, response);
+        
+        return response.success ? response.data : false;
+      } catch (error) {
+        console.error('❌ Error verificando rol:', error);
+        return false;
+      }
+    },
+  };
