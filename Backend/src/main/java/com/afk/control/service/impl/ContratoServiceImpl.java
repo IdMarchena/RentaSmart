@@ -73,7 +73,7 @@ public class ContratoServiceImpl implements ContratoService {
         List<Contrato> contratos = repository.findAll();
         if(contratos.isEmpty()) throw new NoSuchElementException("Usuario no encontrado");
         List<Contrato> listaFiltrada = contratos.stream()
-                .filter(c -> c.getUsuarioArrendador().getId().equals(idUsuario))
+                .filter(c -> c.getUsuarioArrendador().getId().equals(idUsuario) ||c.getUsuarioArrendatario().getId().equals(idUsuario))
                 .collect(Collectors.toList());
         log.info("esta es la cantidad de contratos del vale:"+listaFiltrada.size());
         return mapper.toDtoList(listaFiltrada);
