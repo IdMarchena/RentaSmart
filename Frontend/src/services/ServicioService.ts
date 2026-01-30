@@ -41,7 +41,7 @@ export class ServicioService {
 
                 console.log(`🏠 Buscando datos completos para Ubicacion ID: ${idUbicacion}`);
                 
-                const ubicacionData = await this.ubicacionRepo.getById(idUbicacion);
+                let ubicacionData = await this.ubicacionRepo.getById(idUbicacion);
                 
                 if (ubicacionData) {
                     const rawUbi = (ubicacionData as any).idUbicacion;

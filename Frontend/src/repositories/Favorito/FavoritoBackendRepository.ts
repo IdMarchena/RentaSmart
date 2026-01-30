@@ -70,18 +70,16 @@ export class BackendFavoritoRepository implements FavoritoRepository {
       id: dto.id,
       usuario: { id: dto.idUsuario } as any,  // Relacionado con Usuario
       publicacion: { id: dto.idPublicacion } as any, // Relacionado con Publicación
-      fechaCreacion: dto.fechaCreacion,
+      fecha: dto.fecha,
     }))
   }
 
   // Mapeo de Entity a DTO
-  private mapToDto(entity: Partial<Favorito>): FavoritoDto {
+  private mapToDto(entity: any): any {
     return {
-      id: entity.id || 0,
-      idUsuario: typeof entity.usuario === 'number' 
-      ? entity.usuario : (entity.usuario as any)?.id || 0,
-      idPublicacion: typeof entity.publicacion === 'number' ? entity.publicacion : entity.publicacion?.id || 0,
-      fechaCreacion: entity.fechaCreacion!,
+      idUsuario: entity.usuario?.id || entity.usuario,
+      idPublicacion: entity.publicacion?.id || entity.publicacion,
+      fecha: entity.fecha! || new Date().toISOString(),
     }
   }
 }

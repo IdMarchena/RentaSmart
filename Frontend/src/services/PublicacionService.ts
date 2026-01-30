@@ -36,6 +36,7 @@ export class PublicacionService {
   }
 
   async getFullPublicacion(id: number): Promise<Publicacion> {
+    console.log("llamando al publicaciones aca esta el error")
     console.log(`🚀 Iniciando getFullPublicacion para ID: ${id}`);
     
     const publicacion = await this.pubRepo.getById(id);
@@ -97,16 +98,12 @@ if (!publicacion.multimedia || publicacion.multimedia.length === 0) {
     }
 }
 
-    // DENTRO de getFullPublicacion en PublicacionService.ts
-
 if (!publicacion.calificaciones || publicacion.calificaciones.length === 0) {
   console.log(`⭐ Obteniendo e HIDRATANDO calificaciones para publicación ID: ${id}`);
   try {
-    // 1. Obtenemos los DTOs básicos (solo tienen IDs)
+  
     const calificacionesBasicas = await this.califRepo.getByPublicacionId(id);
-    
-    // 2. Usamos CalificacionService para obtener cada calificación COMPLETA (con usuario)
-    // Promise.all permite que todas las peticiones se hagan en paralelo
+  
     const calificacionesCompletas = await Promise.all(
       calificacionesBasicas.map(c => this.CalificacionService.getFullCalificacion(c.id))
     );
@@ -123,11 +120,6 @@ if (!publicacion.calificaciones || publicacion.calificaciones.length === 0) {
     console.log(`🎯 Publicación final completa:`, publicacion);
     return publicacion;
   }
-
-
-
-
-
 
   private mapTipoMultimedia(tipo: string): Multimedia['tipo'] {
     if (tipo === 'FOTO' || tipo === 'IMAGEN') return 'IMAGEN';

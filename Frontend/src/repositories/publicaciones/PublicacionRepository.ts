@@ -35,7 +35,9 @@ export interface PublicacionRepository {
   getByIdArrendatario(id: number): Promise<Publicacion[]>
   getByIdUsuario(id: number): Promise<Publicacion[]>
   getTop6(): Promise<Publicacion[]>
+  getByTipoInmueble(tipo: string): Promise<Publicacion[]>
+  getByUbicacion(ubicacion: string): Promise<Publicacion[]>
+  getByEstrato(estrato: string): Promise<Publicacion[]>
   
-  // Acciones
   cambiarEstado(id: number, estado: string): Promise<void>
 }

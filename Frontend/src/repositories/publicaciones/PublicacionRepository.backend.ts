@@ -200,6 +200,27 @@ export class BackendPublicacionRepository implements PublicacionRepository {
     // Mapear cada DTO a Entity y filtrar los nulos
     return response.data.map(dto => this.mapToEntity(dto)).filter(pub => pub !== null)
   }
+    async getByTipoInmueble(tipo: string): Promise<Publicacion[]> {
+    const response = await http<JsonResponse<any[]>>(`/api/publicaciones/tipo?tipo=${encodeURIComponent(tipo)}`)
+    
+    if (!response.success || !response.data) return []
+    
+    return response.data.map(dto => this.mapToEntity(dto)).filter(pub => pub !== null)
+  }
+    async getByUbicacion(ubicacion:string): Promise<Publicacion[]> {
+    const response = await http<JsonResponse<any[]>>(`/api/publicaciones/ubicacion?ubicacion=${encodeURIComponent(ubicacion)}`)
+    
+    if (!response.success || !response.data) return []
+    
+    return response.data.map(dto => this.mapToEntity(dto)).filter(pub => pub !== null)
+  }
+      async getByEstrato(estrato:string): Promise<Publicacion[]> {
+    const response = await http<JsonResponse<any[]>>(`/api/publicaciones/estratoInmueble?estrato=${encodeURIComponent(estrato)}`)
+    
+    if (!response.success || !response.data) return []
+    
+    return response.data.map(dto => this.mapToEntity(dto)).filter(pub => pub !== null)
+  }
 
   async cambiarEstado(id: number, estado: string): Promise<void> {
     await http<JsonResponse<void>>(`/api/publicaciones/${id}/estado?estado=${encodeURIComponent(estado)}`, {
@@ -238,7 +259,7 @@ private mapToEntity(dto: any): Publicacion {
     descripcion: dto.descripcion || dto.descripcion_publicacion,
     precio: dto.precio,
     fechaPublicacion: dto.fechaPublicacion || dto.fecha_publicacion,
-    estadoPublicacion: dto.estadoPublicacion || dto.estado_publicacion,
+    estadoPublicacion: dto.estadoPublicacion || dto.estado_publicacion || 'ACTIVA', // Valor por defecto
     usuario: { id: dto.idUsuario || dto.id_usuario } as any,
     inmueble: { id: dto.idInmueble } as any,
     multimedia: dto.multimedia ?? [],
