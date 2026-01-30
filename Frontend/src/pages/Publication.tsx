@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom"
 import { useEffect, useState } from "react"
 import { usePublicaciones } from "../hooks/usePublicaciones"
 import { useAuthContext } from "../context/AuthContext"
+import { useFavorito } from "../hooks/useFavorito"
 import { GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api'
 import imgBed from "../assets/bed.png"
 import imgBath from "../assets/bath.png"
@@ -29,46 +30,112 @@ export const Publication = () => {
     const { id } = useParams<{ id: string }>()
     const { user } = useAuthContext()
     const { getById, getCalificaciones, createCalificacion, getPromedioCalificacion, loading } = usePublicaciones()
+    const { create, remove, getByUsuarioId } = useFavorito()
     const [publication, setPublication] = useState<any>(null)
     const [calificaciones, setCalificaciones] = useState<any[]>([])
     const [promedio, setPromedio] = useState(0)
     const [totalCalificaciones, setTotalCalificaciones] = useState(0)
     const [showModalReview, setShowModalReview] = useState(false)
     const [errorMessage, setErrorMessage] = useState('')
+    const [isFavorito, setIsFavorito] = useState(false)
+    const [loadingFav, setLoadingFav] = useState(false)
 
     const { isLoaded } = useJsApiLoader({
         googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ''
     })
 
     useEffect(() => {
-        const loadPublication = async () => {
-            if (id) {
+        const checkFavorito = async () => {
+            if (user?.id && publication?.id) {
                 try {
-                    const result = await getById(parseInt(id))
-                    if (result) {
-                        setPublication(result)
-
-                        // Cargar calificaciones
-                        const calResult = await getCalificaciones(parseInt(id))
-                        if (calResult.success && calResult.data) {
-                            setCalificaciones(calResult.data)
-                            console.log("RESEÑAS CARGADAS:", calResult.data);
-                        }
-
-                        // Cargar promedio
-                        const promResult = await getPromedioCalificacion(parseInt(id))
-                        if (promResult) {
-                            setPromedio(promResult.promedio || 0)
-                            setTotalCalificaciones(promResult.total || 0)
-                        }
-                    }
+                    const favoritos = await getByUsuarioId(parseInt(user.id))
+                    const esFavorito = favoritos.some(fav => fav.publicacion.id === publication.id)
+                    setIsFavorito(esFavorito)
                 } catch (error) {
-                    console.error('Error al cargar publicación:', error)
+                    console.error('Error checking favorito:', error)
                 }
             }
         }
-        loadPublication()
-    }, [id])
+        checkFavorito()
+    }, [user?.id, publication?.id, getByUsuarioId])
+
+    const handleFavorito = async () => {
+        if (!user?.id) {
+            alert('Debes iniciar sesión para agregar a favoritos')
+            return
+        }
+
+        if (!publication?.id) return
+
+        setLoadingFav(true)
+        try {
+            if (isFavorito) {
+                // Buscar y eliminar el favorito
+                const favoritos = await getByUsuarioId(parseInt(user.id))
+                const favoritoExistente = favoritos.find(fav => fav.publicacion.id === publication.id)
+                if (favoritoExistente) {
+                    await remove(favoritoExistente.id)
+                    setIsFavorito(false)
+                }
+            } else {
+                // Crear nuevo favorito
+                await create({
+                    usuario: { 
+                        id: parseInt(user.id),
+                        nombre: user.nombre || '',
+                        correo: user.correo || '',
+                        rol: user.rol || 'CLIENTE'
+                    },
+                    publicacion: { 
+                        id: publication.id,
+                        titulo: publication.titulo,
+                        descripcion: publication.descripcion,
+                        inmueble: publication.inmueble || {} as any,
+                        fechaPublicacion: publication.fechaPublicacion || new Date().toISOString(),
+                        estadoPublicacion: (publication.estadoPublicacion as any) || 'PUBLICADA',
+                        precio: publication.precio || 0,
+                        usuario: publication.usuario || { id: 0 } as any,
+                        multimedia: (publication.multimedia || []) as any,
+                        calificaciones: publication.calificaciones || []
+                    },
+                    fecha: new Date().toISOString()
+                })
+                setIsFavorito(true)
+            }
+        } catch (error) {
+            console.error('Error handling favorito:', error)
+            alert('Error al gestionar favorito')
+        } finally {
+            setLoadingFav(false)
+        }
+    }
+
+useEffect(() => {
+    const loadPublication = async () => {
+        if (!id) return;
+        
+        try {
+            const result = await getById(parseInt(id));
+            
+            if (result) {
+                setPublication(result);
+                
+                if (result.calificaciones) {
+                    setCalificaciones(result.calificaciones);
+                    
+                    const total = result.calificaciones.length;
+                    const suma = result.calificaciones.reduce((acc: number, curr: any) => acc + curr.puntuacion, 0);
+                    
+                    setTotalCalificaciones(total);
+                    setPromedio(total > 0 ? suma / total : 0);
+                }
+            }
+        } catch (error) {
+            console.error('Error al cargar publicación:', error);
+        }
+    };
+    loadPublication();
+}, [id, getById]);
 
     const handleSubmitReview = async (puntuacion: number, comentario: string) => {
         if (!user) {
@@ -81,7 +148,6 @@ export const Publication = () => {
         const result = await createCalificacion(parseInt(id), parseInt(user.id), puntuacion, comentario)
 
         if (result.success) {
-            // Recargar calificaciones
             const calResult = await getCalificaciones(parseInt(id))
             if (calResult.success && calResult.data) {
                 setCalificaciones(calResult.data)
@@ -233,7 +299,31 @@ export const Publication = () => {
                             </div>
                         </div>
                     </div>
-                    <span className="text-[#EB8369] text-sm md:text-xl font-bold">{precioFormateado}</span>
+                    <div className="flex items-center justify-between">
+                        <span className="text-[#EB8369] text-sm md:text-xl font-bold">{precioFormateado}</span>
+                        
+                        {/* Corazón de favoritos */}
+                        <button
+                            onClick={handleFavorito}
+                            disabled={loadingFav}
+                            className="p-2 bg-white/80 backdrop-blur-sm rounded-full shadow-lg hover:bg-white transition-all duration-200 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
+                            title={isFavorito ? "Quitar de favoritos" : "Agregar a favoritos"}
+                        >
+                            <svg
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill={isFavorito ? "#EB8369" : "none"}
+                                stroke={isFavorito ? "#EB8369" : "#393939"}
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="transition-all duration-200"
+                            >
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
             </div>
             <div className="w-full h-auto flex flex-col items-start p-5 mt-10">

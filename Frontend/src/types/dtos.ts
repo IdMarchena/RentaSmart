@@ -55,7 +55,7 @@ export interface FavoritoDto{
     id:number;
     idUsuario:number;
     idPublicacion:number;
-    fechaCreacion:string;
+    fecha:string;
 }
 export interface FinanciacionDto{
     id:number;

@@ -1,7 +1,8 @@
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 import { CardPublications } from "../components/CardPublications";
-import { useFilters, type PublicationFilters } from "../hooks/useFilters";
+import type { PublicationFilters } from "../hooks/useFilters";
+import { usePublicaciones } from '@/hooks/usePublicaciones'
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import imgRow from "../assets/row.png";
@@ -9,7 +10,7 @@ import imgMaps from "../assets/maps.png";
 
 export const Publications = () => {
     const location = useLocation();
-    const { filtersPublications, loading, error, getFilteredPublications } = useFilters();
+    const { publications, getAll, loading, error, getByUbicacion, getByTipoInmueble, getByEstrato, getByPrecioMenor, getByPrecioMayor, getByPrecioRango } = usePublicaciones();
 
     const [openLocation, setOpenLocation] = useState(false);
     const [cityList, setCityList] = useState<string[]>([]);
@@ -18,13 +19,19 @@ export const Publications = () => {
         ubicacion: '',
         tipoInmueble: '',
         precioMinimo: 0,
-        precioMaximo: 0
+        precioMaximo: 0,
+        estrato: ''
     });
 
     useEffect(() => {
         fetch('https://api-colombia.com/api/v1/city')
             .then(r => r.json())
             .then(data => setCityList(data.map((c: any) => c.name)));
+    }, []);
+
+    // Cargar todas las publicaciones del backend
+    useEffect(() => {
+        getAll();
     }, []);
 
     useEffect(() => {
@@ -34,17 +41,67 @@ export const Publications = () => {
                 ubicacion: initialFilters.city || '',
                 tipoInmueble: initialFilters.type || '',
                 precioMinimo: initialFilters.priceMin || 0,
-                precioMaximo: initialFilters.priceMax || 0
+                precioMaximo: initialFilters.priceMax || 0,
+                estrato: initialFilters.estrato || ''
             });
         }
     }, [location.state]);
 
-    useEffect(() => {
-        getFilteredPublications(filters);
-    }, [filters]);
+    const getFilteredPublications = async (filters: PublicationFilters) => {
+        try {
+            // Lógica de precios - ahora usa los métodos correctos del backend
+            if (filters.precioMinimo && filters.precioMaximo) {
+                // Rango de precios
+                await getByPrecioRango(filters.precioMinimo, filters.precioMaximo);
+                return;
+            } else if (filters.precioMinimo) {
+                // Solo precio mínimo
+                await getByPrecioMenor(filters.precioMinimo);
+                return;
+            } else if (filters.precioMaximo) {
+                // Solo precio máximo
+                await getByPrecioMayor(filters.precioMaximo);
+                return;
+            }
+            
+            // Si hay ubicación, filtrar por ubicación
+            if (filters.ubicacion) {
+                await getByUbicacion(filters.ubicacion);
+                return;
+            }
+            
+            // Si hay tipo de inmueble, filtrar por tipo
+            if (filters.tipoInmueble) {
+                await getByTipoInmueble(filters.tipoInmueble);
+                return;
+            }
+            
+            // Si hay estrato, filtrar por estrato
+            if (filters.estrato) {
+                await getByEstrato(filters.estrato);
+                return;
+            }
+            
+            // Si no hay filtros específicos, cargar todas
+            await getAll();
+        } catch (error) {
+            console.error('Error al filtrar publicaciones:', error);
+        }
+    };
 
     const handleSearch = () => {
         getFilteredPublications(filters);
+    };
+
+    const handleClearFilters = () => {
+        setFilters({
+            ubicacion: '',
+            tipoInmueble: '',
+            precioMinimo: 0,
+            precioMaximo: 0,
+            estrato: ''
+        });
+        getAll(); // Cargar todas las publicaciones
     };
 
     return (
@@ -57,9 +114,9 @@ export const Publications = () => {
                     <p className="text-[#6B7280] text-sm md:text-base text-center mb-8">Explora las mejores opciones de arriendo con filtros personalizados</p>
 
                     <div className="w-full md:w-[90%] lg:w-[85%] bg-[#FFFEF8] shadow-lg rounded-[15px] p-4 md:p-6 relative">
-                        <div className="flex flex-col md:flex-row md:flex-wrap items-center justify-between gap-3 md:gap-4 w-full">
-                            <div className="flex flex-col md:flex-row md:flex-wrap items-center gap-3 md:gap-4 w-full md:flex-1">
-                                <div className="relative w-full md:w-[20%] h-[40px]">
+                        <div className="flex flex-wrap items-center justify-between gap-3 md:gap-4 w-full">
+                            <div className="flex flex-wrap items-center gap-3 md:gap-4 w-full">
+                                <div className="relative flex-shrink-0 w-full md:w-[180px] h-[40px]">
                                     <input
                                         type="text"
                                         placeholder="Ubicación"
@@ -122,16 +179,26 @@ export const Publications = () => {
                                     )}
                                 </div>
 
-                                <div className="relative w-full md:w-[20%] h-[40px]">
+                                <div className="relative flex-shrink-0 w-full md:w-[180px] h-[40px]">
                                     <select
                                         value={filters.tipoInmueble}
                                         onChange={(e) => setFilters({ ...filters, tipoInmueble: e.target.value })}
                                         className="w-full h-full border border-[#BCBBB0] bg-[#FEFEFE] rounded-[10px] pl-4 pr-8 text-sm font-bold appearance-none"
                                     >
                                         <option value="">Tipo Inmueble</option>
-                                        <option value="Apartamento">Apartamento</option>
-                                        <option value="Casa">Casa</option>
-                                        <option value="Habitación">Habitación</option>
+                                        <option value="APARTAMENTO">Apartamento</option>
+                                        <option value="APARTAESTUDIO">Apartaestudio</option>
+                                        <option value="CASA">Casa</option>
+                                        <option value="OFICINA">Oficina</option>
+                                        <option value="LOCAL_COMERCIAL">Local Comercial</option>
+                                        <option value="PISO">Piso</option>
+                                        <option value="CHALET">Chalet</option>
+                                        <option value="ESTUDIO">Estudio</option>
+                                        <option value="LOFT">Loft</option>
+                                        <option value="VIVIENDA_RURAL">Vivienda Rural</option>
+                                        <option value="CASA_CAMPO">Casa de Campo</option>
+                                        <option value="BODEGA">Bodega</option>
+                                        <option value="HABITACION">Habitación</option>
                                     </select>
                                     <button
                                         type="button"
@@ -141,7 +208,7 @@ export const Publications = () => {
                                     </button>
                                 </div>
 
-                                <div className="relative w-full md:w-[20%] h-[40px]">
+                                <div className="relative flex-shrink-0 w-full md:w-[140px] h-[40px]">
                                     <input
                                         type="number"
                                         placeholder="Precio Mínimo"
@@ -151,7 +218,7 @@ export const Publications = () => {
                                     />
                                 </div>
 
-                                <div className="relative w-full md:w-[20%] h-[40px]">
+                                <div className="relative flex-shrink-0 w-full md:w-[140px] h-[40px]">
                                     <input
                                         type="number"
                                         placeholder="Precio Máximo"
@@ -160,16 +227,48 @@ export const Publications = () => {
                                         className="w-full h-full border border-[#BCBBB0] bg-[#FEFEFE] rounded-[10px] pl-4 pr-8 text-sm font-bold"
                                     />
                                 </div>
+
+                                <div className="relative flex-shrink-0 w-full md:w-[120px] h-[40px]">
+                                    <select
+                                        value={filters.estrato}
+                                        onChange={(e) => setFilters({ ...filters, estrato: e.target.value })}
+                                        className="w-full h-full border border-[#BCBBB0] bg-[#FEFEFE] rounded-[10px] pl-4 pr-8 text-sm font-bold appearance-none"
+                                    >
+                                        <option value="">Estrato</option>
+                                        <option value="1">Estrato 1</option>
+                                        <option value="2">Estrato 2</option>
+                                        <option value="3">Estrato 3</option>
+                                        <option value="4">Estrato 4</option>
+                                        <option value="5">Estrato 5</option>
+                                        <option value="6">Estrato 6</option>
+                                    </select>
+                                    <button
+                                        type="button"
+                                        className="absolute top-6 right-2 transform -translate-y-1/2 w-[15px] h-[15px] p-0 m-0 pointer-events-none"
+                                    >
+                                        <img src={imgRow} alt="Dropdown" className="w-full h-full" />
+                                    </button>
+                                </div>
                             </div>
 
-                            <button
-                                type="button"
-                                onClick={handleSearch}
-                                disabled={loading}
-                                className="w-full md:w-auto bg-[#FF6B35] hover:bg-[#FF5722] text-white font-bold py-2 px-6 rounded-[10px] h-[40px] transition-colors duration-200 shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                {loading ? 'Buscando...' : 'Buscar'}
-                            </button>
+                            <div className="flex flex-wrap items-center gap-2 md:gap-3">
+                                <button
+                                    type="button"
+                                    onClick={handleSearch}
+                                    disabled={loading}
+                                    className="flex-shrink-0 w-full md:w-auto bg-[#FF6B35] hover:bg-[#FF5722] text-white font-bold py-2 px-6 rounded-[10px] h-[40px] transition-colors duration-200 shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {loading ? 'Buscando...' : 'Buscar'}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={handleClearFilters}
+                                    disabled={loading}
+                                    className="flex-shrink-0 w-full md:w-auto bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded-[10px] h-[40px] transition-colors duration-200 shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    Limpiar
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -182,7 +281,7 @@ export const Publications = () => {
                             <h1 className="text-[#393939] text-sm md:text-md lg:text-lg font-bold">Mejores Publicaciones</h1>
                             <div className="text-xs md:text-sm text-[#6B7280]">
                                 <span className="font-semibold">
-                                    {filtersPublications.length} {filtersPublications.length === 1 ? 'propiedad disponible' : 'propiedades disponibles'}
+                                    {publications.length} {publications.length === 1 ? 'propiedad disponible' : 'propiedades disponibles'}
                                 </span>
                             </div>
                         </div>
@@ -197,13 +296,13 @@ export const Publications = () => {
                             <div className="w-full flex justify-center items-center py-20">
                                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#EB8369]"></div>
                             </div>
-                        ) : filtersPublications.length === 0 ? (
+                        ) : publications.length === 0 ? (
                             <div className="w-full text-center py-20 text-gray-500">
-                                No se encontraron publicaciones con los filtros seleccionados
+                                No se encontraron publicaciones
                             </div>
                         ) : (
                             <div className="flex flex-col md:flex-row md:flex-wrap items-center md:items-start justify-center md:justify-start gap-3 md:gap-5 overflow-y-scroll custom-scrollbar w-full h-auto md:h-[99vh] pb-5">
-                                {filtersPublications.map((publication) => (
+                                {publications.map((publication) => (
                                     <CardPublications key={publication.id} publication={publication} />
                                 ))}
                             </div>

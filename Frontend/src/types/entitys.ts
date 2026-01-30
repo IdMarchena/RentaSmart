@@ -158,5 +158,5 @@ export interface Favorito{
     id:number;
     usuario:UsuarioResumen;
     publicacion:Publicacion;
-    fechaCreacion:string;
+    fecha:string;
 }
