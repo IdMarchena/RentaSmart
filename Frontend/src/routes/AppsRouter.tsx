@@ -10,6 +10,7 @@ import { MensajesDash } from "../admin/pages/MensajesDash";
 import { ServiciosDash } from "../admin/pages/ServiciosDash";
 import { UsuarioDash } from "../admin/pages/UsuarioDash";
 import { ServiciosAdminDash } from "../admin/pages/ServiciosAdminDash.tsx";
+import { FavoritosDash } from "../admin/pages/FavoritosDash";
 import { ProtectedRoute } from "../components/ProtectedRoute";
 import { PublicacionesRoute, ContratosRoute, ServiciosRoute, MensajesRoute, ProfesionalRoute } from "../components/RolProtectedRoute";
 
@@ -83,6 +84,14 @@ export const AppsRouter = () => {
         element={
           <ProtectedRoute>
             <ServiciosAdminDash />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/favorites"
+        element={
+          <ProtectedRoute>
+            <FavoritosDash />
           </ProtectedRoute>
         }
       />
