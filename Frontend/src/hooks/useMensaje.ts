@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { mensajeRepository } from '@/repositories'
 import type { Mensaje } from '@/types/entitys'
 
@@ -6,6 +6,11 @@ export const useMensaje = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [mensajes, setMensajes] = useState<Mensaje[]>([]);
+
+  // Cargar mensajes automáticamente al montar el componente
+  useEffect(() => {
+    getAll();
+  }, []);
 
   const getAll = async (): Promise<Mensaje[]> => {
     setLoading(true)

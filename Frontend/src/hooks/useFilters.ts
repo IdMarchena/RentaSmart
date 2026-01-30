@@ -7,6 +7,7 @@ export interface PublicationFilters {
   tipoInmueble?: string
   precioMinimo?: number
   precioMaximo?: number
+  estrato?: string
 }
 
 export interface ServiceFilters {

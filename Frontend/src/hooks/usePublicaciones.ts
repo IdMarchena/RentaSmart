@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import {  usuariosRepository, calificacionRepository } from '@/repositories'
+import { useState, useEffect, useCallback, useMemo } from 'react'
+import { usuariosRepository, calificacionRepository } from '@/repositories'
 import { useAuthContext } from '../context/AuthContext'
 import type { Publicacion } from '@/types/entitys'
 import type { Inmueble } from '@/types/entitys'
@@ -11,38 +11,48 @@ import { BackendCalificacionRepository } from '@/repositories/Calificacion/Calif
 import { BackendMultimediaRepository } from '@/repositories/multimedia/MultimediaRepository.backend'
 import { CalificacionService } from '@/services/CalificacionService'
 import { BackendServicioRepository } from '@/repositories/Servicio/ServicioBackendRepository'
+
 export const usePublicaciones = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [publications, setPublications] = useState<Publicacion[]>([])
+  const [publicationsHome, setPublicationsHome] = useState<Publicacion[]>([])
+  
   const { user } = useAuthContext()
 
-  // Instanciamos los repositorios necesarios para la lógica compuesta
-  const repoUbicacion = new BackendUbicacionRepository();
-  const repoPublicacion = new BackendPublicacionRepository();
-  const repoInmueble = new BackendInmuebleRepository();
-  const repoMultimedia = new BackendMultimediaRepository();
-  const repoCalificacion = new BackendCalificacionRepository();
-  const repoServicio = new BackendServicioRepository();
-  const calificacionService = new CalificacionService(
-    repoCalificacion as any,
-    repoServicio as any,
-    repoPublicacion as any
-  );
+  const services = useMemo(() => {
+    const repoUbicacion = new BackendUbicacionRepository();
+    const repoPublicacion = new BackendPublicacionRepository();
+    const repoInmueble = new BackendInmuebleRepository();
+    const repoMultimedia = new BackendMultimediaRepository();
+    const repoCalificacion = new BackendCalificacionRepository();
+    const repoServicio = new BackendServicioRepository();
+    const calificacionService = new CalificacionService(
+      repoCalificacion as any,
+      repoServicio as any,
+      repoPublicacion as any
+    );
 
-  const service = new PublicacionService(
-    repoPublicacion as any,
-    repoInmueble as any,
-    usuariosRepository as any,
-    repoUbicacion as any,
-    repoCalificacion as any,
-    repoMultimedia as any,
-    calificacionService as any
-  )
+    const service = new PublicacionService(
+      repoPublicacion as any,
+      repoInmueble as any,
+      usuariosRepository as any,
+      repoUbicacion as any,
+      repoCalificacion as any,
+      repoMultimedia as any,
+      calificacionService as any
+    );
 
-  // ==========================================
-  // LÓGICA DE CREACIÓN COMPUESTA (ORQUESTADA)
-  // ==========================================
+
+    return {
+      repoPublicacion,
+      repoInmueble,
+      repoUbicacion,
+      service,
+      calificacionService
+    };
+  }, []); 
+
   const createPublicacionCompleta = async (data: {
     inmueble: Partial<Inmueble>
     publicacion: Partial<Publicacion>
@@ -54,26 +64,25 @@ export const usePublicaciones = () => {
     try {
       if (!user?.id) throw new Error("Debes estar autenticado para publicar");
 
-      // 1. Crear la Ubicación primero con los datos del mapa
       const nuevaUbicacionReq = {
         nombre: data.inmueble.ubicacion?.nombre || "Ubicación sin nombre",
         latitud: data.inmueble.ubicacion?.latitud || 0,
         longitud: data.inmueble.ubicacion?.longitud || 0,
         estado: 'ACTIVA' as const,
-        padre: { id: 1 } as any, // ID de la ciudad base (ej. Santa Marta)
+        padre: { id: 1 } as any,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
 
-      // CORRECCIÓN: Usamos la instancia 'repoUbicacion', no la clase
-        const ubicacionGuardada = await repoUbicacion.create(nuevaUbicacionReq);
+      
+        const ubicacionGuardada = await services.repoUbicacion.create(nuevaUbicacionReq);
       console.log("📍 Ubicación guardada con ID:", ubicacionGuardada.id);
       console.log("Ubicación guardada:", ubicacionGuardada);
-      // 2. Crear el Inmueble vinculado a la nueva ubicación
+      
       const inmuebleDto = {
         tipo: data.inmueble.tipo?.toUpperCase(),
         descripcion: data.inmueble.descripcion,
-        idUbicacion: ubicacionGuardada.id, // ID real retornado por el backend
+        idUbicacion: ubicacionGuardada.id, 
         areaTotal: data.inmueble.areaTotal,
         numeroBanos: data.inmueble.numeroBanos,
         numeroPisos: data.inmueble.numeroPisos || 1,
@@ -85,9 +94,8 @@ export const usePublicaciones = () => {
         numeroHabitaciones: data.inmueble.numeroHabitaciones
       };
       
-      const resInmueble = await repoInmueble.create(inmuebleDto as any);
+      const resInmueble = await services.repoInmueble.create(inmuebleDto as any);
       
-      // 3. Preparar Multimedia
       const listaMultimedia = (data.imagenes || []).map((url, index) => {
         const esVideo = /\.(mp4|webm|ogg|mov)$/i.test(url);
         return {
@@ -97,7 +105,6 @@ export const usePublicaciones = () => {
         };
       });
 
-      // 4. Crear la Publicación final vinculada al Inmueble
       const publicacionDto = {
         titulo: data.publicacion.titulo,
         descripcion: data.publicacion.descripcion,
@@ -109,7 +116,7 @@ export const usePublicaciones = () => {
         multimedia: listaMultimedia 
       };
       console.log("Publicación DTO:", publicacionDto);
-      const resPublicacion = await repoPublicacion.create(publicacionDto as any);
+      const resPublicacion = await services.repoPublicacion.create(publicacionDto as any);
 
       return resPublicacion;
     } catch (err: any) {
@@ -121,41 +128,168 @@ export const usePublicaciones = () => {
     }
   }
 
-  // ==========================================
-  // MÉTODOS DE CONSULTA
-  // ==========================================
-const getAll = async (): Promise<Publicacion[]> => {
+  const getAll = useCallback(async (): Promise<Publicacion[]> => {
     setLoading(true);
+    setError(null);
     try {
-        const data = await repoPublicacion.getAll();
-        setPublications(data); // <--- AGREGA ESTA LÍNEA
-        return data;
+        const data = await services.repoPublicacion.getAll();
+        const fullPublicacion = await Promise.all(data.map(pub => services.service.getFullPublicacion(pub.id)));
+        setPublications(fullPublicacion);
+        return fullPublicacion;
     } catch (err: any) {
         setError(err.message);
         throw err;
     } finally {
         setLoading(false);
     }
-}
+  }, [services.repoPublicacion, services.service]);
 
-  const getTop6 = async (): Promise<Publicacion[]> => {
+  const getTop6 = useCallback(async (): Promise<Publicacion[]> => {
     setLoading(true);
     try {
-      return await repoPublicacion.getTop6();
+        const data = await services.repoPublicacion.getTop6();
+        const fullPublications = await Promise.all(
+            data.map(dto => services.service.getFullPublicacion(dto.id))
+        );
+        const filtered = fullPublications.filter(p => p !== null) as Publicacion[];
+        setPublicationsHome(filtered);
+        return filtered;
     } catch (err: any) {
       setError(err.message);
       throw err;
     } finally {
       setLoading(false);
     }
-  }
+  }, [services.repoPublicacion, services.service]);
+  
+  const getById = useCallback(async (id: number): Promise<Publicacion | null> => {
+    setLoading(true);
+    setError(null);
+    try {
+        const data = await services.repoPublicacion.getById(id);
+        if (!data) return null;
+        
+        const fullPublication = await services.service.getFullPublicacion(data.id);
+        return fullPublication;
+    } catch (err: any) {
+      setError(err.message);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [services.repoPublicacion, services.service]);
+    const getByTipoInmueble = useCallback(async (tipo: string): Promise<Publicacion[]> => {
+    setLoading(true);
+    try {
+        const data = await services.repoPublicacion.getByTipoInmueble(tipo);
+        const fullPublications = await Promise.all(
+            data.map(dto => services.service.getFullPublicacion(dto.id))
+        );
+        const filtered = fullPublications.filter(p => p !== null) as Publicacion[];
+        setPublications(filtered);
+        return filtered;
+    } catch (err: any) {
+      setError(err.message);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [services.repoPublicacion, services.service]);
+    const getByUbicacion = useCallback(async (ubicacion: string): Promise<Publicacion[]> => {
+    setLoading(true);
+    try {
+        const data = await services.repoPublicacion.getByUbicacion(ubicacion);
+        const fullPublications = await Promise.all(
+            data.map(dto => services.service.getFullPublicacion(dto.id))
+        );
+        const filtered = fullPublications.filter(p => p !== null) as Publicacion[];
+        setPublications(filtered);
+        return filtered;
+    } catch (err: any) {
+      setError(err.message);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [services.repoPublicacion, services.service]);
+      const getByEstrato = useCallback(async (estrato: string): Promise<Publicacion[]> => {
+    setLoading(true);
+    try {
+        const data = await services.repoPublicacion.getByEstrato(estrato);
+        const fullPublications = await Promise.all(
+            data.map(dto => services.service.getFullPublicacion(dto.id))
+        );
+        const filtered = fullPublications.filter(p => p !== null) as Publicacion[];
+        setPublications(filtered);
+        return filtered;
+    } catch (err: any) {
+      setError(err.message);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [services.repoPublicacion, services.service]);
+
+  const getByPrecioMenor = useCallback(async (precio: number): Promise<Publicacion[]> => {
+    setLoading(true);
+    try {
+        const data = await services.repoPublicacion.getByPrecioMenor(precio);
+        const fullPublications = await Promise.all(
+            data.map(dto => services.service.getFullPublicacion(dto.id))
+        );
+        const filtered = fullPublications.filter(p => p !== null) as Publicacion[];
+        setPublications(filtered);
+        return filtered;
+    } catch (err: any) {
+      setError(err.message);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [services.repoPublicacion, services.service]);
+
+  const getByPrecioMayor = useCallback(async (precio: number): Promise<Publicacion[]> => {
+    setLoading(true);
+    try {
+        const data = await services.repoPublicacion.getByPrecioMayor(precio);
+        const fullPublications = await Promise.all(
+            data.map(dto => services.service.getFullPublicacion(dto.id))
+        );
+        const filtered = fullPublications.filter(p => p !== null) as Publicacion[];
+        setPublications(filtered);
+        return filtered;
+    } catch (err: any) {
+      setError(err.message);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [services.repoPublicacion, services.service]);
+
+  const getByPrecioRango = useCallback(async (precioMin: number, precioMax: number): Promise<Publicacion[]> => {
+    setLoading(true);
+    try {
+        const data = await services.repoPublicacion.getByPrecioRango(precioMin, precioMax);
+        const fullPublications = await Promise.all(
+            data.map(dto => services.service.getFullPublicacion(dto.id))
+        );
+        const filtered = fullPublications.filter(p => p !== null) as Publicacion[];
+        setPublications(filtered);
+        return filtered;
+    } catch (err: any) {
+      setError(err.message);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [services.repoPublicacion, services.service]);
 
   const getPublicationsByUser = async (userId: number) => {
     setLoading(true);
     try {
-      const dtos = await repoPublicacion.getByIdUsuario(userId);
+      const dtos = await services.repoPublicacion.getByIdUsuario(userId);
       const fullPublications = await Promise.all(
-        dtos.map(dto => service.getFullPublicacion(dto.id))
+        dtos.map(dto => services.service.getFullPublicacion(dto.id))
       );
       setPublications(fullPublications.filter(p => p !== null) as Publicacion[]);
     } catch (error) {
@@ -165,19 +299,15 @@ const getAll = async (): Promise<Publicacion[]> => {
     }
   };
 
-  // Métodos de calificaciones
-// DENTRO DE usePublicaciones.ts
-
+  
 const getCalificaciones = async (idPublicacion: number) => {
     setLoading(true);
     try {
-        // 1. Obtenemos las calificaciones base (solo IDs)
-        const baseCalificaciones = await calificacionRepository.getByPublicacionId(idPublicacion);
         
-        // 2. IMPORTANTE: Usamos el SERVICE para hidratar cada una
-        // Esto activará los console.log que pusiste en CalificacionService
+        const baseCalificaciones = await calificacionRepository.getByPublicacionId(idPublicacion);
+
         const calificacionesHidratadas = await Promise.all(
-            baseCalificaciones.map(cal => calificacionService.getFullCalificacion(cal.id))
+            baseCalificaciones.map(cal => services.calificacionService.getFullCalificacion(cal.id))
         );
 
         console.log("Calificaciones hidratadas con éxito:", calificacionesHidratadas);
@@ -198,10 +328,10 @@ const createCalificacion = async (idPublicacion: number, idUsuario: number, punt
         const payload = {
             publicacion: { id: idPublicacion },
             usuario: { id: idUsuario },
-            servicio: null, // IMPORTANTE: Debe ser null para que el backend no proteste
+            servicio: null, 
             puntaje: puntuacion,
             comentario: comentario,
-            fecha: new Date().toISOString() // Enviamos formato ISO estándar
+            fecha: new Date().toISOString()
         };
         
         const result = await calificacionRepository.create(payload as any);
@@ -232,23 +362,29 @@ const createCalificacion = async (idPublicacion: number, idUsuario: number, punt
     loading,
     error,
     publications,
+    publicationsHome,
     create: createPublicacionCompleta,
     getAll,
     getTop6,
     getPublicationsByUser,
-    getById: (id: number) => service.getFullPublicacion(id),
-    remove: (id: number) => repoPublicacion.delete(id),
-    cambiarEstado: (id: number, estado: string) => repoPublicacion.cambiarEstado(id, estado),
+    getByTipoInmueble,
+    getByUbicacion,
+    getByEstrato,
+    getByPrecioMenor,
+    getByPrecioMayor,
+    getByPrecioRango,
+    getById,
+    remove: (id: number) => services.repoPublicacion.delete(id),
+    cambiarEstado: (id: number, estado: string) => services.repoPublicacion.cambiarEstado(id, estado),
     getCalificaciones,
     createCalificacion,
     getPromedioCalificacion
   }
 }
 
-// Hook secundario para lista reactiva
 export const usePublicacionesList = () => {
   const [publicaciones, setPublicaciones] = useState<Publicacion[]>([])
-  const { loading, error, getAll } = usePublicaciones()
+  const { loading, error, getAll, getByPrecioMenor, getByPrecioMayor, getByPrecioRango } = usePublicaciones()
 
   const loadPublicaciones = async () => {
     try {

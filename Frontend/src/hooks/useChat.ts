@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BackendMensajeRepository } from '@/repositories/Mensaje/MensajeBackendRepository';
 import { BackendChatRepository } from '@/repositories/Chat/ChatBackendRepository';
 import type { Chat } from '@/types/entitys';
@@ -18,6 +18,11 @@ export const useChat = () => {
   const mensajeRepository = new BackendMensajeRepository();
 
   const serviceC = new ChatService(mensajeRepository, chatRepository);
+
+  // Cargar chats automáticamente al montar el componente
+  useEffect(() => {
+    getAll();
+  }, []);
 
   // Método que obtiene todos los chats con la hidratación completa
   const getAll = async (): Promise<Chat[]> => {

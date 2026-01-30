@@ -109,7 +109,7 @@ export const usePublications = () => {
           titulo: publicationData.publicacion.titulo,
           descripcion: publicationData.publicacion.descripcion,
           estado: publicationData.publicacion.estadoPublicacion || 'borrador',
-          fecha_publicacion: publicationData.publicacion.estadoPublicacion === 'publicada'
+          fecha_publicacion: publicationData.publicacion.fechaPublicacion === 'publicada'
             ? new Date().toISOString()
             : null,
           vistas: 0,

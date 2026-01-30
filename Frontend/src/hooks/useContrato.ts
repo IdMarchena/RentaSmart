@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { contratoRepository } from '@/repositories'
 import { useAuthContext } from '../context/AuthContext'
 import { ContratoService } from '@/services/ContratoService'
@@ -25,6 +25,11 @@ export const useContrato = () => {
     repoFinanciacion as any,
     repoContrato as any ,
 repoUbicacion  );
+
+  // Cargar contratos automáticamente al montar el componente
+  useEffect(() => {
+    getAll();
+  }, []);
 
   const getAll = async (): Promise<Contrato[]> => {
     setLoading(true)
