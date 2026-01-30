@@ -99,6 +99,19 @@ public class PublicacionController {
                 new JsonResponse<>(true, "Publicaciones encontradas por estado exitosamente", publicaciones, 200)
         );
     }
+    @GetMapping("/tipo")
+    public ResponseEntity<JsonResponse<List<PublicacionDto>>> listarPublicacionesPorTipo(@RequestParam String tipo){
+        List<PublicacionDto> publicaciones = publicacionService.listarPublicacionesPorTipo(tipo);
+        if(publicaciones.isEmpty()){
+            return ResponseEntity.status(404).body(
+                    new JsonResponse<>(false, "No se encontraron publicaciones por tipo", null, 404)
+            );
+        }
+        return ResponseEntity.ok(
+                new JsonResponse<>(true, "Publicaciones encontradas por tipo exitosamente", publicaciones, 200)
+        );
+    }
+
 
     @GetMapping("/titulo")
     public ResponseEntity<JsonResponse<List<PublicacionDto>>> listarPublicacionesPorTitulo(@RequestParam String titulo){
