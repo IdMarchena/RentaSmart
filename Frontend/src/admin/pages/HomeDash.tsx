@@ -7,14 +7,14 @@ import { CardsData3 } from "../components/CardsData-3"
 import { CardsData4 } from "../components/CardsData-4"
 import { CardChart1 } from "../components/CardChart-1"
 import { CardActivity } from "../components/CardActivity"
-import { useActivity } from "../hooks/useActivity"
+import { useActivity } from '../hooks/useActivity'
 import { useAuthContext } from "../../context/AuthContext"
 import { useRol } from "@/hooks/useRol"
 
 
 export const HomeDash = () => {
     const { user } = useAuthContext()
-    const { activities, loading } = useActivity(user?.id)
+    const { activities, loading, refreshAllData } = useActivity(user?.id)
     const { 
         userRole,
         esAdministrador, 
@@ -82,7 +82,15 @@ export const HomeDash = () => {
                                         <h1 className="text-[#393939] text-[14px] font-bold">Actividad Reciente</h1>
                                         <p className="text-[#393939] text-[8px] font-medium">Tu historial de acciones en la plataforma.</p>
                                     </div>
-                                    <img src={imgActivity} alt="Activity" className="w-[30px] h-[30px] object-cover mr-2" />
+                                    <div className="flex items-center gap-2 mr-2">
+                                        <button 
+                                            onClick={refreshAllData}
+                                            className="p-2 rounded hover:bg-[#D4D3C8] transition-colors"
+                                            title="Refrescar actividad"
+                                        >
+                                            <img src={imgActivity} alt="Refresh" className="w-[30px] h-[30px] object-cover" />
+                                        </button>
+                                    </div>
                                 </div>
                                 <div className="w-full h-[350px] flex flex-col items-center justify-start overflow-y-scroll custom-scrollbar-1 overflow-x-hidden p-2 gap-4">
                                     {loading ? (

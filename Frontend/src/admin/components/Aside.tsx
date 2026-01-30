@@ -25,6 +25,7 @@ export const Aside = () => {
     const isMessages = location.pathname === '/admin/messages';
     const isServices = location.pathname === '/admin/services';
     const isUser = location.pathname === '/admin/user';
+    const isFavorites = location.pathname === '/admin/favorites';
     const { logout } = useAuthContext()
     const { 
         loading, 
@@ -100,6 +101,19 @@ export const Aside = () => {
                         <div className={isServices ? " hidden md:block w-2 aspect-square rounded-full bg-[#EB8369]" : ""}></div>
                     </div>
                 )}
+                
+                {/* Favoritos - Todos los roles */}
+                <div className="md:flex flex-row items-center justify-between w-full max-[1082px]:justify-start max-[1082px]:gap-2">
+                    <Link to="/admin/favorites">
+                        <span className="text-[#A9ADB6] hover:text-[#EB8369] transition-colors text-2xl">
+                            {isFavorites ? "❤️" : "🤍"}
+                        </span>
+                    </Link>
+                    <Link to="/admin/favorites">
+                        <span className={isFavorites ? "text-[#EB8369] xl:text-[14px] text-[12px] font-semibold max-[1082px]:hidden" : "text-[#A9ADB6] hover:text-[#EB8369] transition-colors xl:text-[14px] text-[12px] font-semibold max-[1082px]:hidden"}>Favoritos</span>
+                    </Link>
+                    <div className={isFavorites ? " hidden md:block w-2 aspect-square rounded-full bg-[#EB8369]" : ""}></div>
+                </div>
             </div>
 
             <div className="w-full h-full flex flex-col items-start justify-end gap-5 p-2">

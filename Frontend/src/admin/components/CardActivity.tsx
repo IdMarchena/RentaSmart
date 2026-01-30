@@ -3,11 +3,15 @@ import imgEdit from "../../assets/editar.png"
 import imgDelete from "../../assets/borrar.png"
 import imgContract from "../../assets/folder.png"
 import imgHistory from "../../assets/history.png"
+import imgChat from "../../assets/chat-on.png"
+import imgMessage from "../../assets/email.png"
+import imgService from "../../assets/servicios-on.png"
 
-interface ActivityItem {
+export interface ActivityItem {
     id: string
     type: 'publicacion_creada' | 'publicacion_editada' | 'publicacion_eliminada' |
-    'contrato_creado' | 'contrato_firmado' | 'contrato_finalizado'
+    'contrato_creado' | 'contrato_firmado' | 'contrato_finalizado' |
+    'chat_creado' | 'mensaje_enviado' | 'servicio_creado'
     description: string
     timestamp: string
 }
@@ -48,6 +52,21 @@ export const CardActivity = ({ activity }: CardActivityProps) => {
             title: 'Contrato Finalizado',
             bgColor: 'bg-gray-50'
         },
+        chat_creado: {
+            icon: imgChat,
+            title: 'Chat Creado',
+            bgColor: 'bg-purple-50'
+        },
+        mensaje_enviado: {
+            icon: imgMessage,
+            title: 'Mensaje Enviado',
+            bgColor: 'bg-blue-50'
+        },
+        servicio_creado: {
+            icon: imgService,
+            title: 'Servicio Creado',
+            bgColor: 'bg-orange-50'
+        }
     }
 
     const config = activityConfig[activity.type]

@@ -1,6 +1,8 @@
 import { BarChart } from '@mui/x-charts/BarChart';
 import { useEffect, useState } from 'react';
-import { supabase } from '../../lib/supabase';
+import { usePublicaciones } from '../../hooks/usePublicaciones';
+import { useContrato } from '../../hooks/useContrato';
+import imgChart from "../../assets/chart-2.png";
 
 interface DashboardStats {
     publicacionesPorEstado: { estado: string, cantidad: number }[]
@@ -13,45 +15,56 @@ export const CardChart1 = () => {
         contratosPorEstado: []
     })
     const [loading, setLoading] = useState(true)
+    
+    const { publications } = usePublicaciones();
+    const { contratos } = useContrato();
 
     useEffect(() => {
         loadStats()
-    }, [])
+    }, [publications, contratos])
 
     const loadStats = async () => {
         try {
-            // Estadísticas de publicaciones
-            const { data: pubData } = await supabase
-                .from('publicaciones')
-                .select('estado')
-
-            const publicacionesStats = pubData?.reduce((acc: any, pub) => {
-                acc[pub.estado] = (acc[pub.estado] || 0) + 1
+            console.log('📊 CardChart1 - Cargando estadísticas...')
+            console.log('📈 Datos disponibles:', {
+                publications: publications.length,
+                contratos: contratos.length
+            })
+            
+            // Estadísticas de publicaciones usando los hooks del backend
+            const publicacionesStats = publications.reduce((acc: any, pub) => {
+                const estado = pub.estadoPublicacion || 'SIN_ESTADO';
+                acc[estado] = (acc[estado] || 0) + 1
                 return acc
             }, {})
 
-            // Estadísticas de contratos
-            const { data: contData } = await supabase
-                .from('contratos')
-                .select('estado')
+            const publicacionesData = Object.entries(publicacionesStats).map(([estado, cantidad]) => ({
+                estado,
+                cantidad: cantidad as number
+            }))
 
-            const contratosStats = contData?.reduce((acc: any, cont) => {
-                acc[cont.estado] = (acc[cont.estado] || 0) + 1
+            console.log('📝 Estadísticas publicaciones:', publicacionesData)
+
+            // Estadísticas de contratos usando los hooks del backend
+            const contratosStats = contratos.reduce((acc: any, contrato) => {
+                const estado = contrato.estadoContrato || 'SIN_ESTADO';
+                acc[estado] = (acc[estado] || 0) + 1
                 return acc
             }, {})
+
+            const contratosData = Object.entries(contratosStats).map(([estado, cantidad]) => ({
+                estado,
+                cantidad: cantidad as number
+            }))
+
+            console.log('📋 Estadísticas contratos:', contratosData)
 
             setStats({
-                publicacionesPorEstado: Object.entries(publicacionesStats || {}).map(([estado, cantidad]) => ({
-                    estado: estado.charAt(0).toUpperCase() + estado.slice(1),
-                    cantidad: cantidad as number
-                })),
-                contratosPorEstado: Object.entries(contratosStats || {}).map(([estado, cantidad]) => ({
-                    estado: estado.charAt(0).toUpperCase() + estado.slice(1),
-                    cantidad: cantidad as number
-                }))
+                publicacionesPorEstado: publicacionesData,
+                contratosPorEstado: contratosData
             })
         } catch (error) {
-            console.error('Error loading stats:', error)
+            console.error('❌ Error loading stats:', error)
         } finally {
             setLoading(false)
         }
@@ -59,31 +72,45 @@ export const CardChart1 = () => {
 
     if (loading) {
         return (
-            <div className="w-full h-[400px] flex items-center justify-center bg-[#EFEDDE] border-[1px] border-[#BCBBB0] rounded-[10px]">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#EB8369]"></div>
+            <div className="w-full h-full flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#EB8369]"></div>
             </div>
         )
     }
 
-    // Preparar datos para la gráfica
+    // Preparar datos para el gráfico
     const categories = ['Publicaciones', 'Contratos']
     const pendientes = [
-        stats.publicacionesPorEstado.find(p => p.estado.toLowerCase() === 'borrador')?.cantidad || 0,
-        stats.contratosPorEstado.find(c => c.estado.toLowerCase() === 'pendiente')?.cantidad || 0
+        stats.publicacionesPorEstado.find(p => p.estado === 'EDITADA')?.cantidad || 0,
+        stats.contratosPorEstado.find(c => c.estado === 'PENDIENTE')?.cantidad || 0
     ]
     const activos = [
-        stats.publicacionesPorEstado.find(p => p.estado.toLowerCase() === 'publicada')?.cantidad || 0,
-        stats.contratosPorEstado.find(c => c.estado.toLowerCase() === 'activo')?.cantidad || 0
+        stats.publicacionesPorEstado.find(p => p.estado === 'PUBLICADA')?.cantidad ||stats.publicacionesPorEstado.find(p => p.estado === 'ACTIVA')?.cantidad || 0,
+        stats.contratosPorEstado.find(c => c.estado === 'ACTIVO')?.cantidad || 0
     ]
     const finalizados = [
-        stats.publicacionesPorEstado.find(p => p.estado.toLowerCase() === 'pausada')?.cantidad || 0,
-        stats.contratosPorEstado.find(c => c.estado.toLowerCase() === 'finalizado')?.cantidad || 0
+        stats.publicacionesPorEstado.find(p => p.estado === 'ELIMINADA')?.cantidad || 0,
+        stats.contratosPorEstado.find(c => c.estado === 'FINALIZADO')?.cantidad || 0
     ]
 
+    console.log('📊 Datos del gráfico:', {
+        categories,
+        pendientes,
+        activos,
+        finalizados,
+        stats
+    })
+
     return (
-        <div className="w-full h-[400px] flex flex-col items-start justify-start bg-[#EFEDDE] border-[1px] border-[#BCBBB0] rounded-[10px] p-4">
-            <h3 className="text-[#393939] text-[14px] font-bold mb-2">Resumen de Publicaciones y Contratos</h3>
-            <div className="w-full flex-1">
+        <div className="w-[60%] h-[400px] flex flex-col items-center justify-start bg-[#EFEDDE] border-[1px] border-[#BCBBB0] rounded-[10px] max-[908px]:w-full">
+            <div className="w-full h-auto flex flex-row items-center justify-between">
+                <div className="w-[70%] flex flex-col items-start justify-start p-6 gap-1">
+                    <h1 className="text-[#393939] text-[14px] font-bold">Análisis General</h1>
+                    <p className="text-[#393939] text-[8px] font-medium">Estado de tus publicaciones y contratos.</p>
+                </div>
+                <img src={imgChart} alt="Chart" className="w-[30px] h-[30px] object-cover mr-2" />
+            </div>
+            <div className="w-full h-[350px] flex items-center justify-center">
                 <BarChart
                     xAxis={[{
                         scaleType: 'band',
@@ -94,21 +121,22 @@ export const CardChart1 = () => {
                     series={[
                         {
                             data: pendientes,
-                            label: 'Pendiente/Borrador',
+                            label: 'Editada/Borrador',
                             stack: 'total'
                         },
                         {
                             data: activos,
-                            label: 'Activo/Publicada',
+                            label: 'Activo/Publicado',
                             stack: 'total'
                         },
                         {
                             data: finalizados,
-                            label: 'Finalizado/Pausada',
+                            label: 'Finalizado',
                             stack: 'total'
                         }
                     ]}
-                    height={350}
+                    width={500}
+                    height={300}
                     borderRadius={8}
                     slotProps={{
                         legend: {
