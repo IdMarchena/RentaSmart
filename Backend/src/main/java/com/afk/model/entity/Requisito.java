@@ -19,8 +19,4 @@ public class Requisito {
 
     @Column(name="descripcion_requisito",nullable = false,length = 250)
     private String descripcion;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_tipo_requisito")
-    private TipoRequisito tipo;
 }

@@ -16,85 +16,88 @@ public class RequisitoController {
 
     private final RequisitoService requisitoService;
 
-    @PostMapping("/crear")
+    // ===================== CREAR =====================
+    @PostMapping
     public ResponseEntity<JsonResponse<RequisitoDto>> crearRequisito(@RequestBody RequisitoDto dto) {
         RequisitoDto creado = requisitoService.createRequisito(dto);
-        if (creado==null) {
-            return ResponseEntity.status(404).body(
-                    new JsonResponse<>(false, "requisito no se pudo crear", null, 404)
+        if (creado == null) {
+            return ResponseEntity.status(400).body(
+                    new JsonResponse<>(false, "El requisito no se pudo crear", null, 400)
             );
         }
-        return ResponseEntity.ok(
-                new JsonResponse<>(
-                        true,
-                        "Requisito creado exitosamente",
-                        creado,
-                        201
-                )
+        return ResponseEntity.status(201).body(
+                new JsonResponse<>(true, "Requisito creado exitosamente", creado, 201)
         );
     }
 
-    @GetMapping("/ObtenerPorId/{id}")
+    // ===================== OBTENER POR ID =====================
+    @GetMapping("/{id}")
     public ResponseEntity<JsonResponse<RequisitoDto>> obtenerRequisitoPorId(@PathVariable Long id) {
         RequisitoDto dto = requisitoService.findRequisitoById(id);
-        if (dto==null) {
+        if (dto == null) {
             return ResponseEntity.status(404).body(
-                    new JsonResponse<>(false, "requisito no se pudo obtener", null, 404)
+                    new JsonResponse<>(false, "No se encontró el requisito", null, 404)
             );
         }
         return ResponseEntity.ok(
-                new JsonResponse<>(
-                        true,
-                        "Requisito obtenido exitosamente",
-                        dto,
-                        200
-                )
+                new JsonResponse<>(true, "Requisito obtenido exitosamente", dto, 200)
         );
     }
 
-    @GetMapping("/obtenerTodos")
+    // ===================== OBTENER TODOS =====================
+    @GetMapping
     public ResponseEntity<JsonResponse<List<RequisitoDto>>> obtenerTodosLosRequisitos() {
         List<RequisitoDto> lista = requisitoService.findAllRequisitos();
         if (lista.isEmpty()) {
             return ResponseEntity.status(404).body(
-                    new JsonResponse<>(false, "requisito no se pudieron obtener", null, 404)
+                    new JsonResponse<>(false, "No se encontraron requisitos", null, 404)
             );
         }
         return ResponseEntity.ok(
-                new JsonResponse<>(
-                        true,
-                        "lista de requisitos obtenida exitosamente",
-                        lista,
-                        200
-                )
+                new JsonResponse<>(true, "Lista de requisitos obtenida exitosamente", lista, 200)
         );
     }
 
-    @DeleteMapping("/eliminarPorId/{id}")
-    public ResponseEntity<JsonResponse<Void>> eliminarRequisito(@PathVariable Long id) {
-        try{
-            requisitoService.deleteRequisitoById(id);
+    // ===================== ACTUALIZAR =====================
+    @PutMapping("/{id}")
+    public ResponseEntity<JsonResponse<RequisitoDto>> actualizarRequisito(
+            @PathVariable Long id,
+            @RequestBody RequisitoDto dto) {
+        try {
+            RequisitoDto actualizado = requisitoService.updateRequisito(dto, id);
+            if (actualizado == null) {
+                return ResponseEntity.status(404).body(
+                        new JsonResponse<>(false, "No se pudo actualizar el requisito", null, 404)
+                );
+            }
             return ResponseEntity.ok(
-                    new JsonResponse<>(true, "requisito eliminado exitosamente", null, 200)
+                    new JsonResponse<>(true, "Requisito actualizado exitosamente", actualizado, 200)
             );
-        }catch (Exception e) {
-            return ResponseEntity.status(404).body(
-                    new JsonResponse<>(false, "requisito no se pudo eliminar", null, 404)
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(
+                    new JsonResponse<>(false, "Error al actualizar el requisito", null, 500)
             );
         }
     }
 
-    @PutMapping("/actualizar")
-    public ResponseEntity<JsonResponse<Void>> actualizarRequisito(@RequestBody RequisitoDto dto) {
-        try{
-            requisitoService.updateRequisito(dto);
+    // ===================== ELIMINAR =====================
+    @DeleteMapping("/{id}")
+    public ResponseEntity<JsonResponse<Void>> eliminarRequisito(@PathVariable Long id) {
+        try {
+            boolean eliminado = requisitoService.deleteRequisitoById(id);
+            if (!eliminado) {
+                return ResponseEntity.status(404).body(
+                        new JsonResponse<>(false, "No se pudo eliminar el requisito", null, 404)
+                );
+            }
             return ResponseEntity.ok(
-                    new JsonResponse<>(true, "requisito actualizado exitosamente", null, 200)
+                    new JsonResponse<>(true, "Requisito eliminado exitosamente", null, 200)
             );
-        }catch (Exception e) {
-            return ResponseEntity.status(404).body(
-                    new JsonResponse<>(false, "requisito no se pudo actualizar", null, 404)
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(
+                    new JsonResponse<>(false, "Error al eliminar el requisito", null, 500)
             );
         }
     }
+
 }

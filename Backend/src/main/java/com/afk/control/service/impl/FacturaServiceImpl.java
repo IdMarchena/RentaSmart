@@ -1,14 +1,16 @@
 package com.afk.control.service.impl;
 import com.afk.control.dto.FacturaDto;
+import com.afk.control.dto.PagoDto;
 import com.afk.control.mapper.FacturaMapper;
+import com.afk.control.mapper.PagoMapper;
 import com.afk.control.service.FacturaService;
 import com.afk.model.entity.*;
 import com.afk.model.entity.enums.EstadoPago;
-import com.afk.model.repository.FacturaRepository;
-import com.afk.model.repository.UsuarioRepository;
-import com.afk.model.repository.ContratoRepository;
+import com.afk.model.entity.enums.TipoFactura;
+import com.afk.model.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,6 +25,7 @@ public class FacturaServiceImpl implements FacturaService {
     private final UsuarioRepository usuarioRepository;
     private final ContratoRepository contratoRepository;
     private final FacturaMapper facturaMapper;
+    private final PagoMapper pagoMapper;
 
     @Override
     public List<FacturaDto> getAllFacturas() {
@@ -42,9 +45,6 @@ public class FacturaServiceImpl implements FacturaService {
     @Override
     public FacturaDto createFactura(FacturaDto facturaDto) {
         Factura factura = facturaMapper.toEntity(facturaDto);
-
-        // Puedes agregar más lógica aquí si es necesario, como validar que el usuario, el reporte y el contrato existen
-
         Factura savedFactura = facturaRepository.save(factura);
         return facturaMapper.toDto(savedFactura);
     }
@@ -75,10 +75,9 @@ public class FacturaServiceImpl implements FacturaService {
 
     @Override
     public List<FacturaDto> getFacturasByContrato(Long idContrato) {
-        List<Factura> facturas = facturaRepository.findByContratoId(idContrato);
-        return facturas.stream()
-                .map(facturaMapper::toDto)
-                .collect(Collectors.toList());
+        List<Factura> facturas = facturaRepository.findByOrigen(idContrato, TipoFactura.CONTRATO);
+
+        return facturaMapper.toDtoList(facturas);
     }
 
     @Override
@@ -88,10 +87,13 @@ public class FacturaServiceImpl implements FacturaService {
 
         Factura newFactura = Factura.builder()
                 .fechaEmision(LocalDateTime.now())
-                .detalle("Factura generada automáticamente para contrato " + contrato.getId())
+                .detalle("Factura generada automáticamente para contrato #" + contrato.getId())
                 .usuario(contrato.getUsuarioArrendatario())
-                .contrato(contrato)
-                .servicio(contrato.getInmueble().getServicio())
+                .idOrigen(idContrato)
+                .tipoFactura(TipoFactura.CONTRATO)
+
+                .estado(EstadoPago.PENDIENTE)
+                .pago(null)
                 .build();
 
         Factura savedFactura = facturaRepository.save(newFactura);
@@ -103,6 +105,29 @@ public class FacturaServiceImpl implements FacturaService {
         Factura factura = facturaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Factura no encontrada"));
         return factura.getPago() != null && factura.getPago().getEstado().equals(EstadoPago.COMPLETADO) ? "Pagado" : "Pendiente";
+    }
+
+    @Override
+    @Transactional
+    public FacturaDto generarFacturaDesdePago(String tipoFactura, PagoDto pagoDto) {
+        TipoFactura tipoFactur = TipoFactura.valueOf(tipoFactura.toUpperCase());
+
+        Usuario usuario = usuarioRepository.findById(pagoDto.idUsuario())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        String detalleEspecifico = "Pago por concepto de " + tipoFactur + " #" + pagoDto.origenId();
+
+        Factura factura = Factura.builder()
+                .fechaEmision(LocalDateTime.now())
+                .detalle(detalleEspecifico)
+                .usuario(usuario)
+                .pago(pagoMapper.toEntity(pagoDto))
+                .tipoFactura(tipoFactur)
+                .idOrigen(pagoDto.origenId())
+                .estado(pagoDto.estado())
+                .build();
+
+        return facturaMapper.toDto(facturaRepository.save(factura));
     }
 
 

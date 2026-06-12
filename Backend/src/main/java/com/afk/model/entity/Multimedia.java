@@ -1,6 +1,6 @@
 package com.afk.model.entity;
 
-import com.afk.model.entity.enums.EstadoMultimedia;
+import com.afk.model.entity.enums.TipoMultimedia;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,7 +23,7 @@ public class Multimedia {
 
 
     @Column(name = "tipo", nullable = false)
-    private EstadoMultimedia tipo;
+    private TipoMultimedia tipo;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_publicacion", nullable = false)

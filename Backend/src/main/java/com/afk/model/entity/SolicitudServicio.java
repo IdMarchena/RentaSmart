@@ -30,10 +30,13 @@ public class SolicitudServicio {
     @JoinColumn(name = "id_inmueble", nullable = false)
     private Inmueble inmueble;
 
-    @Column(name = "fecha")
+    @Column(name = "fecha",nullable = false)
     private LocalDateTime fecha;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "estado_solicitud", nullable = false)
     private EstadoCita estado;
+
+    @Column(name = "descripcion_problema", nullable = false)
+    private String descripcionProblema;
 }

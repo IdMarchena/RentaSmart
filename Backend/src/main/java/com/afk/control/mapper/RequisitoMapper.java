@@ -7,11 +7,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-@Mapper(componentModel = "spring",
-        uses = {
-                TipoRequisitoMapper.class
-                }
-        )
+@Mapper(componentModel = "spring")
 public interface RequisitoMapper {
 
     @Named("requisitoFromId")
@@ -24,18 +20,15 @@ public interface RequisitoMapper {
     @Named("requisitoFromDto")
     default RequisitoDto requisitoFromDto(Requisito requisito) {
         if (requisito == null) return null;
-        RequisitoDto requisitoDto = new RequisitoDto(
+        return new RequisitoDto(
                 requisito.getId(),
-                requisito.getDescripcion(),
-                requisito.getTipo().getId()
+                requisito.getDescripcion()
         );
-        return requisitoDto;
     }
 
-    @Mapping(target="tipo",source="idTipo",qualifiedByName = "TipoRequisitoFromId")
+
     Requisito toEntity(RequisitoDto dto);
 
-    @Mapping(target = "idTipo", source = "tipo.id")
     RequisitoDto toDto(Requisito requisito);
 
     @Named("requisitoToDtoList")
@@ -51,7 +44,6 @@ public interface RequisitoMapper {
                 .collect(Collectors.toList());
     }
 
-    @Mapping(target="tipo",source="idTipo",qualifiedByName = "TipoRequisitoFromId")
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateEntityFromDto(RequisitoDto dto, @MappingTarget Requisito entity);
 }

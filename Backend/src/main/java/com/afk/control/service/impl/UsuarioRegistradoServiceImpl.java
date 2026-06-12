@@ -17,7 +17,6 @@ import java.util.List;
 public class UsuarioRegistradoServiceImpl implements UsuarioRegistradoService {
 
     private final UsuarioRegistradoRepository usuarioRegistradoRepository;
-    private final RolRepository rolRepository;
     private final UbicacionRepository ubicacionRepository;
 
     private final UsuarioRegistradoMapper mapper;
@@ -40,14 +39,10 @@ public class UsuarioRegistradoServiceImpl implements UsuarioRegistradoService {
 
     @Override
     public UsuarioRegistradoDto createUsuarioRegistrado(UsuarioRegistradoDto usuarioDto) {
-        if (usuarioDto.idRol() != null) {
-            Rol rol = rolRepository.findById(usuarioDto.idRol())
-                    .orElseThrow(() -> new RuntimeException("Rol no encontrado"));
-        }
         Ubicacion ubicacion = ubicacionRepository.findById(usuarioDto.idUbicacion())
                 .orElseThrow(() -> new RuntimeException("Ubicación no encontrada"));
         UsuarioRegistrado usuario = mapper.toEntity(usuarioDto);
-        usuario.setRol(rolRepository.getReferenceById(usuarioDto.idRol()));
+        usuario.setRol(usuarioDto.rol());
         usuario.setUbicacion(ubicacion);
         usuario.setFechaRegistro(LocalDateTime.now());
         usuario.setTelefono(usuarioDto.telefono());

@@ -13,5 +13,5 @@ public record PublicacionDto(
         List<Long> calificacionesIds,
         Long idUsuario,
         Double precio,
-        List<Long> multimediaIds
+        List<MultimediaDto> multimedia
 ) {}

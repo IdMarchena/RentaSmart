@@ -3,19 +3,27 @@ import com.afk.control.dto.UsuarioDto;
 import com.afk.control.mapper.UsuarioMapper;
 import com.afk.control.service.UsuarioService;
 import com.afk.model.entity.Usuario;
+import com.afk.model.entity.UsuarioRegistrado;
+import com.afk.model.entity.enums.Roles;
+import com.afk.model.repository.UsuarioRegistradoRepository;
 import com.afk.model.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UsuarioServiceImpl implements UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
     private final UsuarioMapper usuarioMapper;
+
+    private final UsuarioRegistradoRepository usuarioRegistradoRepository;
 
     @Override
     public UsuarioDto createUsuario(UsuarioDto usuarioDto) {
@@ -34,8 +42,10 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     @Transactional(readOnly = true)
     public UsuarioDto findUsuarioById(Long id) {
+        log.info("este es el id a buscar de el usuario madnadod esde el backedn:"+id);
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        log.info("este es el nombre a buscar de el usuario madnadod esde el backedn:"+usuario.getNombre());
         return mapToDto(usuario);
     }
 
@@ -88,4 +98,23 @@ public class UsuarioServiceImpl implements UsuarioService {
                 null
         );
     }
+
+    @Override
+    public boolean verificarRol(Long idUser, String rol) {
+        log.info("Verificando rol {} para usuario con id: {}", rol, idUser);
+        try {
+            Roles rolValidar = Roles.valueOf(rol);
+            UsuarioRegistrado a = usuarioRegistradoRepository.findById(idUser)
+                            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+            log.info("El rol a validar es este"+rolValidar+"y el rol del usuario es este"+a.getRol().name());
+            return usuarioRegistradoRepository.findById(idUser)
+                    .map(u -> u.getRol().equals(rolValidar))
+                    .orElse(false);
+        } catch (IllegalArgumentException e) {
+            log.error("Rol no válido: {}", rol);
+            return false;
+        }
+    }
+
+
 }

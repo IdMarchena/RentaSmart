@@ -12,7 +12,6 @@ import java.util.stream.StreamSupport;
 @Mapper(componentModel = "spring")
 public interface CalificacionMapper {
 
-
     @Named("calificacioFromId")
     default Calificacion calificacioFromId(Long id) {
         if (id == null) return null;

@@ -16,119 +16,147 @@ public class FinanciacionController {
 
     private final FinanciacionService service;
 
-    @PutMapping("/crear")
-    public ResponseEntity<JsonResponse<FinanciacionDto>> crearFinanciacion(@RequestBody FinanciacionDto financiacionDto){
+    // ========================= CREATE =========================
+
+    @PostMapping
+    public ResponseEntity<JsonResponse<FinanciacionDto>> crearFinanciacion(
+            @RequestBody FinanciacionDto financiacionDto) {
+
         FinanciacionDto creada = service.crearFinanciacion(financiacionDto);
-        if(creada == null){
+
+        if (creada == null) {
             return ResponseEntity.status(404).body(
-                    new JsonResponse<>(false,"error al crear la financiacion",null,404)
-            );
-        }else{
-            return ResponseEntity.ok(
-                    new JsonResponse<>(true,"financiacion creada exitosamente",creada,200)
+                    new JsonResponse<>(false, "No se pudo crear la financiación", null, 404)
             );
         }
+
+        return ResponseEntity.status(201).body(
+                new JsonResponse<>(true, "Financiación creada exitosamente", creada, 201)
+        );
     }
 
-    @PutMapping("/acutualizarPorId/{id}")
-    public ResponseEntity<JsonResponse<Void>> actualizarFinanciacion(@PathVariable Long id,
-                                @RequestBody FinanciacionDto financiacionDto){
-        try{
+    // ========================= UPDATE =========================
+
+    @PutMapping("/{id}")
+    public ResponseEntity<JsonResponse<Void>> actualizarFinanciacion(
+            @PathVariable Long id,
+            @RequestBody FinanciacionDto financiacionDto) {
+
+        try {
             service.actualizarFinanciacion(id, financiacionDto);
             return ResponseEntity.ok(
-                    new JsonResponse<>(true,"financiacion actualizada por id exitosamente",null,200)
+                    new JsonResponse<>(true, "Financiación actualizada exitosamente", null, 200)
             );
-
         } catch (Exception e) {
             return ResponseEntity.status(404).body(
-                    new JsonResponse<>(false,"error al actualizar la financiacion",null,404)
+                    new JsonResponse<>(false, "No se pudo actualizar la financiación", null, 404)
             );
         }
     }
-    @DeleteMapping("/eliminarPorId/{id}")
-    public ResponseEntity<JsonResponse<Void>> eliminarFinanciacion(@PathVariable Long id){
-        try{
+
+    // ========================= DELETE =========================
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<JsonResponse<Void>> eliminarFinanciacion(@PathVariable Long id) {
+        try {
             service.eliminarFinanciacion(id);
             return ResponseEntity.ok(
-                    new JsonResponse<>(true,"financiacion eliminada por id exitosamente",null,200)
+                    new JsonResponse<>(true, "Financiación eliminada exitosamente", null, 200)
             );
-
         } catch (Exception e) {
             return ResponseEntity.status(404).body(
-                    new JsonResponse<>(false,"error al eliminar la financiacion",null,404)
+                    new JsonResponse<>(false, "No se pudo eliminar la financiación", null, 404)
             );
         }
     }
 
-    @GetMapping("/listar")
-    public ResponseEntity<JsonResponse<List<FinanciacionDto>>> listarFinanciaciones(){
+    // ========================= READ =========================
+
+    @GetMapping
+    public ResponseEntity<JsonResponse<List<FinanciacionDto>>> listarFinanciaciones() {
         List<FinanciacionDto> lista = service.listarFinanciaciones();
-        if(lista.isEmpty()){
+
+        if (lista.isEmpty()) {
             return ResponseEntity.status(404).body(
-                    new JsonResponse<>(false,"error al listar las financiaciones",null,404)
-            );
-        }else{
-            return ResponseEntity.ok(
-                    new JsonResponse<>(true,"financiaciones encontradas exitosamente",null,200)
+                    new JsonResponse<>(false, "No se encontraron financiaciones", null, 404)
             );
         }
+
+        return ResponseEntity.ok(
+                new JsonResponse<>(true, "Financiaciones encontradas exitosamente", lista, 200)
+        );
     }
 
-    @GetMapping("/buscarPorId/{id}")
-    public ResponseEntity<JsonResponse<FinanciacionDto>> buscarFinanciacion(@PathVariable Long id){
-        FinanciacionDto lista = service.buscarFinanciacion(id);
-        if(lista == null){
+    @GetMapping("/{id}")
+    public ResponseEntity<JsonResponse<FinanciacionDto>> buscarFinanciacion(@PathVariable Long id) {
+        FinanciacionDto financiacion = service.buscarFinanciacion(id);
+
+        if (financiacion == null) {
             return ResponseEntity.status(404).body(
-                    new JsonResponse<>(false,"error al buscar la financiacion",null,404)
-            );
-        }else{
-            return ResponseEntity.ok(
-                    new JsonResponse<>(true,"financiacion encontrada exitosamente",null,200)
+                    new JsonResponse<>(false, "Financiación no encontrada", null, 404)
             );
         }
+
+        return ResponseEntity.ok(
+                new JsonResponse<>(true, "Financiación encontrada exitosamente", financiacion, 200)
+        );
     }
 
-    @GetMapping("/generarPlanDePagosPorIdFinanciacion/{financiacionId}")
-    public ResponseEntity<JsonResponse<List<FinanciacionDto>>> generarPlanDePagos(@PathVariable Long financiacionId){
+    // ========================= PLANES DE PAGO =========================
+
+    @PostMapping("/{financiacionId}/plan-pagos")
+    public ResponseEntity<JsonResponse<List<FinanciacionDto>>> generarPlanDePagos(
+            @PathVariable Long financiacionId) {
+
         List<FinanciacionDto> lista = service.generarPlanDePagos(financiacionId);
-        if(lista.isEmpty()){
-            return ResponseEntity.status(404).body(
-                    new JsonResponse<>(false,"error al generar pagos para la financiacion",null,404)
-            );
-        }else{
-            return ResponseEntity.ok(
-                    new JsonResponse<>(true,"pagos generados para la financiacion exitosamente",null,200)
-            );
-        }
-    }
 
-    @GetMapping("/simularPlanDePagos")
-    public ResponseEntity<JsonResponse<List<FinanciacionDto>>> simularPlanDePagos(@RequestParam Integer numeroCuotas,
-                                                                                  @RequestParam Float montoTotal,
-                                                                                  @RequestParam Float interes){
-        List<FinanciacionDto> lista = service.simularPlanDePagos(numeroCuotas, montoTotal, interes);
-        if(lista.isEmpty()){
+        if (lista.isEmpty()) {
             return ResponseEntity.status(404).body(
-                    new JsonResponse<>(false,"error al generar la simulacion de los pagos para la financiacion",null,404)
-            );
-        }else{
-            return ResponseEntity.ok(
-                    new JsonResponse<>(true,"simulacion de pagos generados para la financiacion exitosamente",null,200)
+                    new JsonResponse<>(false, "No se pudo generar el plan de pagos", null, 404)
             );
         }
 
+        return ResponseEntity.ok(
+                new JsonResponse<>(true, "Plan de pagos generado exitosamente", lista, 200)
+        );
     }
-    @GetMapping("/validarFinanciacionPorId/{financiacionId}")
-    public ResponseEntity<JsonResponse<Boolean>> esFinanciacionValida(@PathVariable Long financiacionId){
-        boolean bandera = service.esFinanciacionValida(financiacionId);
-        if(bandera){
-            return ResponseEntity.ok(
-                    new JsonResponse<>(true,"simulacion de pagos generados para la financiacion exitosamente", true,200)
-            );
-        }else{
+
+    @GetMapping("/simular")
+    public ResponseEntity<JsonResponse<List<FinanciacionDto>>> simularPlanDePagos(
+            @RequestParam Integer numeroCuotas,
+            @RequestParam Float montoTotal,
+            @RequestParam Float interes) {
+
+        List<FinanciacionDto> lista =
+                service.simularPlanDePagos(numeroCuotas, montoTotal, interes);
+
+        if (lista.isEmpty()) {
             return ResponseEntity.status(404).body(
-                    new JsonResponse<>(false,"error al generar la simulacion de los pagos para la financiacion", false,404)
+                    new JsonResponse<>(false, "No se pudo generar la simulación", null, 404)
             );
         }
+
+        return ResponseEntity.ok(
+                new JsonResponse<>(true, "Simulación de pagos generada exitosamente", lista, 200)
+        );
+    }
+
+    // ========================= VALIDACIÓN =========================
+
+    @GetMapping("/{financiacionId}/validar")
+    public ResponseEntity<JsonResponse<Boolean>> esFinanciacionValida(
+            @PathVariable Long financiacionId) {
+
+        boolean valida = service.esFinanciacionValida(financiacionId);
+
+        if (!valida) {
+            return ResponseEntity.status(404).body(
+                    new JsonResponse<>(false, "La financiación no es válida", false, 404)
+            );
+        }
+
+        return ResponseEntity.ok(
+                new JsonResponse<>(true, "La financiación es válida", true, 200)
+        );
     }
 }

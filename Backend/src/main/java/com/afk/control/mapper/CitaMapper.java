@@ -2,7 +2,6 @@ package com.afk.control.mapper;
 import com.afk.control.dto.CitaDto;
 import com.afk.model.entity.Cita;
 import org.mapstruct.*;
-import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -11,7 +10,6 @@ import java.util.stream.StreamSupport;
         uses = {UsuarioMapper.class,
                 ServicioMapper.class,
                 PublicacionMapper.class})
-@Component
 public interface CitaMapper {
 
     @Named("citaFromId")

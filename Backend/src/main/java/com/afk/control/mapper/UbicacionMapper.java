@@ -1,6 +1,5 @@
 package com.afk.control.mapper;
 import com.afk.client.external.dto.UbicacionDt;
-import com.afk.control.dto.UbicacionDto;
 import com.afk.model.entity.Ubicacion;
 import org.mapstruct.*;
 import java.util.List;
@@ -27,7 +26,7 @@ public interface UbicacionMapper {
 
 
     @Named("listUbicacionToListUbicacionDto")
-    List<UbicacionDto> toDtoList(List<Ubicacion> ubicaciones);
+    List<UbicacionDt> toDtoList(List<Ubicacion> ubicaciones);
 
     @Named("listUbicacionDtoToListUbicacion")
     List<Ubicacion> toEntityList(List<UbicacionDt> dtos);

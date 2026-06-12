@@ -1,11 +1,9 @@
 package com.afk.control.security.oauth2;
 import com.afk.control.security.service.UserDetailsImpl;
-import com.afk.model.entity.Rol;
 import com.afk.model.entity.Ubicacion;
 import com.afk.model.entity.UsuarioRegistrado;
 import com.afk.model.entity.enums.EstadoUsuarioRegistrado;
 import com.afk.model.entity.enums.Roles;
-import com.afk.model.repository.RolRepository;
 import com.afk.model.repository.UbicacionRepository;
 import com.afk.model.repository.UsuarioRegistradoRepository;
 import jakarta.transaction.Transactional;
@@ -28,7 +26,6 @@ import java.util.*;
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private final UsuarioRegistradoRepository usuarioRepository;
-    private final RolRepository rolRepository;
     private final UbicacionRepository ubicacionRepository;
 
     @Override
@@ -88,18 +85,14 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     }
 
     private UsuarioRegistrado createNewUser(String correo, String nombre) {
-        Rol rolDefault = rolRepository.findByRole(Roles.ARRENDATARIO)
-                .orElseThrow(() -> new RuntimeException("Rol ROLE_POSTULANTE no encontrado"));
-
-        Ubicacion ubicacionDefault = ubicacionRepository.findByNombre("Santa Marta")
-                .orElseThrow(() -> new RuntimeException("Ubicación por defecto no encontrada"));
-
+        List<Ubicacion> ubicacionDefault = ubicacionRepository.findByNombre("Santa Marta");
+        if(ubicacionDefault.isEmpty()) throw new RuntimeException("No se pudo obtener el ubicacion default");
         UsuarioRegistrado user = UsuarioRegistrado.builder()
                 .nombre(nombre != null ? nombre : "Usuario OAuth2")
                 .correo(correo)
                 .clave("OAUTH2") // placeholder
-                .rol(rolDefault)
-                .ubicacion(ubicacionDefault)
+                .rol(Roles.ARRENDATARIO)
+                .ubicacion(ubicacionDefault.get(1))
                 .telefono("0000000000")
                 .cedula("0000000000")
                 .estado(EstadoUsuarioRegistrado.ACTIVO)
@@ -117,7 +110,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         }
         return List.of(
                 new SimpleGrantedAuthority(
-                        user.getRol().getRole().name()
+                        user.getRol().name().toUpperCase()
                 )
         );
     }

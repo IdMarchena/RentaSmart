@@ -11,7 +11,6 @@ import java.util.stream.StreamSupport;
 @Mapper(componentModel = "spring",
         uses = {UsuarioMapper.class,
                 PublicacionMapper.class})
-@Component
 public interface FavoritoMapper {
 
     @Named("favoritoFromId")

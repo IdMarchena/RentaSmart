@@ -5,7 +5,7 @@ import com.afk.control.service.MultimediaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import com.afk.control.dto.JsonResponse;
 import java.util.List;
 
 @RestController
@@ -15,45 +15,97 @@ public class MultimediaController {
 
     private final MultimediaService multimediaService;
 
+    // ========================= CREAR =========================
     @PostMapping
-    public ResponseEntity<MultimediaDto> createMultimedia(@RequestBody MultimediaDto multimediaDto) {
-        MultimediaDto savedMultimedia = multimediaService.createMultimedia(multimediaDto);
-        return ResponseEntity.ok(savedMultimedia);
+    public ResponseEntity<JsonResponse<MultimediaDto>> createMultimedia(@RequestBody MultimediaDto multimediaDto) {
+        MultimediaDto created = multimediaService.createMultimedia(multimediaDto);
+
+        if (created == null) {
+            return ResponseEntity.status(404)
+                    .body(new JsonResponse<>(false, "No se pudo crear la multimedia", null, 404));
+        }
+
+        return ResponseEntity.status(201)
+                .body(new JsonResponse<>(true, "Multimedia creada exitosamente", created, 201));
     }
 
+    // ========================= OBTENER =========================
     @GetMapping("/{id}")
-    public ResponseEntity<MultimediaDto> getMultimediaById(@PathVariable Long id) {
-        MultimediaDto multimediaDto = multimediaService.findMultimediaById(id);
-        return ResponseEntity.ok(multimediaDto);
+    public ResponseEntity<JsonResponse<MultimediaDto>> getMultimediaById(@PathVariable Long id) {
+        MultimediaDto multimedia = multimediaService.findMultimediaById(id);
+
+        if (multimedia == null) {
+            return ResponseEntity.status(404)
+                    .body(new JsonResponse<>(false, "Multimedia no encontrada", null, 404));
+        }
+
+        return ResponseEntity.ok(
+                new JsonResponse<>(true, "Multimedia obtenida exitosamente", multimedia, 200));
     }
 
     @GetMapping
-    public ResponseEntity<List<MultimediaDto>> getAllMultimedias() {
-        List<MultimediaDto> multimediaDtos = multimediaService.findAllMultimedias();
-        return ResponseEntity.ok(multimediaDtos);
-    }
+    public ResponseEntity<JsonResponse<List<MultimediaDto>>> getAllMultimedias() {
+        List<MultimediaDto> list = multimediaService.findAllMultimedias();
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteMultimediaById(@PathVariable Long id) {
-        multimediaService.deleteMultimediaById(id);
-        return ResponseEntity.noContent().build();
+        if (list.isEmpty()) {
+            return ResponseEntity.status(404)
+                    .body(new JsonResponse<>(false, "No se encontraron multimedias", null, 404));
+        }
+
+        return ResponseEntity.ok(
+                new JsonResponse<>(true, "Multimedias obtenidas exitosamente", list, 200));
     }
 
     @GetMapping("/publicacion/{publicacionId}")
-    public ResponseEntity<List<MultimediaDto>> getMultimediasByPublicacion(@PathVariable Long publicacionId) {
-        List<MultimediaDto> multimediaDtos = multimediaService.findMultimediasByPublicacion(publicacionId);
-        return ResponseEntity.ok(multimediaDtos);
+    public ResponseEntity<JsonResponse<List<MultimediaDto>>> getMultimediasByPublicacion(@PathVariable Long publicacionId) {
+        List<MultimediaDto> list = multimediaService.findMultimediasByPublicacion(publicacionId);
+
+        if (list.isEmpty()) {
+            return ResponseEntity.status(200)
+                    .body(new JsonResponse<>(false, "No se encontraron multimedias para la publicación", null, 200));
+        }
+
+        return ResponseEntity.ok(
+                new JsonResponse<>(true, "Multimedias obtenidas por publicación exitosamente", list, 200));
     }
 
     @GetMapping("/tipo/{tipo}")
-    public ResponseEntity<List<MultimediaDto>> getMultimediasByTipo(@PathVariable String tipo) {
-        List<MultimediaDto> multimediaDtos = multimediaService.findMultimediasByTipo(tipo);
-        return ResponseEntity.ok(multimediaDtos);
-    }
-    @PutMapping("/{id}")
-    public ResponseEntity<MultimediaDto> updateMultimedia(@PathVariable Long id, @RequestBody MultimediaDto dto) {
-        MultimediaDto actualizada = multimediaService.updateMultimedia(id, dto);
-        return ResponseEntity.ok(actualizada);
+    public ResponseEntity<JsonResponse<List<MultimediaDto>>> getMultimediasByTipo(@PathVariable String tipo) {
+        List<MultimediaDto> list = multimediaService.findMultimediasByTipo(tipo);
+
+        if (list.isEmpty()) {
+            return ResponseEntity.status(404)
+                    .body(new JsonResponse<>(false, "No se encontraron multimedias por tipo", null, 404));
+        }
+
+        return ResponseEntity.ok(
+                new JsonResponse<>(true, "Multimedias obtenidas por tipo exitosamente", list, 200));
     }
 
+    // ========================= ACTUALIZAR =========================
+    @PutMapping("/{id}")
+    public ResponseEntity<JsonResponse<MultimediaDto>> updateMultimedia(@PathVariable Long id, @RequestBody MultimediaDto dto) {
+        MultimediaDto updated = multimediaService.updateMultimedia(id, dto);
+
+        if (updated == null) {
+            return ResponseEntity.status(404)
+                    .body(new JsonResponse<>(false, "No se pudo actualizar la multimedia", null, 404));
+        }
+
+        return ResponseEntity.ok(
+                new JsonResponse<>(true, "Multimedia actualizada exitosamente", updated, 200));
+    }
+
+    // ========================= ELIMINAR =========================
+    @DeleteMapping("/{id}")
+    public ResponseEntity<JsonResponse<Void>> deleteMultimediaById(@PathVariable Long id) {
+        try {
+            multimediaService.deleteMultimediaById(id);
+            return ResponseEntity.ok(
+                    new JsonResponse<>(true, "Multimedia eliminada exitosamente", null, 200));
+        } catch (Exception e) {
+            return ResponseEntity.status(404)
+                    .body(new JsonResponse<>(false, "No se pudo eliminar la multimedia", null, 404));
+        }
+    }
 }

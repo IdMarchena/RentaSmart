@@ -49,7 +49,7 @@ public class SolicitudServiceImpl implements SolicitudServicioService {
     }
 
     @Override
-    public void actualizarSolicitudServicio(Long id, SolicitudDeServicioDto solicitudServicio) {
+    public SolicitudDeServicioDto actualizarSolicitudServicio(Long id, SolicitudDeServicioDto solicitudServicio) {
         if(solicitudServicio==null) throw new IllegalArgumentException("El solicitud de servicio no puede ser nulo");
         SolicitudServicio s = repository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("no se encontraron solicitud de servicio"));
@@ -63,7 +63,7 @@ public class SolicitudServiceImpl implements SolicitudServicioService {
         s.setFecha(LocalDateTime.now());
 
         s.setEstado(solicitudServicio.estado());
-        repository.save(s);
+        return mapper.toDto(repository.save(s));
     }
 
     @Override
@@ -85,17 +85,7 @@ public class SolicitudServiceImpl implements SolicitudServicioService {
 
     @Override
     public List<SolicitudDeServicioDto> findByEstado(String estado) {
-        EstadoCita e = switch (estado) {
-            case "SOLICITADA" -> EstadoCita.SOLICITADA;
-            case "EN_REVISION" -> EstadoCita.EN_REVISION;
-            case "CONFIRMADA" -> EstadoCita.CONFIRMADA;
-            case "REAGENDADA" -> EstadoCita.REAGENDADA;
-            case "CANCELADA" -> EstadoCita.CANCELADA;
-            case "VENCIDA" -> EstadoCita.VENCIDA;
-            case "ASISTIDA" -> EstadoCita.ASISTIDA;
-            case "NO_ASISTIDA" -> EstadoCita.NO_ASISTIDA;
-            default -> throw new NoSuchElementException("no se encontraron solicitud de servicio");
-        };
+        EstadoCita e = EstadoCita.valueOf(estado.toUpperCase());
         List<SolicitudServicio> lista = repository.findAll();
 
         if(lista.isEmpty()) throw new NoSuchElementException("no se encontraron solicitud de servicio");
@@ -149,9 +139,14 @@ public class SolicitudServiceImpl implements SolicitudServicioService {
     }
 
     @Override
-    public void deleteById(Long id) {
+    public boolean deleteById(Long id) {
         SolicitudServicio solicitudServicio = repository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("no se encontraron solicitud de servicio"));
-        repository.delete(solicitudServicio);
+        try{
+            repository.delete(solicitudServicio);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

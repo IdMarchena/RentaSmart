@@ -12,4 +12,5 @@ public interface MensajeService {
     void marcarMensajesComoLeidos(Long chatId, Long usuarioReceptorId);
     long contarMensajesNoLeidos(Long chatId, Long usuarioId);
     List<MensajeDto> buscarContenidoEnChat(Long chatId, String consulta);
+
 }

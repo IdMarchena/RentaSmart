@@ -1,0 +1,7 @@
+package com.afk.model.entity.enums;
+
+public enum TipoInmueble {
+    APARTAMENTO, APARTAESTUDIO, CASA, OFICINA,
+    LOCAL_COMERCIAL, PISO, CHALET, ESTUDIO,
+    LOFT, VIVIENDA_RURAL, CASA_CAMPO, BODEGA, HABITACION
+}

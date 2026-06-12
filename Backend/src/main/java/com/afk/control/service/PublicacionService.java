@@ -27,5 +27,9 @@ public interface PublicacionService {
 
     List<PublicacionDto> obtenerTop6Publicaciones();
 
+    List<PublicacionDto> listarPublicacionesPorTipo(String tipo);
+
+    List<PublicacionDto> listarPublicacionesPorUbicacion(String ubicacion);
+
 
 }

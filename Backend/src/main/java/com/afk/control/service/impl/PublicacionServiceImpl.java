@@ -5,16 +5,20 @@ import com.afk.control.mapper.*;
 import com.afk.control.service.*;
 import com.afk.model.entity.*;
 import com.afk.model.entity.enums.EstadoPublicacion;
+import com.afk.model.entity.enums.TipoInmueble;
 import com.afk.model.repository.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.stream.Collectors;
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PublicacionServiceImpl implements PublicacionService {
@@ -33,43 +37,80 @@ public class PublicacionServiceImpl implements PublicacionService {
 
     private final MultimediaRepository multimediaRepository;
     private final MultimediaMapper mMapper;
-
-
+    @Transactional
     @Override
-    public PublicacionDto crearPublicacion(PublicacionDto publicacionDto) {
-        if(publicacionDto==null) throw new IllegalArgumentException("El publicacion no puede ser nulo");
-        Publicacion p = mapper.toEntity(publicacionDto);
+    public PublicacionDto crearPublicacion(PublicacionDto dto) {
+        log.info("Creando publicacion");
+        log.info("este es el id del inmueble: "+dto.idInmueble());
+        log.info("este es el id del usuario: "+dto.idUsuario());
+        if(dto.multimedia().isEmpty())throw new NoSuchElementException("multimedia nulo, debe haber una imagen por lo menos ");
+        if(dto.idInmueble()==null)throw new NoSuchElementException("inmueble nulo, debe haber una imagen por lo menos ");
+        if(dto.idUsuario()==null)throw new NoSuchElementException("usuario nulo, debe haber una imagen por lo menos ");
+        // 1. Convertir a entidad
+        Publicacion p = mapper.toEntity(dto);
         p.setFechaPublicacion(LocalDateTime.now());
-        return mapper.toDto(repository.save(p));
+
+        // 2. RECUPERAR RELACIONES (Obligatorio para que Hibernate no intente crear nuevos)
+        p.setUsuario(usuarioRepository.findById(dto.idUsuario())
+                .orElseThrow(() -> new NoSuchElementException("Usuario no encontrado")));
+        p.setInmueble(iRepository.findById(dto.idInmueble())
+                .orElseThrow(() -> new NoSuchElementException("Inmueble no encontrado")));
+
+        // 3. VÍNCULO BIDIRECCIONAL (La clave del éxito)
+        // El "mappedBy" en Publicacion delega la responsabilidad a Multimedia
+        if (p.getMultimedia() != null && !p.getMultimedia().isEmpty()) {
+            p.getMultimedia().forEach(m -> {
+                m.setPublicacion(p); // Le decimos a cada foto quién es su publicación padre
+            });
+        } else {
+            // Log preventivo para depurar en consola si el DTO llega vacío
+            System.out.println("ADVERTENCIA: La lista de multimedia llegó vacía al Service");
+        }
+
+        // 4. PERSISTENCIA
+        // CascadeType.ALL hará que se disparen los inserts de Multimedia
+        p.setEstadoPublicacion(EstadoPublicacion.ACTIVA);
+        Publicacion guardada = repository.save(p);
+
+        return mapper.toDto(guardada);
     }
 
     @Override
+    @Transactional
     public PublicacionDto actualizarPublicacion(Long id, PublicacionDto publicacionDto) {
         if(id == null || id < 0 || publicacionDto == null) throw new IllegalArgumentException("El id no puede ser nulo");
+
         Publicacion p = repository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("El id no existe en el sistema"));
+                .orElseThrow(() -> new NoSuchElementException("La publicación no existe"));
+
+        // Actualizar campos básicos
         p.setTitulo(publicacionDto.titulo());
         p.setDescripcion(publicacionDto.descripcion());
-
-        Inmueble i = iRepository.findById(publicacionDto.idInmueble())
-                .orElseThrow(() -> new NoSuchElementException("El id no existe en el sistema"));
-
-
-        p.setInmueble(i);
-        p.setFechaPublicacion(publicacionDto.fechaPublicacion());
+        p.setPrecio(publicacionDto.precio());
         p.setEstadoPublicacion(publicacionDto.estadoPublicacion());
 
-        List<Calificacion> calificaciones = calificacionRepository.findAllById(publicacionDto.calificacionesIds());
-        p.setCalificaciones(calificaciones);
-        Usuario u = usuarioRepository.findById(publicacionDto.idUsuario())
-                .orElseThrow(() -> new NoSuchElementException("El id no existe en el sistema"));
-        p.setUsuario(u);
-        p.setPrecio(publicacionDto.precio());
-        List<Multimedia> m = multimediaRepository.findAllById(publicacionDto.multimediaIds());
-        p.setMultimedia(m);
+        // Actualizar Inmueble y Usuario
+        p.setInmueble(iRepository.findById(publicacionDto.idInmueble()).orElseThrow());
+        p.setUsuario(usuarioRepository.findById(publicacionDto.idUsuario()).orElseThrow());
+
+        // --- CORRECCIÓN DE MULTIMEDIA ---
+        // Convertimos los DTOs que vienen en el request a entidades
+        if (publicacionDto.multimedia() != null) {
+            List<Multimedia> nuevasMultimedias = publicacionDto.multimedia().stream()
+                    .map(dto -> {
+                        Multimedia m = mMapper.toEntity(dto);
+                        m.setPublicacion(p); // Importante: mantener vínculo
+                        return m;
+                    }).collect(Collectors.toList());
+
+            // Gracias a orphanRemoval = true, esto reemplaza las anteriores
+            p.getMultimedia().clear();
+            p.getMultimedia().addAll(nuevasMultimedias);
+        }
+
         return mapper.toDto(repository.save(p));
     }
-
+    @Transactional
     @Override
     public void eliminarPublicacion(Long id) {
         if(id == null || id < 0) throw new IllegalArgumentException("El id no puede ser nulo");
@@ -78,21 +119,26 @@ public class PublicacionServiceImpl implements PublicacionService {
         repository.delete(p);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<PublicacionDto> obtenerTodasLasPublicaciones() {
+        log.info("listado todas las publicaciones");
         List<Publicacion> listaPublicaciones = repository.findAll();
         if(listaPublicaciones.isEmpty()) throw new NoSuchElementException("No existe las publicaciones");
         return mapper.toDtoList(listaPublicaciones);
     }
-
+    @Transactional(readOnly = true)
     @Override
     public PublicacionDto obtenerPublicacionPorId(Long id) {
         if(id == null || id < 0) throw new IllegalArgumentException("El id no puede ser nulo");
         Publicacion p = repository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("El id no existe en el sistema"));
+                .orElseThrow(() -> new NoSuchElementException("El id no existe en el sistema" + id));
+        System.out.println("📌 Publicación ID: " + p.getId());
+        System.out.println("🏠 Inmueble asociado: " +
+                (p.getInmueble() != null ? p.getInmueble().getId() : "NULL"));
         return mapper.toDto(p);
     }
-
+    @Transactional(readOnly = true)
     @Override
     public List<PublicacionDto> listarPublicacionesPorEstado(String estado) {
         List<Publicacion> listaPublicaciones = repository.findAll();
@@ -102,7 +148,7 @@ public class PublicacionServiceImpl implements PublicacionService {
                 .collect(Collectors.toList());
         return mapper.toDtoList(listFiltrada);
     }
-
+    @Transactional(readOnly = true)
     @Override
     public List<PublicacionDto> listarPublicacionesPorTitulo(String titulo) {
         List<Publicacion> listaPublicaciones = repository.findAll();
@@ -112,7 +158,7 @@ public class PublicacionServiceImpl implements PublicacionService {
                 .collect(Collectors.toList());
         return mapper.toDtoList(listFiltrada);
     }
-
+    @Transactional(readOnly = true)
     @Override
     public List<PublicacionDto> listarPublicacionesPorPrecioMenor(Double precioMenor) {
         List<Publicacion> listaPublicaciones = repository.findAll();
@@ -120,9 +166,10 @@ public class PublicacionServiceImpl implements PublicacionService {
         List<Publicacion> listFiltrada = listaPublicaciones.stream()
                 .filter(publicacion -> publicacion.getPrecio()<=precioMenor)
                 .collect(Collectors.toList());
+        log.info("Se encontró la cantidad de: {} con el precio de  {}", listFiltrada.size(), precioMenor);
         return mapper.toDtoList(listFiltrada);
     }
-
+    @Transactional(readOnly = true)
     @Override
     public List<PublicacionDto> listarPublicacionesPorPrecioEntreMenorYMayor(Double precioMenor, Double precioMayor) {
         List<Publicacion> listaPublicaciones = repository.findAll();
@@ -130,9 +177,11 @@ public class PublicacionServiceImpl implements PublicacionService {
         List<Publicacion> listFiltrada = listaPublicaciones.stream()
                 .filter(publicacion -> publicacion.getPrecio()>=precioMenor  && publicacion.getPrecio()<=precioMayor)
                 .collect(Collectors.toList());
+        log.info("Se encontró la cantidad de: {} con el precio dentre menor  {} a  mayor  {}", listFiltrada.size(), precioMenor,precioMayor);
+
         return mapper.toDtoList(listFiltrada);
     }
-
+    @Transactional(readOnly = true)
     @Override
     public List<PublicacionDto> listarPublicacionesPorNombreInmueble(String nombreInmueble) {
         List<Publicacion> listaPublicaciones = repository.findAll();
@@ -142,7 +191,7 @@ public class PublicacionServiceImpl implements PublicacionService {
                 .collect(Collectors.toList());
         return mapper.toDtoList(listFiltrada);
     }
-
+    @Transactional(readOnly = true)
     @Override
     public List<PublicacionDto> listarPublicacionesPorUbicacionInmueble(String ubicaciion) {
         List<Publicacion> listaPublicaciones = repository.findAll();
@@ -152,17 +201,32 @@ public class PublicacionServiceImpl implements PublicacionService {
                 .collect(Collectors.toList());
         return mapper.toDtoList(listFiltrada);
     }
-
+    @Transactional(readOnly = true)
     @Override
     public List<PublicacionDto> listarPublicacionesPorEstratoInmueble(String estratoInmueble) {
+
         List<Publicacion> listaPublicaciones = repository.findAll();
-        if(listaPublicaciones.isEmpty()) throw new NoSuchElementException("No existe las publicaciones");
-        List<Publicacion> listFiltrada = listaPublicaciones.stream()
-                .filter(publicacion -> publicacion.getInmueble().getEstrato().equals(estratoInmueble))
+        if (listaPublicaciones.isEmpty()) {
+            throw new NoSuchElementException("No existen publicaciones");
+        }
+
+        Integer estrato;
+        try {
+            estrato = Integer.valueOf(estratoInmueble);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Estrato inválido: " + estratoInmueble);
+        }
+
+        List<Publicacion> listaFiltrada = listaPublicaciones.stream()
+                .filter(p -> p.getInmueble().getEstrato().equals(estrato))
                 .collect(Collectors.toList());
-        return mapper.toDtoList(listFiltrada);
+
+        log.info("Se encontró la cantidad de: {} con el estrato {}", listaFiltrada.size(), estrato);
+
+        return mapper.toDtoList(listaFiltrada);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<PublicacionDto> ListarPublicacionesByUbicacionAndEstado(Long ubicacionId, String estado) {
         List<Publicacion> listaPublicaciones = repository.findAll();
@@ -172,7 +236,7 @@ public class PublicacionServiceImpl implements PublicacionService {
                 .collect(Collectors.toList());
         return mapper.toDtoList(listFiltrada);
     }
-
+    @Transactional(readOnly = true)
     @Override
     public List<PublicacionDto> ListarPublicacionesByNombreAndEstrato(String nombre, Integer estrato) {
         List<Publicacion> listaPublicaciones = repository.findAll();
@@ -182,7 +246,7 @@ public class PublicacionServiceImpl implements PublicacionService {
                 .collect(Collectors.toList());
         return mapper.toDtoList(listFiltrada);
     }
-
+    @Transactional(readOnly = true)
     @Override
     public List<PublicacionDto> finInmueblesByIdArrendatario(Long idArrendario) {
         List<Publicacion> listaPublicaciones = repository.findAll();
@@ -192,7 +256,7 @@ public class PublicacionServiceImpl implements PublicacionService {
                 .collect(Collectors.toList());
         return mapper.toDtoList(listFiltrada);
     }
-
+    @Transactional(readOnly = true)
     @Override
     public void cambiarEstadoPublicacion(Long id, String estado) {
         if(id == null || id < 0 || estado == null) throw new IllegalArgumentException("El id no puede ser nulo ni el estado");
@@ -209,6 +273,7 @@ public class PublicacionServiceImpl implements PublicacionService {
         p.setEstadoPublicacion(e);
         repository.save(p);
     }
+    @Transactional(readOnly = true)
     @Override
     public List<PublicacionDto> listarPublicacionesByIdArrendador(Long id){
         List<Publicacion> listaPublicaciones = repository.findAll();
@@ -219,6 +284,7 @@ public class PublicacionServiceImpl implements PublicacionService {
         return mapper.toDtoList(publicacion);
 
     }
+    @Transactional(readOnly = true)
     @Override
     public List<PublicacionDto> listarPublicacionesPorPrecioMayor(Double precioMayor) {
         List<Publicacion> listaPublicaciones = repository.findAll();
@@ -226,59 +292,56 @@ public class PublicacionServiceImpl implements PublicacionService {
         List<Publicacion> listFiltrada = listaPublicaciones.stream()
                 .filter(publicacion -> publicacion.getPrecio()>=precioMayor)
                 .collect(Collectors.toList());
+        log.info("se contro la cantidad de {} publicaciones con el precio mayor {}", listFiltrada.size(), precioMayor);
         return mapper.toDtoList(listFiltrada);
     }
-
+    @Transactional(readOnly = true)
     @Override
     public List<PublicacionDto> obtenerTop6Publicaciones() {
         List<Publicacion> publicaciones = repository.findAll();
-        List<PublicacionDto> publicacionesConPromedio = publicaciones.stream()
-                .map(publicacion -> {
-                    double promedio = 0;
-                    List<Calificacion> calificaciones = publicacion.getCalificaciones();
-                    if (!calificaciones.isEmpty()) {
-                        promedio = calificaciones.stream()
-                                .mapToInt(Calificacion::getPuntaje)
-                                .average()
-                                .orElse(0);
-                    }
-                    return new PublicacionDto(
-                            publicacion.getId(),
-                            publicacion.getTitulo(),
-                            publicacion.getDescripcion(),
-                            publicacion.getInmueble().getId(),
-                            publicacion.getFechaPublicacion(),
-                            publicacion.getEstadoPublicacion(),
-                            obtenerIdsCalificaciones(publicacion.getCalificaciones()),
-                            publicacion.getUsuario().getId(),
-                            publicacion.getPrecio(),
-                            obtenerIdsMultimedias(publicacion.getMultimedia())
-                    );
-                })
-                .sorted(Comparator.comparingDouble(this::calcularPromedio).reversed())
-                .limit(6)
-                .collect(Collectors.toList());
 
-        return publicacionesConPromedio;
+        return publicaciones.stream()
+                .sorted(Comparator.comparingDouble(this::calcularPromedioEntidad).reversed())
+                .limit(6)
+                .map(mapper::toDto)
+                .collect(Collectors.toList());
     }
 
-    private double calcularPromedio(PublicacionDto publicacionDto) {
-        Publicacion p = mapper.toEntity(publicacionDto);
-        List<Calificacion> calificaciones = p.getCalificaciones();
-        if (calificaciones.isEmpty()) return 0;
+    @Override
+    public List<PublicacionDto> listarPublicacionesPorTipo(String tipo){
+        List<Publicacion> listaPublicaciones = repository.findAll();
+        if(listaPublicaciones.isEmpty()) throw new NoSuchElementException("No existe las publicaciones");
+        TipoInmueble t = TipoInmueble.valueOf(tipo);
+        List<Publicacion> listaFiltrada = listaPublicaciones.stream()
+                .filter(p -> p.getInmueble().getTipo().equals(t))
+                .collect(Collectors.toList());
+        log.info("se encontro la cantidad de: " + listaFiltrada.size()+" con el tipo"+t);
+        return mapper.toDtoList(listaFiltrada);
+    }
+    @Override
+    public List<PublicacionDto> listarPublicacionesPorUbicacion(String ubicacion){
+        log.info("encontrando publicaicones por ubicacion");
+        System.out.println("escanenado publicaciones por ubicacion");
+        List<Publicacion> listaPublicaciones = repository.findAll();
+        if(listaPublicaciones.isEmpty()) throw new NoSuchElementException("No existe las publicaciones");
+        List<Publicacion> listaFiltrada = listaPublicaciones.stream()
+                .filter(p -> p.getInmueble()
+                        .getUbicacion()
+                        .getNombre()
+                        .equalsIgnoreCase(ubicacion))
+                .collect(Collectors.toList());
+        log.info("se encontro la cantidad de: " + listaFiltrada.size()+" con la ubicacion"+ ubicacion);
+        return mapper.toDtoList(listaFiltrada);
+    }
+
+    private double calcularPromedioEntidad(Publicacion p) {
+        Set<Calificacion> calificaciones = p.getCalificaciones();
+        if (calificaciones == null || calificaciones.isEmpty()) {
+            return 0;
+        }
         return calificaciones.stream()
                 .mapToInt(Calificacion::getPuntaje)
                 .average()
                 .orElse(0);
-    }
-    private List<Long> obtenerIdsCalificaciones(List<Calificacion> calificaciones) {
-        return calificaciones.stream()
-                .map(Calificacion::getId)
-                .collect(Collectors.toList());
-    }
-    private List<Long> obtenerIdsMultimedias(List<Multimedia> multimedias) {
-        return multimedias.stream()
-                .map(Multimedia::getId)
-                .collect(Collectors.toList());
     }
 }

@@ -32,7 +32,7 @@ public class Chat {
     private Usuario usuariob;
 
     @Builder.Default
-    @OneToMany(mappedBy = "chat",fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "chat",fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Mensaje> mensajes = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)

@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Service
@@ -95,13 +96,20 @@ public class CalificacionServiceImpl implements CalificacionService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<CalificacionDto> encontrarCalificacionesPorPublicacionId(Long idPublicacion) {
-        if(idPublicacion<0 || idPublicacion==null) throw new IllegalArgumentException("el id no puede ser nulo o negativo");
+        if (idPublicacion == null || idPublicacion < 0)
+            throw new IllegalArgumentException("El id no puede ser nulo o negativo");
+
         Publicacion p = publicacionRepository.findById(idPublicacion)
-                .orElseThrow(() -> new NoSuchElementException("publicacion con ID " + idPublicacion + " no encontrada"));
-        if(p == null) throw new NoSuchElementException("la publicacion  con ese id"+idPublicacion+" no fue encontrado");
-        List<Calificacion> calificaciones = p.getCalificaciones();
-        if(calificaciones.isEmpty()) throw new NoSuchElementException("no se encontraron calificaciones asociadas a esta publicacion");
+                .orElseThrow(() -> new NoSuchElementException("Publicación con ID " + idPublicacion + " no encontrada"));
+
+        Set<Calificacion> calificaciones = p.getCalificaciones();
+
+        if (calificaciones == null || calificaciones.isEmpty()) {
+            return List.of(); // Devuelve [] al Frontend
+        }
+
         return mapper.toDtoList(calificaciones);
     }
 }

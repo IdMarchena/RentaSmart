@@ -8,9 +8,7 @@ import java.util.stream.StreamSupport;
 
 @Mapper(componentModel = "spring",
         uses = {UsuarioMapper.class,
-                PagoMapper.class,
-                ContratoMapper.class,
-                ServicioMapper.class,})
+                PagoMapper.class})
 public interface FacturaMapper {
 
     @Named("facturaFromId")
@@ -24,14 +22,10 @@ public interface FacturaMapper {
 
     @Mapping(target = "usuario", source = "idUsuario", qualifiedByName = "usuarioFromId")
     @Mapping(target = "pago", source = "idPago", qualifiedByName = "pagoFromId")
-    @Mapping(target = "contrato", source = "idContrato", qualifiedByName = "contratoFromId")
-    @Mapping(target = "servicio", source = "idServicio", qualifiedByName = "servicioFromId")
     Factura toEntity(FacturaDto facturaDto);
 
     @Mapping(target = "idUsuario", source = "usuario.id")
     @Mapping(target = "idPago", source = "pago.id")
-    @Mapping(target = "idContrato", source = "contrato.id")
-    @Mapping(target = "idServicio", source = "servicio.id")
     FacturaDto toDto(Factura factura);
 
     @Named("facturaToDtoList")
@@ -50,8 +44,6 @@ public interface FacturaMapper {
 
     @Mapping(target = "usuario", source = "idUsuario", qualifiedByName = "usuarioFromId")
     @Mapping(target = "pago", source = "idPago", qualifiedByName = "pagoFromId")
-    @Mapping(target = "contrato", source = "idContrato", qualifiedByName = "contratoFromId")
-    @Mapping(target = "servicio", source = "idServicio", qualifiedByName = "servicioFromId")
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateEntityFromDto(FacturaDto dto, @MappingTarget Factura entity);
 }

@@ -11,4 +11,5 @@ public interface UsuarioService {
     UsuarioDto updateUsuario(Long id, UsuarioDto usuario);
     void deleteUsuarioById(Long id);
     UsuarioDto findByCorreo(String correo);
+    boolean verificarRol(Long idUser,String rol);
 }

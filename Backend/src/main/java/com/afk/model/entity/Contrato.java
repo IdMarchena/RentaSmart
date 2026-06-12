@@ -37,13 +37,13 @@ public class Contrato {
     private Inmueble inmueble;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_financiacion", nullable = true)
+    @JoinColumn(name = "id_financiacion")
     private Financiacion financiacion;
 
     @Column(name = "fecha_inicio",nullable = false)
     private LocalDateTime fechaInicio;
 
-    @Column(name = "fecha_finalizacion",nullable = true)
+    @Column(name = "fecha_finalizacion")
     private LocalDateTime fechaFinalizacion;
 
     @Column(name = "precio", nullable = false)
@@ -55,4 +55,10 @@ public class Contrato {
 
     @Column(name="deposito")
     private Double deposito;
+
+    @Column(name = "clausulas_especiales", nullable = false, length = 1000)
+    private String clausulasEspeciales;
+
+    @Column(name="dia_de_pago")
+    private Integer diaDePago;
 }
