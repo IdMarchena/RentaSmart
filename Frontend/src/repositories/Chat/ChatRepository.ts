@@ -9,4 +9,5 @@ export interface ChatRepository {
   delete(id: number): Promise<void>
 
   getByName(nombre: string): Promise<Chat | null>
+  verificarSiExisteChatEntreUsuarios(idDuenoPublicacion: number, idArrendatario: number): Promise<boolean>
 }

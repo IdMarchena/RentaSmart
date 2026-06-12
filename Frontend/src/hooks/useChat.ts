@@ -186,6 +186,23 @@ const getAllByUserId = async (): Promise<Chat[]> => {
     }
   };
 
+  // Método para verificar si ya existe un chat entre dos usuarios
+  const verificarSiExisteChatEntreUsuarios = async (idDuenoPublicacion: number, idArrendatario: number): Promise<boolean> => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const existe = await chatRepository.verificarSiExisteChatEntreUsuarios(idDuenoPublicacion, idArrendatario);
+      return existe;
+    } catch (err: any) {
+      const errorMessage = err.message || 'Error al verificar si existe chat entre usuarios';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     loading,
     error,
@@ -197,5 +214,6 @@ const getAllByUserId = async (): Promise<Chat[]> => {
     remove,
     getByName,
     getAllByUserId,
+    verificarSiExisteChatEntreUsuarios,
   };
 };

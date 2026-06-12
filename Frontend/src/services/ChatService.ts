@@ -30,15 +30,24 @@ export class ChatService {
     console.log(`🔍 usuario B en el chat:`, chat.usuarioB);
     console.log(`🔍 Mensajes en el chat:`, chat.mensajes);
 
-    if (!chat.usuarioA.id) {
+    // Hidratar usuario A si no tiene nombre (está incompleto)
+    if (!chat.usuarioA.nombre || chat.usuarioA.nombre === 'Usuario desconocido') {
         console.log(`⚠️ El chat no está completamente hidratado, obteniendo usuario A por ID: ${chat.usuarioA.id}`);
         const usuarioCompletoA = await usuariosRepository.getById(chat.usuarioA.id || 0);
-        chat.usuarioA = usuarioCompletoA as any;
+        if (usuarioCompletoA) {
+            chat.usuarioA = usuarioCompletoA as any;
+            console.log(`✅ Usuario A hidratado:`, chat.usuarioA);
+        }
     }
-    if (!chat.usuarioB.id) {
+    
+    // Hidratar usuario B si no tiene nombre (está incompleto)
+    if (!chat.usuarioB.nombre || chat.usuarioB.nombre === 'Usuario desconocido') {
         console.log(`⚠️ El chat no está completamente hidratado, obteniendo usuario B por ID: ${chat.usuarioB.id}`);
         const usuarioCompletoB = await usuariosRepository.getById(chat.usuarioB.id || 0);
-        chat.usuarioB = usuarioCompletoB as any;
+        if (usuarioCompletoB) {
+            chat.usuarioB = usuarioCompletoB as any;
+            console.log(`✅ Usuario B hidratado:`, chat.usuarioB);
+        }
     }
 
     if (!chat.mensajes || chat.mensajes.length === 0) {

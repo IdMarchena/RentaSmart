@@ -87,6 +87,17 @@ export class BackendChatRepository implements ChatRepository {
     return this.mapToEntity([response.data])[0]
   }
 
+  // Verificar si ya existe un chat entre dos usuarios
+  async verificarSiExisteChatEntreUsuarios(idDuenoPublicacion: number, idArrendatario: number): Promise<boolean> {
+    const response = await http<JsonResponse<boolean>>(`/api/v1/chats/verificar/${idDuenoPublicacion}/${idArrendatario}`)
+
+    if (!response.success || response.data === undefined) {
+      throw new Error(response.message || 'Error al verificar si existe chat entre usuarios')
+    }
+
+    return response.data
+  }
+
   // Mapeo de DTO a Entity
   private mapToEntity(dtos: ChattDto[]): Chat[] {
     return dtos.map(dto => ({
