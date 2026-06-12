@@ -14,6 +14,8 @@ import imgServicioOn from "../../assets/servicios-on.png"
 import imgServicioOff from "../../assets/servicios-off.png"
 import { useLocation } from "react-router-dom"
 import { Link } from "react-router-dom"
+import { useAuthContext } from "../../context/AuthContext"
+import { useRol } from "@/hooks/useRol"
 
 export const Aside = () => {
     const location = useLocation();
@@ -23,13 +25,39 @@ export const Aside = () => {
     const isMessages = location.pathname === '/admin/messages';
     const isServices = location.pathname === '/admin/services';
     const isUser = location.pathname === '/admin/user';
+    const isFavorites = location.pathname === '/admin/favorites';
+    const { logout } = useAuthContext()
+    const { 
+        loading, 
+        esAdministrador, 
+        esArrendatario, 
+        esArrendador, 
+        esPrestadorServicio,
+        puedeVerPublicaciones,
+        puedeVerContratos,
+        puedeVerServicios,
+        puedeVerMensajes,
+        puedeAccederProfesional
+    } = useRol();
+    
+    const handleLogout = () => {
+        logout()
+    }
 
+    // Si está cargando, mostrar loading
+    if (loading) {
+        return (
+            <div className="w-auto h-full flex flex-col items-center justify-center border-r border-[#C7C6BA] p-5">
+                <div className="text-gray-500">Cargando...</div>
+            </div>
+        );
+    }
 
     return (
         <div className="w-auto h-full flex flex-col items-start justify-start border-r border-[#C7C6BA] gap-2 p-5 max-[1082px]:p-2">
             <div className="w-full h-[50px] bg-[#FEFCEC] md:flex flex-row items-center justify-center mb-2 p-2 max-[1082px]:justify-start">
                 <img src={imgLogo} alt="Logo" className="w-[37.33px] h-[50px] object-cover"/>
-                <h1 className="text-[#393939] xl:text-[20px] font-semibold max-[1082px]:hidden">Renta<span className="text-[#EB8369] xl:text-[20px] font-semibold max-[1082px]:hidden">Smart</span></h1>
+                <Link to="/"><h1 className="text-[#393939] xl:text-[20px] font-semibold max-[1082px]:hidden">Renta<span className="text-[#EB8369] xl:text-[20px] font-semibold max-[1082px]:hidden">Smart</span></h1></Link>
             </div>
             <div className="w-full h-full flex flex-col items-start justify-center gap-5 p-2">
                 <div className="md:flex flex-row items-center justify-between w-full max-[1082px]:justify-start max-[1082px]:gap-2">
@@ -37,25 +65,54 @@ export const Aside = () => {
                     <Link to="/admin"><span className={isHome ? "text-[#EB8369] xl:text-[14px] text-[12px] font-semibold max-[1082px]:hidden" : "text-[#A9ADB6] xl:text-[14px] text-[12px] font-semibold max-[1082px]:hidden"}>Inicio</span></Link>
                     <div className={isHome ? " hidden md:block w-2 aspect-square rounded-full bg-[#EB8369]" : ""}></div>
                 </div>
+                
+                {/* Publicaciones - Solo ARRENDADOR y ADMINISTRADOR */}
+                {puedeVerPublicaciones() && (
+                    <div className="md:flex flex-row items-center justify-between w-full max-[1082px]:justify-start max-[1082px]:gap-2">
+                        <Link to="/admin/publications"><img src={isPublications ? imgPubliOn : imgPubliOff} alt="Logo" className="w-[30px] h-[30px] object-cover"/></Link>
+                        <Link to="/admin/publications"><span className={isPublications ? "text-[#EB8369] xl:text-[14px] text-[12px] font-semibold max-[1082px]:hidden" : "text-[#A9ADB6] xl:text-[14px] text-[12px] font-semibold max-[1082px]:hidden"}>Publicaciones</span></Link>
+                        <div className={isPublications ? " hidden md:block w-2 aspect-square rounded-full bg-[#EB8369]" : ""}></div>
+                    </div>
+                )}
+                
+                {/* Contratos - Solo ARRENDADOR y ADMINISTRADOR */}
+                {puedeVerContratos() && (
+                    <div className="md:flex flex-row items-center justify-between w-full max-[1082px]:justify-start max-[1082px]:gap-2">
+                        <Link to="/admin/contracts"><img src={isContracts ? imgContratosOn : imgContratosOff} alt="Logo" className="w-[30px] h-[30px] object-cover"/></Link>
+                        <Link to="/admin/contracts"><span className={isContracts ? "text-[#EB8369] xl:text-[14px] text-[12px] font-semibold max-[1082px]:hidden" : "text-[#A9ADB6] xl:text-[14px] text-[12px] font-semibold max-[1082px]:hidden"}>Contratos</span></Link>
+                        <div className={isContracts ? " hidden md:block w-2 aspect-square rounded-full bg-[#EB8369]" : ""}></div>
+                    </div>
+                )}
+                
+                {/* Mensajes - Todos los roles */}
+                {puedeVerMensajes() && (
+                    <div className="md:flex flex-row items-center justify-between w-full max-[1082px]:justify-start max-[1082px]:gap-2">
+                        <Link to="/admin/messages"><img src={isMessages ? imgChatOn : imgChatOff} alt="Logo" className="w-[30px] h-[30px] object-cover"/></Link>
+                        <Link to="/admin/messages"><span className={isMessages ? "text-[#EB8369] xl:text-[14px] text-[12px] font-semibold max-[1082px]:hidden" : "text-[#A9ADB6] xl:text-[14px] text-[12px] font-semibold max-[1082px]:hidden"}>Mensajes</span></Link>
+                        <div className={isMessages ? " hidden md:block w-2 aspect-square rounded-full bg-[#EB8369]" : ""}></div>
+                    </div>
+                )}
+                
+                {/* Servicios - ARRENDADOR, ADMINISTRADOR y PRESTADOR_SERVICIO */}
+                {puedeVerServicios() && (
+                    <div className="md:flex flex-row items-center justify-between w-full max-[1082px]:justify-start max-[1082px]:gap-2">
+                        <Link to="/admin/services"><img src={isServices ? imgServicioOn : imgServicioOff} alt="Logo" className="w-[30px] h-[30px] object-cover"/></Link>
+                        <Link to="/admin/services"><span className={isServices ? "text-[#EB8369] xl:text-[14px] text-[12px] font-semibold max-[1082px]:hidden" : "text-[#A9ADB6] xl:text-[14px] text-[12px] font-semibold max-[1082px]:hidden"}>Servicios</span></Link>
+                        <div className={isServices ? " hidden md:block w-2 aspect-square rounded-full bg-[#EB8369]" : ""}></div>
+                    </div>
+                )}
+                
+                {/* Favoritos - Todos los roles */}
                 <div className="md:flex flex-row items-center justify-between w-full max-[1082px]:justify-start max-[1082px]:gap-2">
-                    <Link to="/admin/publications"><img src={isPublications ? imgPubliOn : imgPubliOff} alt="Logo" className="w-[30px] h-[30px] object-cover"/></Link>
-                    <Link to="/admin/publications"><span className={isPublications ? "text-[#EB8369] xl:text-[14px] text-[12px] font-semibold max-[1082px]:hidden" : "text-[#A9ADB6] xl:text-[14px] text-[12px] font-semibold max-[1082px]:hidden"}>Publicaciones</span></Link>
-                    <div className={isPublications ? " hidden md:block w-2 aspect-square rounded-full bg-[#EB8369]" : ""}></div>
-                </div>
-                <div className="md:flex flex-row items-center justify-between w-full max-[1082px]:justify-start max-[1082px]:gap-2">
-                    <Link to="/admin/contracts"><img src={isContracts ? imgContratosOn : imgContratosOff} alt="Logo" className="w-[30px] h-[30px] object-cover"/></Link>
-                    <Link to="/admin/contracts"><span className={isContracts ? "text-[#EB8369] xl:text-[14px] text-[12px] font-semibold max-[1082px]:hidden" : "text-[#A9ADB6] xl:text-[14px] text-[12px] font-semibold max-[1082px]:hidden"}>Contratos</span></Link>
-                    <div className={isContracts ? " hidden md:block w-2 aspect-square rounded-full bg-[#EB8369]" : ""}></div>
-                </div>
-                <div className="md:flex flex-row items-center justify-between w-full max-[1082px]:justify-start max-[1082px]:gap-2">
-                    <Link to="/admin/messages"><img src={isMessages ? imgChatOn : imgChatOff} alt="Logo" className="w-[30px] h-[30px] object-cover"/></Link>
-                    <Link to="/admin/messages"><span className={isMessages ? "text-[#EB8369] xl:text-[14px] text-[12px] font-semibold max-[1082px]:hidden" : "text-[#A9ADB6] xl:text-[14px] text-[12px] font-semibold max-[1082px]:hidden"}>Mensajes</span></Link>
-                    <div className={isMessages ? " hidden md:block w-2 aspect-square rounded-full bg-[#EB8369]" : ""}></div>
-                </div>
-                <div className="md:flex flex-row items-center justify-between w-full max-[1082px]:justify-start max-[1082px]:gap-2">
-                    <Link to="/admin/services"><img src={isServices ? imgServicioOn : imgServicioOff} alt="Logo" className="w-[30px] h-[30px] object-cover"/></Link>
-                    <Link to="/admin/services"><span className={isServices ? "text-[#EB8369] xl:text-[14px] text-[12px] font-semibold max-[1082px]:hidden" : "text-[#A9ADB6] xl:text-[14px] text-[12px] font-semibold max-[1082px]:hidden"}>Servicios</span></Link>
-                    <div className={isServices ? " hidden md:block w-2 aspect-square rounded-full bg-[#EB8369]" : ""}></div>
+                    <Link to="/admin/favorites">
+                        <span className="text-[#A9ADB6] hover:text-[#EB8369] transition-colors text-2xl">
+                            {isFavorites ? "❤️" : "🤍"}
+                        </span>
+                    </Link>
+                    <Link to="/admin/favorites">
+                        <span className={isFavorites ? "text-[#EB8369] xl:text-[14px] text-[12px] font-semibold max-[1082px]:hidden" : "text-[#A9ADB6] hover:text-[#EB8369] transition-colors xl:text-[14px] text-[12px] font-semibold max-[1082px]:hidden"}>Favoritos</span>
+                    </Link>
+                    <div className={isFavorites ? " hidden md:block w-2 aspect-square rounded-full bg-[#EB8369]" : ""}></div>
                 </div>
             </div>
 
@@ -67,7 +124,7 @@ export const Aside = () => {
                 </div>
                 <div className="md:flex flex-row items-center justify-between w-full max-[1082px]:justify-start max-[1082px]:gap-2">
                     <img src={imgExitOff} alt="Logo" className="w-[30px] h-[30px] object-cover"/>
-                    <span className="text-[#A9ADB6] xl:text-[14px] text-[12px] font-semibold max-[1082px]:hidden">Salir</span>
+                    <span className="text-[#A9ADB6] xl:text-[14px] text-[12px] font-semibold max-[1082px]:hidden cursor-pointer" onClick={handleLogout}>Cerrar Sesión</span>
                     <div className=""></div>
                 </div>
             </div>
