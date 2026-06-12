@@ -11,5 +11,6 @@ public interface ChatService {
     ChattDto buscarChatPorNombre(String nombre);
     void deleteChat(Long id);
     List<ChattDto> findAllChatsByIdUser(Long idUser);
+    boolean verificarSiYaExisteChatEntreUsuarios(Long idDueñoPublicacion, Long idArrendatario);
 
 }

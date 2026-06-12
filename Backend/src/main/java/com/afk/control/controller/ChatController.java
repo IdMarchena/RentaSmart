@@ -79,6 +79,15 @@ public class ChatController {
         return ResponseEntity.ok(
                 new JsonResponse<>(true, "Lista de chats", chats, 200));
     }
+    @GetMapping("/verificar/{idDuenoPublicacion}/{idArrendatario}")
+    public ResponseEntity<JsonResponse<Boolean>> verificarSiYaExisteChatEntreUsuarios(
+            @PathVariable Long idDuenoPublicacion,
+            @PathVariable Long idArrendatario) {
+        boolean existe = chatService.verificarSiYaExisteChatEntreUsuarios(idDuenoPublicacion, idArrendatario);
+        return ResponseEntity.ok(new JsonResponse<>(true, existe ? "Ya existe un chat entre los usuarios" : "No existe un chat entre los usuarios", existe, 200)
+        );
+    }
+
 
 
     @PatchMapping("/{id}")

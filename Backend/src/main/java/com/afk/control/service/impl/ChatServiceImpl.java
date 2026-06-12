@@ -6,6 +6,7 @@ import com.afk.model.entity.Chat;
 import com.afk.model.entity.enums.EstadoChat;
 import com.afk.model.repository.ChatRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,7 +16,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ChatServiceImpl implements ChatService {
@@ -94,5 +95,18 @@ public class ChatServiceImpl implements ChatService {
                 .filter(c -> c.getUsuarioa().getId().equals(idUser) || c.getUsuariob().getId().equals(idUser))
                 .collect(Collectors.toList());
         return mapper.toDtoList(chatsFiltrados);
+    }
+    @Override
+    public boolean verificarSiYaExisteChatEntreUsuarios(Long idDueñoPublicacion, Long idArrendatario){
+        boolean bandera=false;
+        Optional<Chat> chatExistente = chatRepository.findByUsuarios(idDueñoPublicacion, idArrendatario);
+        if(chatExistente.isPresent()){
+            log.info("no se puede crear chat porque ya existe uno ");
+            bandera=true;
+        }else{
+            log.info("no hay chats asociados creando uno ");
+        }
+
+        return bandera;
     }
 }
