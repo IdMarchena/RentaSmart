@@ -17,5 +17,8 @@ export interface UsuariosRepository {
   
   // Nuevo método para verificar rol
   verificarRol(idUser: number, rol: string): Promise<boolean>;
+  
+  // Nuevo método para obtener perfil completo con teléfono
+  getProfileById(id: number): Promise<UsuarioResumen | null>;
 }
 

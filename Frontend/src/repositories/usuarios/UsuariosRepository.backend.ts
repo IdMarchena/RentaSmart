@@ -157,4 +157,25 @@ export const usuariosRepositoryBackend: UsuariosRepository = {
         return false;
       }
     },
+
+    async getProfileById(id: number): Promise<UsuarioResumen | null> {
+      try {
+        // Intentar obtener el perfil completo usando el endpoint de auth
+        const response = await http<JsonResponse<any>>(`/api/v1/auth/user/${id}`, {
+          method: 'GET',
+        });
+        
+        if (response.success && response.data) {
+          console.log('📞 Perfil completo obtenido:', response.data);
+          return toUsuarioResumen(response.data);
+        }
+        
+        // Fallback al endpoint básico
+        return await this.getById(id);
+      } catch (error) {
+        console.error('❌ Error obteniendo perfil completo:', error);
+        // Fallback al endpoint básico
+        return await this.getById(id);
+      }
+    },
   };

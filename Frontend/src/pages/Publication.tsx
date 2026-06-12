@@ -2,9 +2,12 @@ import { Header } from "../components/Header"
 import { Footer } from "../components/Footer"
 import { useParams } from "react-router-dom"
 import { useEffect, useState } from "react"
-import { usePublicaciones } from "../hooks/usePublicaciones"
-import { useAuthContext } from "../context/AuthContext"
-import { useFavorito } from "../hooks/useFavorito"
+import { usePublicaciones } from '@/hooks/usePublicaciones'
+import { useFavorito } from '../hooks/useFavorito'
+import { useChat } from '../hooks/useChat'
+import { useAuthContext } from '../context/AuthContext'
+import { useUsuarioRegistrado } from '@/hooks/useUsuarioRegistrado'
+import { usuariosRepository } from '@/repositories/usuarios'
 import { GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api'
 import imgBed from "../assets/bed.png"
 import imgBath from "../assets/bath.png"
@@ -19,6 +22,7 @@ import imgWhatsApp from "../assets/whatsapp.png"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 import { CardReview } from "../components/CardReview"
 import { ModalReview } from "../components/ModalReview"
+import { useAuth } from '@/hooks/useAuth'
 
 const mapContainerStyle = {
     width: '100%',
@@ -30,11 +34,16 @@ export const Publication = () => {
     const { id } = useParams<{ id: string }>()
     const { user } = useAuthContext()
     const { getById, getCalificaciones, createCalificacion, getPromedioCalificacion, loading } = usePublicaciones()
-    const { create, remove, getByUsuarioId } = useFavorito()
+    const { create, verificarSiExisteChatEntreUsuarios, getAllByUserId } = useChat()
+    const { getById: getUsuarioRegistradoById } = useUsuarioRegistrado()
+    const { create: createFavorito, remove, getByUsuarioId } = useFavorito()
     const [publication, setPublication] = useState<any>(null)
     const [calificaciones, setCalificaciones] = useState<any[]>([])
-    const [promedio, setPromedio] = useState(0)
-    const [totalCalificaciones, setTotalCalificaciones] = useState(0)
+    const [promedio, setPromedio] = useState<number>(0)
+    const [totalCalificaciones, setTotalCalificaciones] = useState<number>(0)
+    const [loadingChat, setLoadingChat] = useState(false)
+    const [usuarioCompleto, setUsuarioCompleto] = useState<any>(null)
+    const [usuarioRegistrado, setUsuarioRegistrado] = useState<any>(null)
     const [showModalReview, setShowModalReview] = useState(false)
     const [errorMessage, setErrorMessage] = useState('')
     const [isFavorito, setIsFavorito] = useState(false)
@@ -110,32 +119,64 @@ export const Publication = () => {
         }
     }
 
-useEffect(() => {
-    const loadPublication = async () => {
-        if (!id) return;
-        
-        try {
-            const result = await getById(parseInt(id));
+    useEffect(() => {
+        const loadPublication = async () => {
+            if (!id) return;
             
-            if (result) {
-                setPublication(result);
+            try {
+                const result = await getById(parseInt(id));
                 
-                if (result.calificaciones) {
-                    setCalificaciones(result.calificaciones);
+                if (result) {
+                    setPublication(result);
                     
-                    const total = result.calificaciones.length;
-                    const suma = result.calificaciones.reduce((acc: number, curr: any) => acc + curr.puntuacion, 0);
+                    // Obtener el usuario completo para tener acceso al teléfono
+                    if (result?.usuario?.id) {
+                        console.log('🔍 Obteniendo perfil completo del usuario para ID:', result.usuario.id)
+                        const usuarioFull = await usuariosRepository.getProfileById(result.usuario.id)
+                        console.log('✅ Perfil completo obtenido:', usuarioFull)
+                        setUsuarioCompleto(usuarioFull)
+                        
+                        // Obtener el UsuarioRegistrado que tiene el teléfono
+                        console.log('📞 Obteniendo UsuarioRegistrado para ID:', result.usuario.id)
+                        const usuarioReg = await getUsuarioRegistradoById(result.usuario.id)
+                        console.log('✅ UsuarioRegistrado obtenido:', usuarioReg)
+                        setUsuarioRegistrado(usuarioReg)
+                    }
                     
-                    setTotalCalificaciones(total);
-                    setPromedio(total > 0 ? suma / total : 0);
+                    // Cargar calificaciones explícitamente para asegurar que siempre se carguen
+                    console.log('⭐ Cargando calificaciones para publicación ID:', result.id)
+                    try {
+                        const calResult = await getCalificaciones(result.id)
+                        if (calResult.success && calResult.data) {
+                            console.log('✅ Calificaciones obtenidas:', calResult.data)
+                            setCalificaciones(calResult.data)
+                            
+                            const total = calResult.data.length
+                            const suma = calResult.data.reduce((acc: number, curr: any) => acc + curr.puntuacion, 0)
+                            
+                            setTotalCalificaciones(total)
+                            setPromedio(total > 0 ? suma / total : 0)
+                            
+                            console.log(`📊 Total calificaciones: ${total}, Promedio: ${total > 0 ? (suma / total).toFixed(1) : 0}`)
+                        } else {
+                            console.log('⚠️ No se encontraron calificaciones o error en la respuesta')
+                            setCalificaciones([])
+                            setTotalCalificaciones(0)
+                            setPromedio(0)
+                        }
+                    } catch (error) {
+                        console.error('❌ Error cargando calificaciones:', error)
+                        setCalificaciones([])
+                        setTotalCalificaciones(0)
+                        setPromedio(0)
+                    }
                 }
+            } catch (error) {
+                console.error('Error al cargar publicación:', error);
             }
-        } catch (error) {
-            console.error('Error al cargar publicación:', error);
-        }
-    };
-    loadPublication();
-}, [id, getById]);
+        };
+        loadPublication();
+    }, [id, getById]);
 
     const handleSubmitReview = async (puntuacion: number, comentario: string) => {
         if (!user) {
@@ -197,16 +238,132 @@ useEffect(() => {
         currency: 'COP',
         minimumFractionDigits: 0
     }) || 'N/A'
-
-    const telefono = publication.usuario?.telefono || '3001234567' || publication.usuario?.telefono?.toString()
-    const whatsappLink = `https://wa.me/57${telefono}?text=Hola, estoy interesado en ${publication.titulo}`
+    
+    const telefono = usuarioRegistrado?.telefono?.toString() || 
+                     usuarioRegistrado?.celular?.toString() || 
+                     usuarioRegistrado?.cel?.toString() ||
+                     usuarioCompleto?.telefono?.toString() || 
+                     usuarioCompleto?.celular?.toString() || 
+                     usuarioCompleto?.telefonoContacto?.toString() || 
+                     publication?.usuario?.telefono?.toString() || 
+                     publication?.usuario?.celular?.toString() || 
+                     '3001234567'
+    const whatsappLink = `https://wa.me/57${telefono}?text=Hola, estoy interesado en ${publication?.titulo || 'esta propiedad'}`
+    
+    // Depuración completa para encontrar el teléfono
+    console.log('📞 DEPURACIÓN COMPLETA DEL TELÉFONO:')
+    console.log('👤 Usuario básico:', publication?.usuario)
+    console.log('👤 Usuario completo:', usuarioCompleto)
+    console.log('👤 Usuario Registrado:', usuarioRegistrado)
+    console.log('📱 teléfono (usuarioRegistrado):', usuarioRegistrado?.telefono)
+    console.log('📱 celular (usuarioRegistrado):', usuarioRegistrado?.celular)
+    console.log('📱 cel (usuarioRegistrado):', usuarioRegistrado?.cel)
+    console.log('📱 teléfono (usuarioCompleto):', usuarioCompleto?.telefono)
+    console.log('📱 celular (usuarioCompleto):', usuarioCompleto?.celular)
+    console.log('📱 telefonoContacto (usuarioCompleto):', usuarioCompleto?.telefonoContacto)
+    console.log('📱 teléfono (publication.usuario):', publication?.usuario?.telefono)
+    console.log('📱 celular (publication.usuario):', publication?.usuario?.celular)
+    console.log('📱 Teléfono final usado:', telefono)
+    console.log('🔗 WhatsApp link:', whatsappLink)
 
     const mapCenter = publication.inmueble?.ubicacion?.latitud && publication.inmueble?.ubicacion?.longitud
     ? { 
-        lat: Number(publication.inmueble.ubicacion.latitud), 
-        lng: Number(publication.inmueble.ubicacion.longitud) 
-      }
-    : null
+        lat: publication.inmueble.ubicacion.latitud, 
+        lng: publication.inmueble.ubicacion.longitud 
+    } : null
+
+    // Función para manejar el clic en "Abrir Chat"
+    const handleOpenChat = async () => {
+        console.log('🚀 handleOpenChat - Iniciando proceso...')
+        console.log('👤 Usuario actual:', user)
+        console.log('📄 Publicación:', publication)
+        
+        if (!user?.id) {
+            console.log('❌ Usuario no autenticado')
+            alert('Debes iniciar sesión para abrir un chat')
+            return
+        }
+
+        if (!publication?.usuario?.id) {
+            console.log('❌ No se puede identificar al propietario')
+            alert('No se puede identificar al propietario de la publicación')
+            return
+        }
+
+        // No permitir crear chat consigo mismo
+        if (user.id === publication.usuario.id) {
+            console.log('❌ Usuario intenta chatear consigo mismo')
+            alert('No puedes crear un chat contigo mismo')
+            return
+        }
+
+        console.log('✅ Validaciones pasadas, iniciando proceso de chat...')
+        setLoadingChat(true)
+
+        try {
+            console.log('🔍 Verificando si existe chat entre usuarios...')
+            console.log('👤 Propietario ID:', publication.usuario.id)
+            console.log('👤 Arrendatario ID:', parseInt(user.id))
+            
+            // Verificar si ya existe un chat entre los usuarios
+            const yaExisteChat = await verificarSiExisteChatEntreUsuarios(
+                publication.usuario.id,
+                parseInt(user.id)
+            )
+
+            console.log('📊 Resultado verificación:', yaExisteChat)
+
+            if (yaExisteChat) {
+                console.log('✅ Chat ya existe, redirigiendo...')
+                alert('Ya existe un chat activo con este propietario. Serás redirigido a la sección de mensajes.')
+                // Recargar chats para asegurar hidratación y redirigir
+                await getAllByUserId()
+                window.location.href = '/admin/messages'
+                return
+            }
+
+            console.log('🆕 Creando nuevo chat...')
+            // Crear nuevo chat
+            const nuevoChat = await create({
+                nombre: `Chat - ${publication.titulo}`,
+                usuarioA: { 
+                    id: publication.usuario.id,
+                    nombre: publication.usuario.nombre || 'Propietario',
+                    correo: publication.usuario.correo || '',
+                    rol: publication.usuario.rol || 'CLIENTE'
+                },
+                usuarioB: { 
+                    id: parseInt(user.id),
+                    nombre: user.nombre || 'Usuario',
+                    correo: user.correo || '',
+                    rol: user.rol || 'CLIENTE'
+                },
+                estado_chat: 'ACTIVO',
+                fechaCreacion: new Date().toISOString(),
+                mensajes: []
+            })
+
+            console.log('✅ Chat creado exitosamente:', nuevoChat)
+            
+            // Recargar chats para asegurar que se hidrate correctamente
+            await getAllByUserId()
+            
+            alert('Chat creado exitosamente. Serás redirigido a la sección de mensajes.')
+            // Redirigir a la sección correcta de mensajes
+            window.location.href = '/admin/messages'
+
+        } catch (error: any) {
+            console.error('❌ Error al manejar el chat:', error)
+            console.error('❌ Detalles del error:', {
+                message: error.message,
+                stack: error.stack,
+                response: error.response
+            })
+            alert(`Error al crear el chat: ${error.message || 'Error desconocido'}`)
+        } finally {
+            setLoadingChat(false)
+        }
+    }
 
     return (
         <>
@@ -258,7 +415,13 @@ useEffect(() => {
                             <div className="flex flex-row items-center gap-1">
                                 <img src={imgMeda} alt="rating" className="w-4 h-4" />
                                 <span className="text-[#393939] text-sm md:text-sm font-bold">
-                                    {promedio > 0 ? `${promedio} (${totalCalificaciones})` : 'Sin calificaciones'}
+                                    Calificaciones   {totalCalificaciones > 0 ? `${promedio.toFixed(1)} (${totalCalificaciones})` : 'Sin calificaciones'}
+                                </span>
+                            </div>
+                            <div className="flex flex-row items-center gap-1">
+                                <img src={imgUsers} alt="estrato" className="w-4 h-4" />
+                                <span className="text-[#393939] text-sm md:text-sm font-bold">
+                                    Estrato {publication.inmueble?.estrato || 'N/A'}
                                 </span>
                             </div>
                             <div className="flex flex-row items-center gap-1">
@@ -361,8 +524,12 @@ useEffect(() => {
                             <span className="text-[#393939] text-[12px] md:text-[13px] font-normal">
                                 Chatea directamente con el arrendador a través de la plataforma en tiempo real. Obtén respuestas rápidas sobre disponibilidad, precios y visitas.
                             </span>
-                            <button className="w-full h-[40px] bg-[#68A9FD] rounded-[10px] text-white text-[12px] md:text-[12px] font-bold mt-5 hover:bg-[#5090e0] transition">
-                                Abrir Chat
+                            <button 
+                                onClick={handleOpenChat}
+                                disabled={loadingChat}
+                                className="w-full h-[40px] bg-[#68A9FD] rounded-[10px] text-white text-[12px] md:text-[12px] font-bold mt-5 hover:bg-[#5090e0] transition disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {loadingChat ? 'Procesando...' : 'Abrir Chat'}
                             </button>
                         </div>
                     </div>

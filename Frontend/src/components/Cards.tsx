@@ -94,6 +94,56 @@ export const Cards = ({ publication }: { publication: Publicacion }) => {
     const descripcionCorta = publication.descripcion?.length > 120
         ? `${publication.descripcion.substring(0, 120)}...`
         : publication.descripcion
+
+    // Función para obtener el estilo del estado
+    const getEstadoStyle = (estado: string) => {
+        switch (estado?.toUpperCase()) {
+            case 'DISPONIBLE':
+                return {
+                    backgroundColor: '#10B981',
+                    color: 'white',
+                    text: 'DISPONIBLE'
+                }
+            case 'ACTIVA':
+                return {
+                    backgroundColor: '#10B981',
+                    color: 'white',
+                    text: 'ACTIVA'
+                }
+            case 'PUBLICADA':
+                return {
+                    backgroundColor: '#10B981',
+                    color: 'white',
+                    text: 'PUBLICADA'
+                }
+            case 'OCUPADA':
+                return {
+                    backgroundColor: '#EF4444',
+                    color: 'white',
+                    text: 'OCUPADA'
+                }
+            case 'ELIMINADA':
+                return {
+                    backgroundColor: '#6B7280',
+                    color: 'white',
+                    text: 'ELIMINADA'
+                }
+            case 'EDITADA':
+                return {
+                    backgroundColor: '#F59E0B',
+                    color: 'white',
+                    text: 'EDITADA'
+                }
+            default:
+                return {
+                    backgroundColor: '#6B7280',
+                    color: 'white',
+                    text: 'NO DISPONIBLE'
+                }
+        }
+    }
+
+    const estadoStyle = getEstadoStyle(publication.estadoPublicacion || '')
     return (
         <div className="w-[500px] h-[500px] rounded-[10px] overflow-hidden ">
             <div className="relative z-10 h-[50%] shadow-[0px_20px_10px_rgba(0,0,0,0.2)]">
@@ -132,9 +182,22 @@ export const Cards = ({ publication }: { publication: Publicacion }) => {
                 </button>
             </div>
             <div className=" w-full p-4 bg-[#EFEDDE]  border-[1px] border-[#BCBBB0] rounded-[0px_0px_10px_10px] ">
-                <div className="flex items-center justify-between text-[#393939]">
+                <div className="flex items-center justify-between text-[#393939] mb-2">
                     <span className="text-lg font-bold">{publication.titulo}</span>
                     <span className="text-xl font-bold">{precioFormateado}</span>
+                </div>
+
+                {/* Badge del estado */}
+                <div className="mb-2">
+                    <span 
+                        className="inline-block px-3 py-1 text-xs font-semibold rounded-full"
+                        style={{
+                            backgroundColor: estadoStyle.backgroundColor,
+                            color: estadoStyle.color
+                        }}
+                    >
+                        {estadoStyle.text}
+                    </span>
                 </div>
 
 

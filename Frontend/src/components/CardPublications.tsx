@@ -113,6 +113,56 @@ export const CardPublications = ({ publication }: { publication: Publicacion }) 
         ? `${publication.descripcion.substring(0, 120)}...`
         : publication.descripcion
 
+    // Función para obtener el estilo del estado
+    const getEstadoStyle = (estado: string) => {
+        switch (estado?.toUpperCase()) {
+            case 'DISPONIBLE':
+                return {
+                    backgroundColor: '#10B981',
+                    color: 'white',
+                    text: 'DISPONIBLE'
+                }
+            case 'ACTIVA':
+                return {
+                    backgroundColor: '#10B981',
+                    color: 'white',
+                    text: 'ACTIVA'
+                }
+            case 'PUBLICADA':
+                return {
+                    backgroundColor: '#10B981',
+                    color: 'white',
+                    text: 'PUBLICADA'
+                }
+            case 'OCUPADA':
+                return {
+                    backgroundColor: '#EF4444',
+                    color: 'white',
+                    text: 'OCUPADA'
+                }
+            case 'ELIMINADA':
+                return {
+                    backgroundColor: '#6B7280',
+                    color: 'white',
+                    text: 'ELIMINADA'
+                }
+            case 'EDITADA':
+                return {
+                    backgroundColor: '#F59E0B',
+                    color: 'white',
+                    text: 'EDITADA'
+                }
+            default:
+                return {
+                    backgroundColor: '#6B7280',
+                    color: 'white',
+                    text: 'NO DISPONIBLE'
+                }
+        }
+    }
+
+    const estadoStyle = getEstadoStyle(publication.estadoPublicacion || '')
+
     return (
         <div className="w-full md:w-[95%] h-[400px] md:h-[240px] rounded-[10px] overflow-hidden p-3 md:p-5 bg-[#FFFEF8] shadow-[10px_10px_10px_rgba(0,0,0,0.2)] flex flex-col md:flex-row">
             <div className="w-full md:w-[40%] relative">
@@ -222,11 +272,14 @@ export const CardPublications = ({ publication }: { publication: Publicacion }) 
 
                     {/* Botones de acción */}
                     <div className="flex flex-row md:flex-col items-center md:items-end gap-2 flex-nowrap justify-center md:justify-end mt-2 md:mt-0">
-                        <span className={`text-xs md:text-sm font-bold px-2 py-1 rounded-[20px] ${publication.estadoPublicacion === 'PUBLICADA'
-                            ? 'text-green-700 bg-green-100'
-                            : 'text-gray-700 bg-gray-100'
-                            }`}>
-                            {publication.estadoPublicacion === 'PUBLICADA' ? 'Disponible' : 'No disponible'}
+                        <span 
+                            className="text-xs md:text-sm font-bold px-3 py-1 rounded-full whitespace-nowrap"
+                            style={{
+                                backgroundColor: estadoStyle.backgroundColor,
+                                color: estadoStyle.color
+                            }}
+                        >
+                            {estadoStyle.text}
                         </span>
                         <Link
                             to={`/publication/${publication.id}`}
